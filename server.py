@@ -1,5 +1,6 @@
+
 """
-Mahadev Fashion Hub - Local Backend Server
+Mom's Pick - Local Backend Server
 Handles all GitHub operations automatically. Admin panel never sees the token.
 """
 import os
@@ -11,12 +12,10 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 import cloudinary
 import cloudinary.uploader
-from multipart import parse_form_data
 
 ENV_FILE = ".env"
 PRODUCTS = "products.json"
 PORT = 5000
-
 
 # ─────────────────────────────────────────────
 # Load .env
@@ -32,7 +31,6 @@ def load_env():
                     env[k.strip()] = v.strip().strip('"').strip("'")
     return env
 
-
 ENV = load_env()
 GH_USER = ENV.get("GITHUB_USER", "")
 GH_REPO = ENV.get("GITHUB_REPO", "")
@@ -45,54 +43,34 @@ cloudinary.config(
     secure=True
 )
 
-
 # ─────────────────────────────────────────────
 # GitHub API helpers
 # ─────────────────────────────────────────────
 def gh_get_sha():
-    """Get current products.json SHA from GitHub (needed for update)."""
     url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/{PRODUCTS}?ref={GH_BRANCH}"
-    req = Request(url, headers={
-        "Authorization": f"Bearer {GH_TOKEN}",
-        "Accept": "application/vnd.github+json"
-    })
+    req = Request(url, headers={"Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json"})
     try:
         with urlopen(req) as r:
             return json.loads(r.read())["sha"]
     except HTTPError as e:
-        if e.code == 404:
-            return None
+        if e.code == 404: return None
         raise
 
-
 def gh_get_sha_file(filename):
-    """Get current SHA for any file from GitHub."""
     url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/{filename}?ref={GH_BRANCH}"
-    req = Request(url, headers={
-        "Authorization": f"Bearer {GH_TOKEN}",
-        "Accept": "application/vnd.github+json"
-    })
+    req = Request(url, headers={"Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json"})
     try:
         with urlopen(req) as r:
             return json.loads(r.read())["sha"]
     except HTTPError as e:
-        if e.code == 404:
-            return None
+        if e.code == 404: return None
         raise
 
 def gh_push(content_str, commit_msg):
-    """Push products.json to GitHub via API."""
     sha = gh_get_sha()
     content_b64 = base64.b64encode(content_str.encode("utf-8")).decode("ascii")
-
-    body = {
-        "message": commit_msg,
-        "content": content_b64,
-        "branch": GH_BRANCH
-    }
-    if sha:
-        body["sha"] = sha
-
+    body = {"message": commit_msg, "content": content_b64, "branch": GH_BRANCH}
+    if sha: body["sha"] = sha
     url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/{PRODUCTS}"
     req = Request(url, method="PUT", data=json.dumps(body).encode("utf-8"), headers={
         "Authorization": f"Bearer {GH_TOKEN}",
@@ -101,7 +79,6 @@ def gh_push(content_str, commit_msg):
     })
     with urlopen(req) as r:
         return json.loads(r.read())
-
 
 # ─────────────────────────────────────────────
 # HTTP Request Handler
@@ -118,78 +95,58 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        # Health check
         if self.path == "/health":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self._cors()
             self.end_headers()
             self.wfile.write(json.dumps({
-                "ok": True,
-                "user": GH_USER,
-                "repo": GH_REPO,
-                "branch": GH_BRANCH,
-                "token_set": bool(GH_TOKEN)
+                "ok": True, "user": GH_USER, "repo": GH_REPO, "branch": GH_BRANCH, "token_set": bool(GH_TOKEN)
             }).encode())
             return
-        # Serve static files normally (admin.html, index.html, etc.)
         return super().do_GET()
 
     def do_POST(self):
-        # ── Upload image to Cloudinary ──
         if self.path == "/upload":
             try:
                 content_type = self.headers.get("Content-Type", "")
                 content_length = int(self.headers.get("Content-Length", 0))
-                
                 if "boundary=" not in content_type:
                     self._json(400, {"ok": False, "error": "Missing boundary"})
                     return
-                
                 boundary = content_type.split("boundary=")[1].strip()
-                if boundary.startswith('"') and boundary.endswith('"'):
-                    boundary = boundary[1:-1]
+                if boundary.startswith('"') and boundary.endswith('"'): boundary = boundary[1:-1]
                 
                 from multipart import MultipartParser
                 import io
-                
                 body = self.rfile.read(content_length)
                 parser = MultipartParser(io.BytesIO(body), boundary, charset="latin-1")
                 
-                # Collect ALL files from the multipart body
                 uploaded = []
                 for part in parser:
                     if part.name == "file":
                         raw = part.value if isinstance(part.value, bytes) else part.value.encode('latin-1')
                         fname = (part.filename or "upload.jpg").replace('\x00', '').strip()
-                        if isinstance(fname, bytes):
-                            fname = fname.decode('latin-1', errors='ignore')
-                        if not fname:
-                            fname = "upload.jpg"
-                        if '.' not in fname:
-                            fname = fname + '.jpg'
+                        if isinstance(fname, bytes): fname = fname.decode('latin-1', errors='ignore')
+                        if not fname: fname = "upload.jpg"
+                        if '.' not in fname: fname = fname + '.jpg'
                         uploaded.append((raw, fname))
                 
                 if not uploaded:
                     self._json(400, {"ok": False, "error": "No files received"})
                     return
-                
                 if len(uploaded) > 5:
                     self._json(400, {"ok": False, "error": "Max 5 images per product"})
                     return
                 
-                # Read optional category from form fields
                 category = ""
                 for part in parser:
                     if part.name == "category":
                         category = (part.value or "").strip() if not isinstance(part.value, bytes) else part.value.decode("latin-1").strip()
                 
-                # Sanitize
                 category = "".join(c for c in category if c.isalnum() or c in "-_")
-                if not category:
-                    category = "Uncategorized"
+                if not category: category = "Uncategorized"
 
-                # 1. Generate Prefix (e.g., Sarees -> SS)
                 cat_lower = category.lower()
                 if "saree" in cat_lower: prefix = "SS"
                 elif "necklace" in cat_lower: prefix = "NK"
@@ -200,63 +157,41 @@ class Handler(SimpleHTTPRequestHandler):
                 elif "accessor" in cat_lower: prefix = "AC"
                 else: prefix = "MM"
 
-                # 2. Generate Date (e.g., 261024)
-                import datetime
+                import datetime, random
                 now = datetime.datetime.now()
                 yy = str(now.year)[-2:]
                 mm = f"{now.month:02d}"
                 dd = f"{now.day:02d}"
                 
-                # 3. Generate Count (01, 02, etc.)
-                # 3. Generate Count (01, 02, etc.)
-                import datetime
+                # Generate a unique 4-digit random number to prevent clashes
                 base_id = f"{prefix}{yy}{mm}{dd}"
-                count = 1
-                folder_path = f"mmw/{category}"
-                
-                while True:
-                    product_id = f"{base_id}{count:02d}"
-                    try:
-                        # Check if this specific image exists
-                        cloudinary.api.resource(f"{folder_path}/{product_id}_0")
-                        count += 1 # If it exists, try the next number
-                    except Exception:
-                        break # If it fails (doesn't exist), we found our number!
+                product_id = f"{base_id}{random.randint(1000, 9999)}"
+                folder_path = f"moms_pick/{category}"
                 
                 urls = []
                 for i, (raw, fname) in enumerate(uploaded):
                     result = cloudinary.uploader.upload(
-                        raw,
-                        folder=folder_path,
-                        public_id=f"{product_id}_{i}",
-                        overwrite=False,
-                        resource_type="image"
+                        raw, folder=folder_path, public_id=f"{product_id}_{i}", overwrite=False, resource_type="image"
                     )
                     urls.append(result["secure_url"])
                 
                 self._json(200, {"ok": True, "urls": urls, "url": urls[0]})
-                
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
             return
                 
-        # ── Upload logo to Cloudinary (folder: ma-fashion/logo) ──
         if self.path == "/upload-logo":
             try:
                 content_type = self.headers.get("Content-Type", "")
                 content_length = int(self.headers.get("Content-Length", 0))
-
                 if "boundary=" not in content_type:
                     self._json(400, {"ok": False, "error": "Missing boundary"})
                     return
-
                 boundary = content_type.split("boundary=")[1].strip()
-                if boundary.startswith('"') and boundary.endswith('"'):
-                    boundary = boundary[1:-1]
+                if boundary.startswith('"') and boundary.endswith('"'): boundary = boundary[1:-1]
 
                 from multipart import MultipartParser
                 import io
-
                 body = self.rfile.read(content_length)
                 parser = MultipartParser(io.BytesIO(body), boundary, charset="latin-1")
 
@@ -265,112 +200,76 @@ class Handler(SimpleHTTPRequestHandler):
                     if part.name == "file":
                         raw = part.value if isinstance(part.value, bytes) else part.value.encode('latin-1')
                         fname = (part.filename or "logo.png").replace('\x00', '').strip()
-                        if isinstance(fname, bytes):
-                            fname = fname.decode('latin-1', errors='ignore')
-                        if not fname:
-                            fname = "logo.png"
-                        if '.' not in fname:
-                            fname = fname + '.png'
+                        if isinstance(fname, bytes): fname = fname.decode('latin-1', errors='ignore')
+                        if not fname: fname = "logo.png"
+                        if '.' not in fname: fname = fname + '.png'
                         uploaded.append((raw, fname))
 
                 if not uploaded:
                     self._json(400, {"ok": False, "error": "No logo file received"})
                     return
-
                 if len(uploaded) > 1:
                     self._json(400, {"ok": False, "error": "Only 1 logo at a time"})
                     return
 
                 raw, fname = uploaded[0]
                 base = fname.rsplit('.', 1)[0]
-                ext  = fname.rsplit('.', 1)[-1].lower()
-
                 result = cloudinary.uploader.upload(
-                    raw,
-                    asset_folder="moms_pick/logo",
-                    use_asset_folder_as_public_id_prefix=True,
-                    public_id=base,
-                    overwrite=True,
-                    resource_type="image"
+                    raw, asset_folder="moms_pick/logo", use_asset_folder_as_public_id_prefix=True,
+                    public_id=base, overwrite=True, resource_type="image"
                 )
-                url = result["secure_url"]
-                self._json(200, {"ok": True, "url": url, "public_id": result.get("public_id", "")})
-
+                self._json(200, {"ok": True, "url": result["secure_url"], "public_id": result.get("public_id", "")})
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
             return
 
-        # ── Save categories → local + GitHub (auto) ──
         if self.path == "/save-categories":
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length).decode("utf-8")
-
             try:
                 data = json.loads(raw)
             except Exception:
                 self._json(400, {"ok": False, "error": "Invalid JSON"})
                 return
 
-            # 1. Write locally
             with open("categories.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
-            # 2. Push to GitHub
             try:
                 pretty = json.dumps(data, indent=2, ensure_ascii=False)
-                # You need to update gh_push to accept a filename, or just copy the logic here
                 sha = gh_get_sha_file("categories.json")
                 content_b64 = base64.b64encode(pretty.encode("utf-8")).decode("ascii")
-                body = {
-                    "message": "Update categories",
-                    "content": content_b64,
-                    "branch": GH_BRANCH
-                }
-                if sha:
-                    body["sha"] = sha
+                body = {"message": "Update categories", "content": content_b64, "branch": GH_BRANCH}
+                if sha: body["sha"] = sha
 
                 url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/categories.json"
                 req = Request(url, method="PUT", data=json.dumps(body).encode("utf-8"), headers={
-                    "Authorization": f"Bearer {GH_TOKEN}",
-                    "Accept": "application/vnd.github+json",
-                    "Content-Type": "application/json"
+                    "Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json", "Content-Type": "application/json"
                 })
                 with urlopen(req) as r:
                     result = json.loads(r.read())
-                
-                self._json(200, {
-                    "ok": True,
-                    "commit": result.get("commit", {}).get("sha", "")[:7]
-                })
+                self._json(200, {"ok": True, "commit": result.get("commit", {}).get("sha", "")[:7]})
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
             return
 
-        # ── Save catalog → local + GitHub (auto) ──
         if self.path == "/save":
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length).decode("utf-8")
-
             try:
                 data = json.loads(raw)
             except Exception:
                 self._json(400, {"ok": False, "error": "Invalid JSON"})
                 return
 
-            # 1. Write locally
             with open(PRODUCTS, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
-            # 2. Push to GitHub
             try:
                 pretty = json.dumps(data, indent=2, ensure_ascii=False)
                 commit_msg = f"Admin update: {len(data)} products"
                 result = gh_push(pretty, commit_msg)
-                self._json(200, {
-                    "ok": True,
-                    "message": "Saved & pushed to GitHub",
-                    "commit": result.get("commit", {}).get("sha", "")[:7]
-                })
+                self._json(200, {"ok": True, "message": "Saved & pushed to GitHub", "commit": result.get("commit", {}).get("sha", "")[:7]})
             except HTTPError as e:
                 err_body = e.read().decode()
                 self._json(500, {"ok": False, "error": f"GitHub: {err_body}"})
@@ -390,13 +289,9 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[server] {self.address_string()} - {fmt % args}")
 
-
-# ─────────────────────────────────────────────
-# Boot
-# ─────────────────────────────────────────────
 def main():
     print("=" * 60)
-    print("✨ MANIMEGALAI MARAN WEARABLES — BACKEND SERVER")
+    print("✨ MOM'S PICK — BACKEND SERVER")
     print("=" * 60)
     if not GH_TOKEN:
         print("⚠️  No GITHUB_TOKEN in .env — push will fail.")
@@ -407,13 +302,11 @@ def main():
     print(f"❤️  Health: http://localhost:{PORT}/health")
     print("=" * 60)
     print("Press Ctrl+C to stop.\n")
-
     httpd = HTTPServer(("0.0.0.0", PORT), Handler)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\n👋 Stopped.")
-
 
 if __name__ == "__main__":
     main()
