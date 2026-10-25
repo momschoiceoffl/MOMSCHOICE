@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": "AJ-3376",
+    "title": "Radiant Pink Rhinestone Silk Saree",
+    "price": 599,
+    "originalPrice": 699,
+    "category": "Sarees",
+    "subcategory": "Designer",
+    "tag": "",
+    "tags": [
+      "new"
+    ],
+    "description": "Elevate your ethnic wardrobe with this stunning vibrant pink saree. Featuring delicate floral motifs embellished with sparkling rhinestones, this lightweight drape offers a perfect blend of modern elegance and traditional charm. Comes with an unstitched blouse piece.",
+    "image": "https://res.cloudinary.com/ft8zlz5x/image/upload/v1792910485/mmw/Sarees/SS26102501_0.png",
+    "images": [
+      "https://res.cloudinary.com/ft8zlz5x/image/upload/v1792910485/mmw/Sarees/SS26102501_0.png",
+      "https://res.cloudinary.com/ft8zlz5x/image/upload/v1792910486/mmw/Sarees/SS26102501_1.png",
+      "https://res.cloudinary.com/ft8zlz5x/image/upload/v1792910499/mmw/Sarees/SS26102501_2.png",
+      "https://res.cloudinary.com/ft8zlz5x/image/upload/v1792910501/mmw/Sarees/SS26102501_3.png",
+      "https://res.cloudinary.com/ft8zlz5x/image/upload/v1792910502/mmw/Sarees/SS26102501_4.png"
+    ]
+  }
+]
