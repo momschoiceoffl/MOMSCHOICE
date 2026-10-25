@@ -409,6 +409,7 @@ body > * { position: relative; z-index: 1; }
   display: flex;
   align-items: center;
   gap: 8px;
+  overflow: hidden; /* Prevents the back button from scrolling */
 }
 .sticky-chips-wrap .subcategory-bar {
   display: flex;
@@ -417,6 +418,7 @@ body > * { position: relative; z-index: 1; }
   scrollbar-width: none;
   padding-bottom: 0;
   margin-bottom: 0;
+  flex: 1; /* Allows the chips to take remaining space and scroll horizontally */
 }
 .sticky-chips-wrap .subcategory-bar::-webkit-scrollbar {
   display: none;

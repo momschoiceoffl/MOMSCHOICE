@@ -234,7 +234,7 @@ function renderCategoryCards() {
       ? `<img class="category-card-img" src="${thumb}" alt="${cat}">`
       : `<div class="category-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-muted);">🖼️</div>`;
     return `
-      <a class="category-card" href="category.html?cat=${encodeURIComponent(cat)}">
+      <a class="category-card" href="category.html?cat=${encodeURIComponent(cat)}" onclick="sessionStorage.setItem('lastCat', '${cat}')">
         ${imgTag}
         <div class="category-card-name">${cat}</div>
       </a>`;
