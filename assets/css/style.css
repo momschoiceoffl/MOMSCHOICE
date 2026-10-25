@@ -773,6 +773,7 @@ body > * { position: relative; z-index: 1; }
   object-fit: cover;
   background: rgba(0,0,0,0.3);
   display: block;
+  transition: opacity 0.3s ease; /* Smooth fade for the slideshow */
 }
 
 .category-card-name {

@@ -227,18 +227,49 @@ function renderCategoryCards() {
   if (!grid) return;
   const cats = [...new Set(products.map(p => p.category))].sort();
   renderSidebarSubnav(cats);
+  
   grid.innerHTML = cats.map(cat => {
-    const first = products.find(p => p.category === cat);
-    const thumb = first ? ((first.images && first.images[0]) || first.image) : "";
+    // Find all unique images for this category
+    const catProducts = products.filter(p => p.category === cat);
+    let allImgs = [];
+    catProducts.forEach(p => {
+      if (p.images && p.images.length) allImgs.push(...p.images);
+      else if (p.image) allImgs.push(p.image);
+    });
+    allImgs = [...new Set(allImgs)].slice(0, 5); // Limit to 5 images per card for performance
+    
+    const thumb = allImgs.length ? allImgs[0] : "";
     const imgTag = thumb
-      ? `<img class="category-card-img" src="${thumb}" alt="${cat}">`
+      ? `<img class="category-card-img cat-auto-slide" src="${thumb}" data-images='${JSON.stringify(allImgs)}' data-index="0" alt="${cat}">`
       : `<div class="category-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-muted);">🖼️</div>`;
+      
     return `
       <a class="category-card" href="category.html?cat=${encodeURIComponent(cat)}" onclick="sessionStorage.setItem('lastCat', '${cat}')">
         ${imgTag}
         <div class="category-card-name">${cat}</div>
       </a>`;
   }).join("");
+
+  // Start the 10-second interval for category images
+  setInterval(() => {
+    document.querySelectorAll(".cat-auto-slide").forEach(img => {
+      try {
+        const imgs = JSON.parse(img.getAttribute("data-images"));
+        if (imgs.length > 1) {
+          let idx = parseInt(img.getAttribute("data-index")) + 1;
+          if (idx >= imgs.length) idx = 0;
+          
+          // Fade effect
+          img.style.opacity = "0.3";
+          setTimeout(() => {
+            img.src = imgs[idx];
+            img.setAttribute("data-index", idx);
+            img.style.opacity = "1";
+          }, 200);
+        }
+      } catch (e) {}
+    });
+  }, 10000); // 10 seconds
 }
 
 function renderSidebarSubnav(cats) {
