@@ -9,16 +9,13 @@
   <meta name="theme-color" content="#d97706">
 </head>
 <body>
-  <header class="pd-header">
-    <!-- Back button moved to the sticky bottom bar or header -->
+  <header class="pd-header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999;">
+    <button class="pd-back" onclick="if(document.referrer && document.referrer.includes('category.html')) { window.history.back(); } else { const cat = new URLSearchParams(location.search).get('cat') || sessionStorage.getItem('lastCat') || 'all'; window.location.href = 'category.html?cat=' + encodeURIComponent(cat); }">← Back</button>
     <h1 id="pdHeaderTitle">Product</h1>
     <button class="cart-trigger" id="cartOpenBtn">🛒 <span class="cart-counter" id="cartCount">0</span></button>
   </header>
 
-  <main class="pd-container">
-    <div style="padding: 12px 16px 0 16px;">
-      <button class="pd-back" onclick="location.href='index.html'">← Back</button>
-    </div>
+  <main class="pd-container" style="padding-top: 55px;">
 
     <section class="pd-gallery-wrap">
       <div class="pd-gallery" id="pdGallery"></div>
