@@ -393,7 +393,7 @@ body > * { position: relative; z-index: 1; }
 /* ─── STICKY CHIPS WRAP (Category Page) ─── */
 .sticky-chips-wrap {
   position: fixed;
-  top: 65px; /* Sticks right under the main header */
+  top: 75px; /* Pushed down safely below the header */
   left: 0;
   right: 0;
   z-index: 105;
@@ -405,11 +405,11 @@ body > * { position: relative; z-index: 1; }
 .sticky-inner {
   width: 100%;
   max-width: 900px;
-  padding: 12px 16px; /* Moved down slightly */
+  padding: 8px 16px;
   display: flex;
   align-items: center;
-  justify-content: center; /* Centers all chips */
-  gap: 8px;
+  justify-content: center; 
+  gap: 10px;
   overflow: hidden;
 }
 .sticky-chips-wrap .subcategory-bar {
@@ -419,7 +419,8 @@ body > * { position: relative; z-index: 1; }
   scrollbar-width: none;
   padding-bottom: 0;
   margin-bottom: 0;
-  flex: 1; /* Allows the chips to take remaining space and scroll horizontally */
+  flex: 1;
+  align-items: center;
 }
 .sticky-chips-wrap .subcategory-bar::-webkit-scrollbar {
   display: none;
@@ -431,8 +432,8 @@ body > * { position: relative; z-index: 1; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 32px; /* Forces identical height */
-  padding: 0 16px; /* Horizontal padding only */
+  height: 38px; /* Forces exact identical height */
+  padding: 0 16px; 
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1;
@@ -444,6 +445,7 @@ body > * { position: relative; z-index: 1; }
   cursor: pointer;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  margin: 0;
 }
 .sticky-chips-wrap .back-btn {
   flex-shrink: 0;
