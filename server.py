@@ -208,17 +208,20 @@ class Handler(SimpleHTTPRequestHandler):
                 dd = f"{now.day:02d}"
                 
                 # 3. Generate Count (01, 02, etc.)
+                # 3. Generate Count (01, 02, etc.)
+                import datetime
                 base_id = f"{prefix}{yy}{mm}{dd}"
                 count = 1
+                folder_path = f"mmw/{category}"
+                
                 while True:
                     product_id = f"{base_id}{count:02d}"
-                    folder_path = f"mmw/{category}"
                     try:
-                        # Check if ID exists to prevent overwrite
-                        cloudinary.api.resource(f"{folder_path}/{product_id}")
-                        count += 1 
+                        # Check if this specific image exists
+                        cloudinary.api.resource(f"{folder_path}/{product_id}_0")
+                        count += 1 # If it exists, try the next number
                     except Exception:
-                        break 
+                        break # If it fails (doesn't exist), we found our number!
                 
                 urls = []
                 for i, (raw, fname) in enumerate(uploaded):
