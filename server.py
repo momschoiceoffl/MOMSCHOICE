@@ -284,7 +284,7 @@ class Handler(SimpleHTTPRequestHandler):
 
                 result = cloudinary.uploader.upload(
                     raw,
-                    asset_folder="mmw/logo",
+                    asset_folder="moms_pick/logo",
                     use_asset_folder_as_public_id_prefix=True,
                     public_id=base,
                     overwrite=True,
