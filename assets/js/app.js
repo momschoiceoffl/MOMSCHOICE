@@ -673,8 +673,7 @@ function removeFromCart(index) {
 /* ═══════════════════════════════════════════════════════════════ */
 function setupListeners() {
   // Cart drawers
-  document.getElementById("loginBtn")?.addEventListener("click", openLoginModal);
-  document.getElementById("sidebarLogin")?.addEventListener("click", (e) => { e.preventDefault(); openLoginModal(); });
+
   document.getElementById("cartOpenBtn").onclick  = () => document.getElementById("cartOverlay").classList.add("open");
   document.getElementById("cartCloseBtn").onclick = () => document.getElementById("cartOverlay").classList.remove("open");
 

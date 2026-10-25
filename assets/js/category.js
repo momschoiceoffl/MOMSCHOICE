@@ -292,10 +292,7 @@ function setupSearch() {
 }
 
 function setupCart() {
-  const lb = document.getElementById("loginBtn");
-  if (lb) lb.addEventListener("click", () => { if (typeof openLoginModal === "function") openLoginModal(); });
-  const sl = document.getElementById("sidebarLogin");
-  if (sl) sl.addEventListener("click", e => { e.preventDefault(); if (typeof openLoginModal === "function") openLoginModal(); });
+
 
 
 }
