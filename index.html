@@ -51,12 +51,14 @@
     </div>
     <div class="header-actions">
       <div class="header-stack">
-        <button class="cart-trigger" id="cartOpenBtn" aria-label="Shopping Cart">
-          🛒 <span class="cart-counter" id="cartCount">0</span>
-        </button>
-        <div class="icon-row">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="icon-btn" id="langToggleBtn" onclick="toggleLanguage()" style="font-size: 0.8rem; font-weight: 800; color: var(--gold-glow); padding: 4px 8px; border: 1px solid var(--border-gold); border-radius: 12px;">த / EN</button>
+          <button class="cart-trigger" id="cartOpenBtn" aria-label="Shopping Cart">
+            🛒 <span class="cart-counter" id="cartCount">0</span>
+          </button>
+        </div>
+        <div class="icon-row" style="justify-content: flex-end;">
           <button class="icon-btn" id="searchToggle" aria-label="Search">🔍</button>
-
         </div>
       </div>
     </div>
