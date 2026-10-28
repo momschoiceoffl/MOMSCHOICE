@@ -12,7 +12,10 @@
   <header class="pd-header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999;">
     <button class="pd-back" onclick="if(document.referrer && document.referrer.includes('category.html')) { window.history.back(); } else { const cat = new URLSearchParams(location.search).get('cat') || sessionStorage.getItem('lastCat') || 'all'; window.location.href = 'category.html?cat=' + encodeURIComponent(cat); }">← Back</button>
     <h1 id="pdHeaderTitle">Product</h1>
-    <button class="cart-trigger" id="cartOpenBtn">🛒 <span class="cart-counter" id="cartCount">0</span></button>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="icon-btn" id="langToggleBtn" onclick="toggleLanguage()" style="font-size: 0.8rem; font-weight: 800; color: var(--gold-glow); padding: 4px 8px; border: 1px solid var(--border-gold); border-radius: 12px;">த / EN</button>
+      <button class="cart-trigger" id="cartOpenBtn">🛒 <span class="cart-counter" id="cartCount">0</span></button>
+    </div>
   </header>
 
   <main class="pd-container" style="padding-top: 55px;">
