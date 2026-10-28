@@ -20,10 +20,10 @@
     </div>
     <nav class="sidebar-nav">
       <a href="index.html" class="sidebar-link active" data-view="home">
-        <span class="nav-icon" aria-hidden="true"></span> Home
+        <span class="nav-icon" aria-hidden="true"></span> <span data-i18n="home">Home</span>
       </a>
       <a href="#" class="sidebar-link" id="sidebarCategoriesToggle">
-        <span class="nav-icon" aria-hidden="true"></span> Categories
+        <span class="nav-icon" aria-hidden="true"></span> <span data-i18n="categories">Categories</span>
       </a>
       <div class="sidebar-subnav" id="sidebarSubnav"></div>
 
@@ -64,7 +64,7 @@
 
   <!-- [SEARCH BAR] Slides down below header -->
   <div class="search-bar" id="searchBar">
-    <input type="search" id="searchInput" placeholder="Search products..." autocomplete="off">
+    <input type="search" id="searchInput" placeholder="Search products..." data-i18n="search_placeholder" autocomplete="off">
     <button class="search-close" id="searchClose">✕</button>
   </div>
   <!-- [END SEARCH BAR] -->
@@ -98,7 +98,7 @@
   <div class="cart-overlay" id="cartOverlay">
     <aside class="cart-drawer">
       <div class="cart-header">
-        <h3>Your Shopping Bag</h3>
+        <h3 data-i18n="shopping_bag">Your Shopping Bag</h3>
         <button class="close-btn" id="cartCloseBtn">&times;</button>
       </div>
 
@@ -108,15 +108,15 @@
 
       <div class="cart-footer">
         <div class="cart-total-row">
-          <span>Subtotal</span>
+          <span data-i18n="subtotal">Subtotal</span>
           <strong id="cartSubtotalDisplay">₹0</strong>
         </div>
         <div class="cart-total-row">
-          <span>Shipping</span>
+          <span data-i18n="shipping">Shipping</span>
           <strong id="cartShippingDisplay">—</strong>
         </div>
         <div class="cart-total-row grand">
-          <span>Grand Total</span>
+          <span data-i18n="grand_total">Grand Total</span>
           <strong id="cartTotalDisplay">₹0</strong>
         </div>
 
@@ -133,7 +133,7 @@
           </label>
         </div>
 
-        <button class="btn-checkout" id="checkoutBtn">📲 Send Order on WhatsApp</button>
+        <button class="btn-checkout" id="checkoutBtn" data-i18n="checkout_wa">📲 Send Order on WhatsApp</button>
       </div>
     </aside>
   </div>
@@ -171,6 +171,7 @@
   </footer>
   <!-- [END FOOTER] -->
 
+  <script src="assets/js/translations.js"></script>
   <script src="assets/js/firebase-config.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/app.js"></script>
