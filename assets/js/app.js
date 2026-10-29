@@ -535,10 +535,6 @@ function initCarousel() {
       </div>
       <div class="carousel-col-cover">
         <img src="${coverImg}" alt="${p.title}">
-        <div class="carousel-overlay-info">
-          <h4>${title}</h4>
-          <div class="desc-price">${sym}${p.price.toLocaleString("en-IN")}</div>
-        </div>
       </div>
       <div class="carousel-col-track">
         <div class="carousel-inner-track" id="innerTrack-${index}">

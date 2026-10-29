@@ -693,17 +693,45 @@ body > * { position: relative; z-index: 1; }
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 4px;
+    padding: 16px;
+    background: #F1F0E2; /* Opposite Cream color */
+    border-radius: 8px;
+    color: #14050B; /* Dark text for readability */
+    overflow: hidden;
+  }
+  .carousel-col-text h4 {
+    color: #6B0F2E; /* Primary Raspberry text */
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .carousel-col-text .desc-price {
+    color: #6B0F2E;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .carousel-col-text .desc-text {
+    font-size: 0.85rem;
+    color: #4A0A20;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
     overflow: hidden;
   }
   .carousel-col-cover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.2); /* Slight background for contained images */
+    background: rgba(0,0,0,0.2); 
     border-radius: 8px;
     overflow: hidden;
     height: 100%;
+  }
+  /* Hide the overlay info on desktop so it doesn't block the image */
+  .carousel-col-cover .carousel-overlay-info {
+    display: none;
   }
   .carousel-col-track {
     display: block;
@@ -727,26 +755,7 @@ body > * { position: relative; z-index: 1; }
     object-fit: contain; /* Prevents image from cropping */
     display: block;
   }
-  .carousel-card-desc h4 {
-    font-size: 1rem;
-    color: var(--primary);
-    margin-bottom: 8px;
-    white-space: normal;
-  }
-  .carousel-card-desc .desc-price {
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
-  .carousel-card-desc .desc-text {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+
 }
 
 .carousel-col-cover {
