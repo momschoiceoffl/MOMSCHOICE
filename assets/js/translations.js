@@ -134,9 +134,23 @@ function setLanguage(lang) {
   const titleEl = document.getElementById("catPageTitle");
   if (titleEl) {
     const urlCat = new URLSearchParams(location.search).get("cat") || "all";
-    if (typeof translateCategoryLocal === 'function') {
-      titleEl.innerText = urlCat === "all" ? (lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products") : translateCategoryLocal(urlCat);
+    
+    // Direct mapping (no external function needed)
+    const catMap = {
+      "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
+      "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
+      "Accessories": "பாகங்கள்"
+    };
+
+    let newTitle;
+    if (urlCat === "all") {
+      newTitle = lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products";
+    } else {
+      newTitle = (lang === "ta" && catMap[urlCat]) ? catMap[urlCat] : urlCat;
     }
+    
+    titleEl.innerText = newTitle;
+    document.title = newTitle + " | Mom's Pick";
   }
 }
 
