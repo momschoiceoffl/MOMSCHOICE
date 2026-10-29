@@ -208,4 +208,60 @@ function applyTranslations() {
   }
 }
 
+function toggleSidebarCategories(e) {
+  if (e) e.preventDefault();
+  
+  const subnav = document.getElementById("sidebarSubnav");
+  if (!subnav) return;
+  
+  // If already open, close it
+  if (subnav.style.display === "block") {
+    subnav.style.display = "none";
+    return;
+  }
+  
+  // If storeCategories isn't loaded yet, fallback to products list
+  if (typeof storeCategories === 'undefined' || Object.keys(storeCategories).length === 0) {
+    if (typeof products !== 'undefined' && products.length > 0) {
+      // Build fallback categories from products
+      let fallbackCats = {};
+      products.forEach(p => {
+        if (!fallbackCats[p.category]) fallbackCats[p.category] = [];
+        if (p.subcategory && !fallbackCats[p.category].includes(p.subcategory)) {
+          fallbackCats[p.category].push(p.subcategory);
+        }
+      });
+      window.storeCategories = fallbackCats;
+    }
+  }
+
+  let html = "";
+  
+  // Build the Categories -> Subcategories drill down
+  if (typeof storeCategories !== 'undefined' && storeCategories) {
+    for (const cat in storeCategories) {
+      if (cat === "_translations") continue;
+      
+      const catName = typeof translateCategory === 'function' ? translateCategory(cat) : cat;
+      
+      // 1. Main Category Link
+      html += `<a href="category.html?cat=${encodeURIComponent(cat)}" class="sidebar-sublink" style="font-weight:bold; color:var(--gold-glow); display:block; padding: 8px 16px;">${catName}</a>`;
+      
+      // 2. Subcategories
+      const subs = storeCategories[cat];
+      if (subs && subs.length > 0) {
+        html += `<div style="padding-left: 16px; display: flex; flex-direction: column;">`;
+        subs.forEach(sub => {
+          const subName = typeof translateCategory === 'function' ? translateCategory(sub) : sub;
+          html += `<a href="category.html?cat=${encodeURIComponent(cat)}&sub=${encodeURIComponent(sub)}" class="sidebar-sublink" style="font-size:0.8rem; color:var(--text-muted); display:block; padding: 4px 16px;">↳ ${subName}</a>`;
+        });
+        html += `</div>`;
+      }
+    }
+  }
+  
+  subnav.innerHTML = html;
+  subnav.style.display = "block";
+}
+
 document.addEventListener("DOMContentLoaded", applyTranslations);

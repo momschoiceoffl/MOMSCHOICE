@@ -22,9 +22,10 @@
       <a href="index.html" class="sidebar-link active">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🏠</span> <span data-i18n="home">Home</span>
       </a>
-      <a href="#" class="sidebar-link" onclick="goToFirstCategory(event)">
+      <a href="#" class="sidebar-link" id="sidebarCategoriesToggle" onclick="toggleSidebarCategories(event)">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🗂️</span> <span data-i18n="categories">Categories</span>
       </a>
+      <div class="sidebar-subnav" id="sidebarSubnav" style="display: none;"></div>
       
       <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
       

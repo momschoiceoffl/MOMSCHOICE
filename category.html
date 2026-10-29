@@ -17,9 +17,10 @@
       <a href="index.html" class="sidebar-link">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🏠</span> Home
       </a>
-      <a href="#" class="sidebar-link active" onclick="goToFirstCategoryFromCategory(event)">
+      <a href="#" class="sidebar-link active" id="sidebarCategoriesToggle" onclick="toggleSidebarCategories(event)">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🗂️</span> Categories
       </a>
+      <div class="sidebar-subnav" id="sidebarSubnav" style="display: none;"></div>
       <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
       <a href="#" class="sidebar-link" onclick="openFavsModal()">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">❤</span> Favorites
