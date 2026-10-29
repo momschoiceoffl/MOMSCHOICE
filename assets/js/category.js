@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   renderSubcategories();
   renderProducts();
+  renderSidebarProducts();
   setupSidebar();
   setupSearch();
   setupCart();
