@@ -597,6 +597,7 @@ body > * { position: relative; z-index: 1; }
   height: 100%;
   transition: transform 0.6s ease-in-out;
   will-change: transform;
+  overflow: hidden; /* This clips the sliver of the next/prev image */
 }
 
 .carousel-pair {
@@ -608,6 +609,7 @@ body > * { position: relative; z-index: 1; }
   display: grid;
   grid-template-columns: 35% 32.5% 32.5%; 
   gap: 8px;
+  overflow: hidden; /* Ensures nothing escapes the slide */
 }
 .carousel-col-text {
   display: flex;
