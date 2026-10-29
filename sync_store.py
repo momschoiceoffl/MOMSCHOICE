@@ -1,5 +1,5 @@
 import json
-)import json
+import json
 import subprocess
 import os
 

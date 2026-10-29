@@ -207,7 +207,15 @@ def git_push(commit_msg="Update store via auto-patch"):
             print("ℹ️  Nothing to commit.")
             return
         subprocess.run(["git", "commit", "-m", commit_msg], check=True)
-        subprocess.run(["git", "push", "origin", f"HEAD:{branch}"], check=True)
+        
+        # Try to pull remote changes first to avoid conflicts, then force-push
+        print("🔄 Syncing with remote...")
+        try:
+            subprocess.run(["git", "pull", "origin", branch, "--rebase"], check=True, capture_output=True)
+        except subprocess.CalledProcessError:
+            print("⚠️ Pull failed, using force push to overwrite remote.")
+            
+        subprocess.run(["git", "push", "origin", f"HEAD:{branch}", "--force"], check=True)
         print("🎉 Pushed! GitHub Pages live in ~20s.")
         
     except subprocess.CalledProcessError as e:
