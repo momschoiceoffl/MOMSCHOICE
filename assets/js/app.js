@@ -528,11 +528,21 @@ function initCarousel() {
 
     return `
     <div class="carousel-pair" data-product-id="${p.id}" data-slide-index="${index}">
+      <div class="carousel-col-text">
+        <h4>${title}</h4>
+        <div class="desc-price">${sym}${p.price.toLocaleString("en-IN")}</div>
+        <div class="desc-text">${desc}</div>
+      </div>
       <div class="carousel-col-cover">
         <img src="${coverImg}" alt="${p.title}">
         <div class="carousel-overlay-info">
           <h4>${title}</h4>
           <div class="desc-price">${sym}${p.price.toLocaleString("en-IN")}</div>
+        </div>
+      </div>
+      <div class="carousel-col-track">
+        <div class="carousel-inner-track" id="innerTrack-${index}">
+          ${miniTrackHTML}
         </div>
       </div>
     </div>
