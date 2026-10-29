@@ -130,28 +130,6 @@ function setLanguage(lang) {
   // Cart Drawer (on all pages)
   if (typeof updateCartUI === 'function') updateCartUI();
 
-  // 4. Update the Category Page Title
-  const titleEl = document.getElementById("catPageTitle");
-  if (titleEl) {
-    const urlCat = new URLSearchParams(location.search).get("cat") || "all";
-    
-    // Direct mapping (no external function needed)
-    const catMap = {
-      "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
-      "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
-      "Accessories": "பாகங்கள்"
-    };
-
-    let newTitle;
-    if (urlCat === "all") {
-      newTitle = lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products";
-    } else {
-      newTitle = (lang === "ta" && catMap[urlCat]) ? catMap[urlCat] : urlCat;
-    }
-    
-    titleEl.innerText = newTitle;
-    document.title = newTitle + " | Mom's Pick";
-  }
 }
 
 
@@ -185,6 +163,25 @@ function applyTranslations() {
   const backBtn = document.getElementById("catBackBtn");
   if (backBtn) {
     backBtn.innerText = lang === "ta" ? "← முகப்பு" : "← Home";
+  }
+
+  // Update the Category Page Title (Sarees -> புடவைகள்)
+  const titleEl = document.getElementById("catPageTitle");
+  if (titleEl) {
+    const urlCat = new URLSearchParams(location.search).get("cat") || "all";
+    const catMap = {
+      "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
+      "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
+      "Accessories": "பாகங்கள்"
+    };
+    let newTitle;
+    if (urlCat === "all") {
+      newTitle = lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products";
+    } else {
+      newTitle = (lang === "ta" && catMap[urlCat]) ? catMap[urlCat] : urlCat;
+    }
+    titleEl.innerText = newTitle;
+    document.title = newTitle + " | Mom's Choice";
   }
 
   const btnEn = document.getElementById("btnLangEn");
