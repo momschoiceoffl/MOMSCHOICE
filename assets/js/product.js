@@ -57,6 +57,61 @@ function renderProduct() {
     const i = Math.round(gallery.scrollLeft / gallery.clientWidth);
     thumbs.querySelectorAll(".pd-thumb").forEach((b,idx) => b.classList.toggle("active", idx === i));
   };
+
+  // Initialize Action Buttons
+  const favBtn = document.getElementById("pdFavBtn");
+  const wishBtn = document.getElementById("pdWishBtn");
+  const shareBtn = document.getElementById("pdShareBtn");
+  
+  if (favBtn) {
+    if (JSON.parse(localStorage.getItem("moms_choice_favs") || "[]").includes(p.id)) favBtn.classList.add("active");
+    favBtn.onclick = () => toggleFav(p.id, favBtn);
+  }
+  if (wishBtn) {
+    if (JSON.parse(localStorage.getItem("moms_choice_wish") || "[]").includes(p.id)) wishBtn.classList.add("active");
+    wishBtn.onclick = () => toggleWish(p.id, wishBtn);
+  }
+  if (shareBtn) {
+    shareBtn.onclick = () => shareProduct(p.id);
+  }
+}
+
+// Favorites & Wishlist Logic
+function toggleFav(id, btn) {
+  let favs = JSON.parse(localStorage.getItem("moms_choice_favs") || "[]");
+  if (favs.includes(id)) {
+    favs = favs.filter(f => f !== id);
+    btn.classList.remove("active");
+  } else {
+    favs.push(id);
+    btn.classList.add("active");
+  }
+  localStorage.setItem("moms_choice_favs", JSON.stringify(favs));
+}
+
+function toggleWish(id, btn) {
+  let wish = JSON.parse(localStorage.getItem("moms_choice_wish") || "[]");
+  if (wish.includes(id)) {
+    wish = wish.filter(w => w !== id);
+    btn.classList.remove("active");
+  } else {
+    wish.push(id);
+    btn.classList.add("active");
+  }
+  localStorage.setItem("moms_choice_wish", JSON.stringify(wish));
+}
+
+function shareProduct(id) {
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Check out this product on Mom\'s Choice!',
+      url: url
+    }).catch(console.error);
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("Link copied to clipboard!\n" + url);
+  }
 }
 
 function renderAlsoLike() {

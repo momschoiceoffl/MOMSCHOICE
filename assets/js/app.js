@@ -434,10 +434,14 @@ function renderProducts(items) {
       <div class="product-info">
         <div>
           <h4>${title}</h4>
-          <div class="category-label">${catName}</div>
-          <div class="price-row">
+          <div class="price-row" style="margin-bottom: 8px;">
             <span class="current-price">${sym}${p.price.toLocaleString("en-IN")}</span>
             <span class="mrp-price">${sym}${p.originalPrice.toLocaleString("en-IN")}</span>
+          </div>
+          <div class="product-actions-row">
+            <button class="action-icon-btn fav-btn" onclick="event.stopPropagation(); toggleFav('${p.id}', this)" title="Favorite">❤</button>
+            <button class="action-icon-btn wish-btn" onclick="event.stopPropagation(); toggleWish('${p.id}', this)" title="Wishlist">🔖</button>
+            <button class="action-icon-btn" onclick="event.stopPropagation(); shareProduct('${p.id}')" title="Share">🔗</button>
           </div>
         </div>
         <button class="btn-add" onclick="event.stopPropagation(); addToCart('${p.id}')">${btnCart}</button>
@@ -824,6 +828,44 @@ function setupListeners() {
 /* ═══════════════════════════════════════════════════════════════ */
 /* [WHATSAPP] Order confirmation                                   */
 /* ═══════════════════════════════════════════════════════════════ */
+// Favorites & Wishlist Logic
+function toggleFav(id, btn) {
+  let favs = JSON.parse(localStorage.getItem("moms_choice_favs") || "[]");
+  if (favs.includes(id)) {
+    favs = favs.filter(f => f !== id);
+    btn.classList.remove("active");
+  } else {
+    favs.push(id);
+    btn.classList.add("active");
+  }
+  localStorage.setItem("moms_choice_favs", JSON.stringify(favs));
+}
+
+function toggleWish(id, btn) {
+  let wish = JSON.parse(localStorage.getItem("moms_choice_wish") || "[]");
+  if (wish.includes(id)) {
+    wish = wish.filter(w => w !== id);
+    btn.classList.remove("active");
+  } else {
+    wish.push(id);
+    btn.classList.add("active");
+  }
+  localStorage.setItem("moms_choice_wish", JSON.stringify(wish));
+}
+
+function shareProduct(id) {
+  const url = window.location.origin + window.location.pathname.replace("index.html", "").replace("category.html", "") + "product.html?id=" + id;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Check out this product on Mom\'s Choice!',
+      url: url
+    }).catch(console.error);
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("Link copied to clipboard!\n" + url);
+  }
+}
+
 function triggerWhatsApp(order) {
   const itemList = order.items.map(i => `• ${i.title} (x${i.qty}) - ₹${i.price * i.qty}`).join("\n");
   const shipLine = order.shipping === 0
