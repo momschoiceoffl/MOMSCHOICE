@@ -95,7 +95,7 @@ function translateCategory(cat) {
   const map = {
     "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
     "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
-    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", "Designer": "டிசைனர்"
+    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", "Designer": "டிசைனர்", "Polyester": "பாலிஎஸ்டர்"
   };
   return map[cat] || cat;
 }
@@ -117,7 +117,13 @@ function setLanguage(lang) {
   // Home Page
   if (typeof renderFiltered === 'function') renderFiltered(); 
   if (typeof renderCategoryCards === 'function') renderCategoryCards(); 
-  if (typeof initCarousel === 'function') initCarousel();     
+  
+  // Update Carousel text WITHOUT resetting position
+  if (typeof updateCarouselText === 'function') {
+    updateCarouselText();
+  } else if (typeof initCarousel === 'function') {
+    initCarousel(); // Fallback if the update function doesn't exist yet
+  }
 
   // Category Page
   if (typeof renderSubcategories === 'function') renderSubcategories(); 

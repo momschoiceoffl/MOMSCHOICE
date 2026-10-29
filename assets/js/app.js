@@ -577,6 +577,27 @@ function initCarousel() {
   startCarouselTimer();
 }
 
+function updateCarouselText() {
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  
+  document.querySelectorAll(".carousel-pair").forEach((slide, index) => {
+    const p = carouselSlides[index];
+    if (!p) return;
+    
+    const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+    const desc = (lang === "ta" && p.description_ta) ? p.description_ta : (p.description || "");
+    
+    const h4 = slide.querySelector("h4");
+    const priceDiv = slide.querySelector(".desc-price");
+    const descDiv = slide.querySelector(".desc-text");
+    
+    if (h4) h4.innerText = title;
+    if (priceDiv) priceDiv.innerText = `${sym}${p.price.toLocaleString("en-IN")}`;
+    if (descDiv) descDiv.innerText = desc;
+  });
+}
+
 function updateCarouselPosition() {
   const track = document.getElementById("carouselTrack");
   if (!track) return;
