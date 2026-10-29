@@ -151,6 +151,10 @@ function applyTranslations() {
   const dict = TRANSLATIONS[lang];
   if (!dict) return;
 
+  // Close the sidebar menu categories if it's open to force a re-render
+  const subnav = document.getElementById("sidebarSubnav");
+  if (subnav) subnav.style.display = "none";
+
   // Translate all elements with data-i18n
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
