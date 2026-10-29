@@ -3,14 +3,14 @@
 // ═══════════════════════════════════════════════════════════════
 const TRANSLATIONS = {
   en: {
-    // Header & Navigation
     home: "Home",
     categories: "Categories",
     search_placeholder: "Search products...",
     search_cat_placeholder: "Search this category...",
     login: "Login",
+    shop_by_category: "Shop by Category",
+    you_may_also_like: "You may also like",
     
-    // Cart & Checkout
     shopping_bag: "Your Shopping Bag",
     empty_bag: "Your shopping bag is empty.",
     subtotal: "Subtotal",
@@ -19,8 +19,8 @@ const TRANSLATIONS = {
     checkout_wa: "📲 Send Order on WhatsApp",
     add_to_cart: "Add to Cart",
     send_wa: "Send Order on WhatsApp",
+    proceed_pay: "Proceed to Pay & WhatsApp Order",
     
-    // Form Fields
     full_name: "Full Name",
     phone: "WhatsApp Number",
     house: "Flat / House No / Street",
@@ -28,17 +28,21 @@ const TRANSLATIONS = {
     district: "District",
     state: "State",
     pincode: "Pincode (6 digits)",
-    save_details: "Save details for next order"
+    save_details: "Save details for next order",
+    address: "Full Delivery Address with Pincode",
+    product_enquiry: "Product Enquiry",
+    back: "← Back",
+    remove: "Remove"
   },
   ta: {
-    // Header & Navigation
     home: "முகப்பு",
     categories: "வகைகள்",
     search_placeholder: "தேடு...",
     search_cat_placeholder: "இந்த வகையில் தேடு...",
     login: "உள்நுழை",
+    shop_by_category: "வகை வாரியாக வாங்க",
+    you_may_also_like: "இவையும் உங்களுக்கு பிடிக்கலாம்",
     
-    // Cart & Checkout
     shopping_bag: "உங்கள் ஷாப்பிங் பேக்",
     empty_bag: "உங்கள் ஷாப்பிங் பேக் காலியாக உள்ளது.",
     subtotal: "மொத்தம்",
@@ -47,8 +51,8 @@ const TRANSLATIONS = {
     checkout_wa: "📲 வாட்ஸ்அப்பில் ஆர்டர் செய்",
     add_to_cart: "கார்ட்டில் சேர்",
     send_wa: "வாட்ஸ்அப்பில் அனுப்பு",
+    proceed_pay: "பணம் செலுத்தி ஆர்டர் செய்",
     
-    // Form Fields
     full_name: "முழு பெயர்",
     phone: "வாட்ஸ்அப் எண்",
     house: "வீட்டு எண் / தெரு",
@@ -56,7 +60,11 @@ const TRANSLATIONS = {
     district: "மாவட்டம்",
     state: "மாநிலம்",
     pincode: "அஞ்சல் குறியீடு",
-    save_details: "அடுத்த ஆர்டருக்கு விவரங்களை சேமி"
+    save_details: "அடுத்த ஆர்டருக்கு விவரங்களை சேமி",
+    address: "முழு டெலிவரி முகவரி",
+    product_enquiry: "பொருள் விசாரணை",
+    back: "← பின்செல்",
+    remove: "நீக்கு"
   }
 };
 
@@ -70,6 +78,8 @@ function toggleLanguage() {
   const current = localStorage.getItem("moms_pick_lang") || "en";
   const next = current === "en" ? "ta" : "en";
   setLanguage(next);
+  if (typeof renderFiltered === 'function') renderFiltered();
+  if (typeof renderProducts === 'function') renderProducts();
 }
 
 function applyTranslations() {
@@ -77,11 +87,12 @@ function applyTranslations() {
   const dict = TRANSLATIONS[lang];
   if (!dict) return;
 
-  // Update elements with data-i18n
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     if (dict[key]) {
       if (el.tagName === "INPUT" && el.hasAttribute("placeholder")) {
+        el.placeholder = dict[key];
+      } else if (el.tagName === "TEXTAREA" && el.hasAttribute("placeholder")) {
         el.placeholder = dict[key];
       } else {
         el.innerText = dict[key];
@@ -89,10 +100,8 @@ function applyTranslations() {
     }
   });
 
-  // Update Toggle Button Text
   const btn = document.getElementById("langToggleBtn");
   if (btn) btn.innerText = lang === "en" ? "த / EN" : "EN / த";
 }
 
-// Apply immediately on load
 document.addEventListener("DOMContentLoaded", applyTranslations);

@@ -426,8 +426,8 @@ function renderProducts(items) {
             <span class="mrp-price">₹${p.originalPrice.toLocaleString("en-IN")}</span>
           </div>
         </div>
-        <button class="btn-add" onclick="event.stopPropagation(); addToCart('${p.id}')">Add to Cart</button>
-        <button class="btn-wa-card" onclick="event.stopPropagation(); checkoutSingleProduct('${p.id}')">Send Order on WhatsApp</button>
+        <button class="btn-add" onclick="event.stopPropagation(); addToCart('${p.id}')" data-i18n="add_to_cart">Add to Cart</button>
+        <button class="btn-wa-card" onclick="event.stopPropagation(); checkoutSingleProduct('${p.id}')" data-i18n="send_wa">Send Order on WhatsApp</button>
       </div>
     </div>
   `;

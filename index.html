@@ -88,7 +88,7 @@
     </section>
 
     <section class="category-cards" id="categoryCards">
-      <h2 class="section-title">Shop by Category</h2>
+      <h2 class="section-title" data-i18n="shop_by_category">Shop by Category</h2>
       <div class="category-grid" id="categoryGrid"></div>
     </section>
 
@@ -123,15 +123,15 @@
         </div>
 
         <div class="checkout-fields">
-          <input type="text" id="custName" placeholder="Full Name" required>
-          <input type="tel" id="custPhone" placeholder="WhatsApp Number" required>
-          <input type="text" id="custHouse" placeholder="Flat / House No / Street" required>
-          <input type="text" id="custArea" placeholder="Area / Locality" required>
-          <input type="text" id="custDistrict" placeholder="District" required>
-          <input type="text" id="custState" placeholder="State" required>
-          <input type="tel" id="custPincode" placeholder="Pincode (6 digits)" maxlength="6" pattern="[0-9]{6}">
+          <input type="text" id="custName" placeholder="Full Name" data-i18n="full_name" required>
+          <input type="tel" id="custPhone" placeholder="WhatsApp Number" data-i18n="phone" required>
+          <input type="text" id="custHouse" placeholder="Flat / House No / Street" data-i18n="house" required>
+          <input type="text" id="custArea" placeholder="Area / Locality" data-i18n="area" required>
+          <input type="text" id="custDistrict" placeholder="District" data-i18n="district" required>
+          <input type="text" id="custState" placeholder="State" data-i18n="state" required>
+          <input type="tel" id="custPincode" placeholder="Pincode (6 digits)" data-i18n="pincode" maxlength="6" pattern="[0-9]{6}">
           <label class="save-checkbox">
-            <input type="checkbox" id="saveDetails"> Save details for next order
+            <input type="checkbox" id="saveDetails"> <span data-i18n="save_details">Save details for next order</span>
           </label>
         </div>
 
