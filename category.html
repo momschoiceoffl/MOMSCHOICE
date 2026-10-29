@@ -46,14 +46,14 @@
   </header>
 
   <div class="search-bar" id="searchBar">
-    <input type="search" id="searchInput" placeholder="Search this category..." autocomplete="off">
+    <input type="search" id="searchInput" placeholder="Search this category..." data-i18n="search_cat_placeholder" autocomplete="off">
     <button class="search-close" id="searchClose">✕</button>
   </div>
 
   <!-- STICKY BACK BUTTON & SUBCATEGORY BAR -->
   <div class="sticky-chips-wrap">
     <div class="sticky-inner">
-      <button class="sub-btn back-btn" onclick="window.location.href='index.html'" data-i18n="home">← Home</button>
+      <button class="sub-btn back-btn" id="catBackBtn" onclick="window.location.href='index.html'">← Home</button>
       <div class="subcategory-bar" id="subcategoryBar"></div>
     </div>
   </div>

@@ -106,28 +106,38 @@ function getCurrency() {
 }
 
 function setLanguage(lang) {
+  // 1. Set the language in localStorage FIRST
   localStorage.setItem("moms_pick_lang", lang);
   document.documentElement.lang = lang;
-  applyTranslations();
   
-  // 1. Update the UI text (Header, Buttons, etc.)
+  // 2. Update static HTML elements
   applyTranslations();
 
-  // 2. Refresh Home Page Dynamic Content (Carousel, Categories, Sidebar)
+  // 3. Re-render all dynamic content using the NEW language
+  // Home Page
   if (typeof renderFiltered === 'function') renderFiltered(); 
   if (typeof renderCategoryCards === 'function') renderCategoryCards(); 
   if (typeof initCarousel === 'function') initCarousel();     
 
-  // 3. Refresh Category Page Dynamic Content (Product Grid & Filter Chips)
-  if (typeof renderProducts === 'function') renderProducts(); 
+  // Category Page
   if (typeof renderSubcategories === 'function') renderSubcategories(); 
+  if (typeof renderProducts === 'function') renderProducts(); 
   
-  // 4. Refresh Product Page Dynamic Content (Details & Related Items)
+  // Product Page
   if (typeof renderProduct === 'function') renderProduct();   
   if (typeof renderAlsoLike === 'function') renderAlsoLike(); 
 
-  // 5. Update Cart UI language
+  // Cart Drawer (on all pages)
   if (typeof updateCartUI === 'function') updateCartUI();
+
+  // 4. Update the Category Page Title
+  const titleEl = document.getElementById("catPageTitle");
+  if (titleEl) {
+    const urlCat = new URLSearchParams(location.search).get("cat") || "all";
+    if (typeof translateCategoryLocal === 'function') {
+      titleEl.innerText = urlCat === "all" ? (lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products") : translateCategoryLocal(urlCat);
+    }
+  }
 }
 
 
@@ -137,6 +147,7 @@ function applyTranslations() {
   const dict = TRANSLATIONS[lang];
   if (!dict) return;
 
+  // Translate all elements with data-i18n
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
     if (dict[key]) {
@@ -149,6 +160,18 @@ function applyTranslations() {
       }
     }
   });
+
+  // Also translate the search bar placeholder on Category page
+  const catSearchInput = document.getElementById("searchInput");
+  if (catSearchInput && catSearchInput.hasAttribute("data-i18n")) {
+    catSearchInput.placeholder = dict[catSearchInput.getAttribute("data-i18n")] || catSearchInput.placeholder;
+  }
+
+  // Update the "← Home" back button text
+  const backBtn = document.getElementById("catBackBtn");
+  if (backBtn) {
+    backBtn.innerText = lang === "ta" ? "← முகப்பு" : "← Home";
+  }
 
   const btnEn = document.getElementById("btnLangEn");
   const btnTa = document.getElementById("btnLangTa");
