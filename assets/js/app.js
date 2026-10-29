@@ -831,14 +831,18 @@ function setupListeners() {
 /* [WHATSAPP] Order confirmation                                   */
 /* ═══════════════════════════════════════════════════════════════ */
 function openFavsModal() {
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("sidebarBackdrop").classList.remove("open");
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (s) s.classList.remove("open");
+  if (b) b.classList.remove("open");
   showItemsModal("moms_choice_favs", "My Favorites");
 }
 
 function openWishModal() {
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("sidebarBackdrop").classList.remove("open");
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (s) s.classList.remove("open");
+  if (b) b.classList.remove("open");
   showItemsModal("moms_choice_wish", "My Wishlist");
 }
 
@@ -876,10 +880,12 @@ function showItemsModal(storageKey, title) {
 }
 
 function shareStore() {
-  document.getElementById("sidebar").classList.remove("open");
-  document.getElementById("sidebarBackdrop").classList.remove("open");
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (s) s.classList.remove("open");
+  if (b) b.classList.remove("open");
   
-  const url = window.location.href.split('?')[0];
+  const url = window.location.href.split('?')[0].replace('product.html', 'index.html').replace('category.html', 'index.html');
   if (navigator.share) {
     navigator.share({
       title: 'Check out Mom\'s Choice!',
