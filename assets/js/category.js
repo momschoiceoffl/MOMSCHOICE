@@ -60,6 +60,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateCartUI();
 });
 
+function translateCategoryLocal(cat) {
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  if (lang !== "ta") return cat;
+  const map = {
+    "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
+    "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
+    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", "Designer": "டிசைனர்",
+    "Choker": "சோக்கர்", "Long": "நீளமானது", "Pendant": "பெண்டென்ட்", "Set": "செட்",
+    "Jhumka": "ஜிமிக்கி", "Studs": "ஸ்டட்ஸ்", "Drops": "டிராப்ஸ்", "Hoops": "ஹூப்ஸ்",
+    "Kada": "கடா", "Bracelet": "ப்ரேஸ்லெட்", "Adjustable": "அட்ஜஸ்டபிள்", "Statement": "ஸ்டேட்மென்ட்",
+    "Maang Tikka": "மாங் டிக்கா", "Hair Pin": "ஹேர் பின்",
+    "Bags": "பைகள்", "Clutches": "கிளட்ச்", "Belts": "பெல்ட்ஸ்"
+  };
+  return map[cat] || cat;
+}
+
 function renderSubcategories() {
   const bar = document.getElementById("subcategoryBar");
   if (!bar) return;
@@ -71,8 +87,7 @@ function renderSubcategories() {
 
   bar.innerHTML = `<button class="sub-btn ${activeSubCat === 'all' ? 'active' : ''}" onclick="setSubCat('all')">${allTxt}</button>` + 
     subs.map(s => {
-      // Use translateCategory to get the Tamil name from the dictionary
-      const sName = typeof translateCategory === 'function' ? translateCategory(s) : s;
+      const sName = translateCategoryLocal(s);
       return `<button class="sub-btn ${activeSubCat === s ? 'active' : ''}" onclick="setSubCat('${s}')">${sName}</button>`;
     }).join("");
 }
@@ -107,7 +122,7 @@ function renderProducts() {
     const thumb = (p.images && p.images[0]) || p.image || "";
     const badge = (p.tags && p.tags[0]) ? p.tags[0].replace("_"," ") : "";
     const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
-    const catName = typeof translateCategory === 'function' ? translateCategory(p.category) : p.category;
+    const catName = typeof translateCategoryLocal === 'function' ? translateCategoryLocal(p.category) : p.category;
 
     return `
       <div class="product-card">
