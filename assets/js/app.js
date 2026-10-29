@@ -216,7 +216,6 @@ async function fetchProducts() {
 
     initCarousel();
     renderCategoryCards();
-    renderSidebarProducts();
     renderSubcategories();
   } catch (e) {
     console.error("Could not load products.json", e);
@@ -289,17 +288,7 @@ function renderCategoryCards() {
   });
 }
 
-function renderSidebarProducts() {
-  const list = document.getElementById("sidebarProductList");
-  if (!list) return;
-  
-  const lang = localStorage.getItem("moms_pick_lang") || "en";
-  
-  list.innerHTML = products.map(p => {
-    const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
-    return `<a href="product.html?id=${p.id}" class="sidebar-sublink" style="border-bottom: none;">• ${title}</a>`;
-  }).join("");
-}
+
 
 function renderSidebarSubnav(cats) {
   const subnav = document.getElementById("sidebarSubnav");
