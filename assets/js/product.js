@@ -62,13 +62,20 @@ function renderProduct() {
 function renderAlsoLike() {
   const others = products.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).slice(0, 6);
   if (!others.length) return;
+  
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+
   document.getElementById("pdAlso").style.display = "block";
-  document.getElementById("pdAlsoGrid").innerHTML = others.map(p => `
+  document.getElementById("pdAlsoGrid").innerHTML = others.map(p => {
+    const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+    return `
     <a class="pd-also-card" href="product.html?id=${p.id}">
-      <img src="${p.image}" alt="${p.title}">
-      <div class="pd-also-title">${p.title}</div>
-      <div class="pd-also-price">₹${p.price.toLocaleString("en-IN")}</div>
-    </a>`).join("");
+      <img src="${p.image}" alt="${title}">
+      <div class="pd-also-title">${title}</div>
+      <div class="pd-also-price">${sym}${p.price.toLocaleString("en-IN")}</div>
+    </a>`;
+  }).join("");
 }
 
 function addToCart(id) {

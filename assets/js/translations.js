@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 const TRANSLATIONS = {
   en: {
+    store_name: "Mom's Pick",
     home: "Home",
     categories: "Categories",
     search_placeholder: "Search products...",
@@ -35,6 +36,7 @@ const TRANSLATIONS = {
     remove: "Remove"
   },
   ta: {
+    store_name: "மாம்ஸ் பிக்",
     home: "முகப்பு",
     categories: "வகைகள்",
     search_placeholder: "தேடு...",

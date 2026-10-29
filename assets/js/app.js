@@ -301,14 +301,19 @@ function renderSidebarSubnav(cats) {
   cats.forEach(cat => {
     const count = products.filter(p => p.category === cat).length;
     const subcats = storeCategories[cat] || [];
+    
+    // Translate category name
+    const catName = typeof translateCategory === 'function' ? translateCategory(cat) : cat;
+    
     html += `<div style="padding: 4px 16px;">`;
-    html += `<a href="category.html?cat=${encodeURIComponent(cat)}" style="color: var(--primary); font-weight: bold; text-decoration: none; display: block; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">${cat} (${count})</a>`;
+    html += `<a href="category.html?cat=${encodeURIComponent(cat)}" style="color: var(--primary); font-weight: bold; text-decoration: none; display: block; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">${catName} (${count})</a>`;
     
     // Add subcategory drill down
     if (subcats.length) {
         html += `<div style="padding-left: 12px; margin-top: 4px;">`;
         subcats.forEach(sub => {
-            html += `<a href="category.html?cat=${encodeURIComponent(cat)}&sub=${encodeURIComponent(sub)}" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; display: block; padding: 4px 0;">↳ ${sub}</a>`;
+            const subName = typeof translateCategory === 'function' ? translateCategory(sub) : sub;
+            html += `<a href="category.html?cat=${encodeURIComponent(cat)}&sub=${encodeURIComponent(sub)}" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; display: block; padding: 4px 0;">↳ ${subName}</a>`;
         });
         html += `</div>`;
     }
