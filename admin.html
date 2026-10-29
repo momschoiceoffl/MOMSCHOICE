@@ -201,8 +201,16 @@
       </div>
       <input type="file" id="imageInput" accept="image/*" multiple onchange="handleImageSelection(event)">
 
-      <label>Item Name</label>
-      <input type="text" id="pTitle" placeholder="e.g. Antique Matte Peacock Choker Set">
+      <div class="row">
+        <div>
+          <label>Item Name (English)</label>
+          <input type="text" id="pTitle" placeholder="e.g. Antique Matte Peacock Choker Set">
+        </div>
+        <div>
+          <label>Item Name (Tamil)</label>
+          <input type="text" id="pTitleTa" placeholder="எ.கா. பீகாக் நெக்லஸ்">
+        </div>
+      </div>
 
       <div class="row">
         <div>
@@ -222,7 +230,7 @@
           <input type="text" id="pSubCat" placeholder="e.g. Choker, Jhumka">
         </div>
         <div>
-          <label>Free-text Badge (optional)</label>
+          <label>Free-text Badge</label>
           <input type="text" id="pTag" placeholder="e.g. Limited Edition">
         </div>
       </div>
@@ -268,8 +276,11 @@
         </div>
       </div>
 
-      <label>Short Description</label>
+      <label>Short Description (English)</label>
       <textarea id="pDesc" rows="2" placeholder="e.g. Handcrafted brass necklace with matching jhumkas..."></textarea>
+      
+      <label>Short Description (Tamil)</label>
+      <textarea id="pDescTa" rows="2" placeholder="எ.கா. கைவினை பித்தளை நெக்லஸ்..."></textarea>
 
       <button class="btn btn-primary" id="saveBtn" onclick="saveProduct()">Publish & Update Store</button>
       <button class="btn btn-outline" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Cancel Edit</button>
@@ -296,12 +307,22 @@
 
       <div class="row">
         <div>
-          <label>New Category</label>
+          <label>New Category (English)</label>
           <input type="text" id="newCatName" placeholder="e.g. Anklets">
         </div>
         <div>
-          <label>New Subcategory</label>
+          <label>New Category (Tamil)</label>
+          <input type="text" id="newCatNameTa" placeholder="எ.கா. கொலுசு">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>New Subcategory (English)</label>
           <input type="text" id="newSubCatName" placeholder="e.g. Payal">
+        </div>
+        <div>
+          <label>New Subcategory (Tamil)</label>
+          <input type="text" id="newSubCatNameTa" placeholder="எ.கா. பாயல்">
         </div>
       </div>
       <button class="btn btn-success" onclick="addCategory()">+ Add to Store</button>
@@ -420,9 +441,10 @@
       const display = document.getElementById("categoryListDisplay");
       if (!display) return;
       
-      const html = Object.keys(storeCategories).map(cat => {
+      const html = Object.keys(storeCategories).filter(k => k !== "_translations").map(cat => {
         const subs = storeCategories[cat].join(", ");
-        return `<strong>${cat}</strong>: ${subs || "No subcategories"}`;
+        const ta = storeCategories["_translations"] && storeCategories["_translations"][cat] ? ` (${storeCategories["_translations"][cat]})` : "";
+        return `<strong>${cat}${ta}</strong>: ${subs || "No subcategories"}`;
       }).join("<br>");
       
       display.innerHTML = html || "No categories yet.";
@@ -442,9 +464,22 @@
 
     async function addCategory() {
       const catInput = document.getElementById("newCatName").value.trim();
+      const catInputTa = document.getElementById("newCatNameTa").value.trim();
       const subInput = document.getElementById("newSubCatName").value.trim();
+      const subInputTa = document.getElementById("newSubCatNameTa").value.trim();
 
       if (!catInput && !subInput) return alert("Enter a category or subcategory name.");
+
+      // Save Tamil mappings in a special dictionary inside categories.json
+      if (catInput && catInputTa) {
+        if (!storeCategories["_translations"]) storeCategories["_translations"] = {};
+        storeCategories["_translations"][catInput] = catInputTa;
+      }
+
+      if (subInput && subInputTa) {
+        if (!storeCategories["_translations"]) storeCategories["_translations"] = {};
+        storeCategories["_translations"][subInput] = subInputTa;
+      }
 
       if (catInput) {
         if (!storeCategories[catInput]) storeCategories[catInput] = [];
@@ -459,7 +494,9 @@
       }
 
       document.getElementById("newCatName").value = "";
+      document.getElementById("newCatNameTa").value = "";
       document.getElementById("newSubCatName").value = "";
+      document.getElementById("newSubCatNameTa").value = "";
 
       renderCategories();
       updateCategoryDropdown();
@@ -738,12 +775,14 @@
     /* ═══════════════════════════════════════════════════════════ */
     async function saveProduct() {
       const title = document.getElementById("pTitle").value.trim();
+      const titleTa = document.getElementById("pTitleTa").value.trim();
       const price = Number(document.getElementById("pPrice").value);
       const mrp   = Number(document.getElementById("pMrp").value) || price;
       const category = document.getElementById("pCat").value;
       const subcategory = document.getElementById("pSubCat").value.trim();
       const freeTag  = document.getElementById("pTag").value.trim();
       const desc  = document.getElementById("pDesc").value.trim();
+      const descTa = document.getElementById("pDescTa").value.trim();
       const editId = document.getElementById("editProductId").value;
       const saveBtn = document.getElementById("saveBtn");
       const original = saveBtn.innerText;
@@ -794,6 +833,7 @@
       const productObj = {
         id: editId || "AJ-" + Date.now().toString().slice(-4),
         title,
+        title_ta: titleTa,
         price,
         originalPrice: mrp,
         category,
@@ -801,8 +841,9 @@
         tag: freeTag,
         tags: selectedTags,
         description: desc,
-        image: finalImages[0],       // backwards compat (first image)
-        images: finalImages          // new multi-image array
+        description_ta: descTa,
+        image: finalImages[0],
+        images: finalImages
       };
 
       if (editId) {
@@ -830,12 +871,14 @@
       document.getElementById("formTitle").innerText = "✏️ Edit Product";
       document.getElementById("editProductId").value = p.id;
       document.getElementById("pTitle").value = p.title;
+      document.getElementById("pTitleTa").value = p.title_ta || "";
       document.getElementById("pPrice").value = p.price;
       document.getElementById("pMrp").value   = p.originalPrice;
       document.getElementById("pCat").value   = p.category;
       document.getElementById("pSubCat").value = p.subcategory || "";
       document.getElementById("pTag").value   = p.tag || "";
-      document.getElementById("pDesc").value  = p.description;
+      document.getElementById("pDesc").value  = p.description || "";
+      document.getElementById("pDescTa").value  = p.description_ta || "";
 
       setSelectedTags(p.tags || []);
       renderPreviewGrid();
@@ -853,11 +896,13 @@
       document.getElementById("formTitle").innerText = "✨ Add New Product";
       document.getElementById("editProductId").value = "";
       document.getElementById("pTitle").value = "";
+      document.getElementById("pTitleTa").value = "";
       document.getElementById("pPrice").value = "";
       document.getElementById("pMrp").value   = "";
       document.getElementById("pTag").value   = "";
       document.getElementById("pSubCat").value = "";
       document.getElementById("pDesc").value  = "";
+      document.getElementById("pDescTa").value  = "";
       document.getElementById("imageInput").value = "";
       document.getElementById("saveBtn").innerText = "Publish & Update Store";
       document.getElementById("cancelEditBtn").style.display = "none";
