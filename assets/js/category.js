@@ -1,5 +1,4 @@
 const CONFIG = { storeName: "MOM'S CHOICE", upiId: "yourname@okhdfcbank", whatsappNumber: "919876543210" };
-
 const SAVED_CUSTOMER_KEY = "ma_fashion_customer";
 const FREE_SHIPPING_ABOVE = 999;
 
@@ -16,8 +15,7 @@ const SHIPPING_ZONES = [
 function getShippingZone(pincode) {
   const pin = parseInt(pincode, 10);
   if (!pincode || isNaN(pin) || pin < 100000 || pin > 855999) return null;
-  return SHIPPING_ZONES.find(z => pin >= z.from && pin <= z.to)
-      || { fee: 150, name: "Rest of India" };
+  return SHIPPING_ZONES.find(z => pin >= z.from && pin <= z.to) || { fee: 150, name: "Rest of India" };
 }
 
 function loadCustomerDetails() {
@@ -34,33 +32,6 @@ let searchQuery = "";
 let activeSubCat = "all";
 let storeCategories = {};
 
-document.addEventListener("DOMContentLoaded", async () => {
-  activeCat = new URLSearchParams(location.search).get("cat") || "all";
-  activeSubCat = new URLSearchParams(location.search).get("sub") || "all";
-  
-  const lang = localStorage.getItem("moms_pick_lang") || "en";
-  const catName = (typeof translateCategoryLocal === 'function') ? translateCategoryLocal(activeCat) : activeCat;
-  document.getElementById("catPageTitle").innerText = activeCat === "all" ? (lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products") : catName;
-
-
-  try {
-    const res = await fetch(`products.json?_t=${Date.now()}`);
-    products = await res.json();
-    
-    const catRes = await fetch(`categories.json?_t=${Date.now()}`);
-    if (catRes.ok) storeCategories = await catRes.json();
-  } catch (e) { console.error(e); return; }
-
-  renderSubcategories();
-  renderProducts();
-  setupSidebar();
-  setupSearch();
-  setupCart();
-  setupCartDrawer();
-  restoreSavedCustomer();
-  updateCartUI();
-});
-
 function translateCategoryLocal(cat) {
   const lang = localStorage.getItem("moms_pick_lang") || "en";
   if (lang !== "ta") return cat;
@@ -76,6 +47,49 @@ function translateCategoryLocal(cat) {
   };
   return map[cat] || cat;
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1. Setup Hamburger Menu FIRST (so it works even if fetch fails)
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  const h = document.getElementById("hamburgerBtn");
+  if (s && b && h) {
+    h.addEventListener("click", (e) => {
+      e.preventDefault();
+      s.classList.add("open"); 
+      b.classList.add("open"); 
+    });
+    b.addEventListener("click", () => { 
+      s.classList.remove("open"); 
+      b.classList.remove("open"); 
+    });
+  }
+
+  // 2. Parse URL Parameters
+  activeCat = new URLSearchParams(location.search).get("cat") || "all";
+  activeSubCat = new URLSearchParams(location.search).get("sub") || "all";
+  
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const catName = translateCategoryLocal(activeCat);
+  document.getElementById("catPageTitle").innerText = activeCat === "all" ? (lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products") : catName;
+
+  // 3. Fetch Data
+  try {
+    const res = await fetch(`products.json?_t=${Date.now()}`);
+    products = await res.json();
+    
+    const catRes = await fetch(`categories.json?_t=${Date.now()}`);
+    if (catRes.ok) storeCategories = await catRes.json();
+  } catch (e) { console.error(e); return; }
+
+  // 4. Render UI
+  renderSubcategories();
+  renderProducts();
+  setupSearch();
+  setupCartDrawer();
+  restoreSavedCustomer();
+  updateCartUI();
+});
 
 function renderSubcategories() {
   const bar = document.getElementById("subcategoryBar");
@@ -96,10 +110,8 @@ function renderSubcategories() {
 function setSubCat(sub) {
   activeSubCat = sub;
   renderSubcategories();
-  renderProducts(true); // Reset to page 1 when filter changes
+  renderProducts(); 
 }
-// Initialize with default "all"
-setTimeout(() => renderProducts(), 1000);
 
 function renderProducts() {
   let list = products;
@@ -110,10 +122,11 @@ function renderProducts() {
     list = list.filter(p => p.title.toLowerCase().includes(q) || (p.description||"").toLowerCase().includes(q));
   }
   
-  // Alphabetical sort
   list.sort((a, b) => a.title.localeCompare(b.title));
   const c = document.getElementById("productsContainer");
+  if (!c) return;
   if (!list.length) { c.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 0;">No products.</p>`; return; }
+  
   const lang = localStorage.getItem("moms_pick_lang") || "en";
   const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
   const btnCart = typeof t === 'function' ? t("add_to_cart") : "Add to Cart";
@@ -123,7 +136,7 @@ function renderProducts() {
     const thumb = (p.images && p.images[0]) || p.image || "";
     const badge = (p.tags && p.tags[0]) ? p.tags[0].replace("_"," ") : "";
     const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
-    const catName = typeof translateCategoryLocal === 'function' ? translateCategoryLocal(p.category) : p.category;
+    const catName = translateCategoryLocal(p.category);
 
     return `
       <div class="product-card">
@@ -149,23 +162,6 @@ function renderProducts() {
         </div>
       </div>`;
   }).join("");
-
-  // Add Pagination
-  if (totalPages > 1) {
-    html += `<div class="pagination">`;
-    for (let i = 1; i <= totalPages; i++) {
-      html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
-    }
-    html += `</div>`;
-  }
-
-  c.innerHTML = html;
-}
-
-function goToPage(n) {
-  currentPage = n;
-  renderProducts();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function addToCart(id) {
@@ -175,8 +171,6 @@ function addToCart(id) {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
 }
-
-
 
 function updateCartUI() {
   const el = document.getElementById("cartCount");
@@ -230,9 +224,7 @@ function updateShippingTotals() {
 
   const grand = subtotal + shipping;
   if (subtotalEl) subtotalEl.innerText = `₹${subtotal.toLocaleString("en-IN")}`;
-  if (shippingEl) shippingEl.innerText = shipping === 0
-    ? "Free"
-    : `₹${shipping.toLocaleString("en-IN")}${zoneName ? " (" + zoneName + ")" : ""}`;
+  if (shippingEl) shippingEl.innerText = shipping === 0 ? "Free" : `₹${shipping.toLocaleString("en-IN")}${zoneName ? " (" + zoneName + ")" : ""}`;
   totalEl.innerText = `₹${grand.toLocaleString("en-IN")}`;
   return { subtotal, shipping, grand, zoneName };
 }
@@ -288,20 +280,15 @@ function setupCartDrawer() {
     }
 
     const fullAddr = `${house}, ${area}, ${district}, ${state} - ${pincode}`.trim();
-
     if (save) saveCustomerDetails({ name, phone, house, area, district, state, pincode: pincode.trim() });
 
     const totals = updateShippingTotals();
     const orderId = "AJ-" + Math.floor(1000 + Math.random() * 9000);
 
     const order = {
-      orderId, name, phone,
-      addr: fullAddr,
-      subtotal: totals.subtotal,
-      shipping: totals.shipping,
-      total: totals.grand,
-      zone: totals.zoneName,
-      items: [...cart]
+      orderId, name, phone, addr: fullAddr,
+      subtotal: totals.subtotal, shipping: totals.shipping,
+      total: totals.grand, zone: totals.zoneName, items: [...cart]
     };
 
     triggerWhatsApp(order);
@@ -318,20 +305,6 @@ function checkoutSingleProduct(id) {
   updateCartUI();
   const drawer = document.getElementById("cartOverlay");
   if (drawer) drawer.classList.add("open");
-}
-
-function setupSidebar() {
-  const s = document.getElementById("sidebar"), b = document.getElementById("sidebarBackdrop"), h = document.getElementById("hamburgerBtn");
-  if (!s || !b || !h) return;
-  h.addEventListener("click", (e) => {
-    e.preventDefault();
-    s.classList.add("open"); 
-    b.classList.add("open"); 
-  });
-  b.addEventListener("click", () => { 
-    s.classList.remove("open"); 
-    b.classList.remove("open"); 
-  });
 }
 
 function setupSearch() {
@@ -354,19 +327,10 @@ function setupSearch() {
   });
   inp.addEventListener("input", () => { 
     searchQuery = inp.value.trim(); 
-    renderProducts(true); 
+    renderProducts(); 
   });
 }
 
-function setupCart() {
-
-
-
-}
-
-
-
-// Favorites & Wishlist Logic
 function toggleFav(id, btn) {
   let favs = JSON.parse(localStorage.getItem("moms_choice_favs") || "[]");
   if (favs.includes(id)) {
@@ -394,10 +358,7 @@ function toggleWish(id, btn) {
 function shareProduct(id) {
   const url = window.location.origin + window.location.pathname.replace("index.html", "").replace("category.html", "") + "product.html?id=" + id;
   if (navigator.share) {
-    navigator.share({
-      title: 'Check out this product on Mom\'s Choice!',
-      url: url
-    }).catch(console.error);
+    navigator.share({ title: 'Check out this product on Mom\'s Choice!', url: url }).catch(console.error);
   } else {
     navigator.clipboard.writeText(url);
     alert("Link copied to clipboard!\n" + url);
@@ -406,9 +367,7 @@ function shareProduct(id) {
 
 function triggerWhatsApp(order) {
   const itemList = order.items.map(i => `• ${i.title} (x${i.qty}) - ₹${i.price * i.qty}`).join("\n");
-  const shipLine = order.shipping === 0
-    ? `🚚 Shipping: Free`
-    : `🚚 Shipping: ₹${order.shipping}${order.zone ? " (" + order.zone + ")" : ""}`;
+  const shipLine = order.shipping === 0 ? `🚚 Shipping: Free` : `🚚 Shipping: ₹${order.shipping}${order.zone ? " (" + order.zone + ")" : ""}`;
   const msg = `🛍️ *NEW ORDER: #${order.orderId}*\n` +
               `---------------------------------\n${itemList}\n---------------------------------\n` +
               `🧾 Subtotal: ₹${order.subtotal}\n${shipLine}\n` +
@@ -417,7 +376,6 @@ function triggerWhatsApp(order) {
               `📍 *Delivery:*\nName: ${order.name}\nPhone: ${order.phone}\nAddress: ${order.addr}\n\n` +
               `✅ *Attaching payment screenshot below.*`;
   window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank");
-  document.getElementById("upiModal").classList.remove("open");
   cart = [];
   localStorage.setItem("cart", "[]");
   updateCartUI();
