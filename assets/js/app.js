@@ -229,11 +229,9 @@ function renderCategoryCards() {
   renderSidebarSubnav(cats);
   
   grid.innerHTML = cats.map(cat => {
-    // Get ONLY the cover images of each product in this category
     const catProducts = products.filter(p => p.category === cat);
     const coverImages = catProducts.map(p => (p.images && p.images[0]) || p.image).filter(Boolean);
     
-    // Load the last seen index from localStorage
     let savedIdx = 0;
     try {
       const saved = localStorage.getItem("cat_slide_" + cat);
@@ -245,10 +243,12 @@ function renderCategoryCards() {
       ? `<img class="category-card-img cat-auto-slide" src="${thumb}" data-cat="${cat}" data-images='${JSON.stringify(coverImages)}' data-index="${savedIdx}" alt="${cat}">`
       : `<div class="category-card-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--text-muted);">🖼️</div>`;
       
+    const catName = typeof translateCategory === 'function' ? translateCategory(cat) : cat;
+      
     return `
       <a class="category-card" href="category.html?cat=${encodeURIComponent(cat)}" onclick="sessionStorage.setItem('lastCat', '${cat}')">
         ${imgTag}
-        <div class="category-card-name">${cat}</div>
+        <div class="category-card-name">${catName}</div>
       </a>`;
   }).join("");
 
@@ -403,6 +403,11 @@ function renderProducts(items) {
   const start = (currentPage - 1) * PER_PAGE;
   const pageItems = items.slice(start, start + PER_PAGE);
 
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  const btnCart = typeof t === 'function' ? t("add_to_cart") : "Add to Cart";
+  const btnWa = typeof t === 'function' ? t("send_wa") : "Send Order on WhatsApp";
+
   container.innerHTML = pageItems.map(p => {
     const badge = p.tags.includes("bestseller") ? "Bestseller"
                 : p.tags.includes("most_loved") ? "Most Loved"
@@ -411,23 +416,26 @@ function renderProducts(items) {
                 : p.tags.includes("sale")       ? "Sale"
                 : (p.tag || "");
 
+    const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+    const catName = typeof translateCategory === 'function' ? translateCategory(p.category) : p.category;
+
     return `
     <div class="product-card" id="card-${p.id}">
       <div class="img-box" onclick="location.href='product.html?id=${p.id}'">
-        <img src="${p.image}" alt="${p.title}" loading="lazy">
+        <img src="${p.image}" alt="${title}" loading="lazy">
         ${badge ? `<span class="product-badge">${badge}</span>` : ""}
       </div>
       <div class="product-info">
         <div>
-          <h4>${p.title}</h4>
-          <div class="category-label">${p.category}</div>
+          <h4>${title}</h4>
+          <div class="category-label">${catName}</div>
           <div class="price-row">
-            <span class="current-price">₹${p.price.toLocaleString("en-IN")}</span>
-            <span class="mrp-price">₹${p.originalPrice.toLocaleString("en-IN")}</span>
+            <span class="current-price">${sym}${p.price.toLocaleString("en-IN")}</span>
+            <span class="mrp-price">${sym}${p.originalPrice.toLocaleString("en-IN")}</span>
           </div>
         </div>
-        <button class="btn-add" onclick="event.stopPropagation(); addToCart('${p.id}')" data-i18n="add_to_cart">Add to Cart</button>
-        <button class="btn-wa-card" onclick="event.stopPropagation(); checkoutSingleProduct('${p.id}')" data-i18n="send_wa">Send Order on WhatsApp</button>
+        <button class="btn-add" onclick="event.stopPropagation(); addToCart('${p.id}')">${btnCart}</button>
+        <button class="btn-wa-card" onclick="event.stopPropagation(); checkoutSingleProduct('${p.id}')">${btnWa}</button>
       </div>
     </div>
   `;
@@ -498,16 +506,20 @@ function initCarousel() {
     const imgs = (p.images && p.images.length) ? p.images : [p.image];
     const coverImg = imgs[0];
     
-    // Create the mini-track HTML (images 2, 3, 4, etc.)
     const miniImgs = imgs.slice(1).length ? imgs.slice(1) : imgs; 
     const miniTrackHTML = miniImgs.map(img => `<img src="${img}" alt="${p.title}">`).join("");
+
+    const lang = localStorage.getItem("moms_pick_lang") || "en";
+    const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+    const desc = (lang === "ta" && p.description_ta) ? p.description_ta : (p.description || "");
+    const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
 
     return `
     <div class="carousel-pair" data-product-id="${p.id}" data-slide-index="${index}">
       <div class="carousel-col-text">
-        <h4 style="font-size: 1rem; color: var(--primary); margin-bottom: 8px;">${p.title}</h4>
-        <div class="desc-price" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">₹${p.price.toLocaleString("en-IN")}</div>
-        <div class="desc-text" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">${p.description || ""}</div>
+        <h4 style="font-size: 1rem; color: var(--primary); margin-bottom: 8px;">${title}</h4>
+        <div class="desc-price" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">${sym}${p.price.toLocaleString("en-IN")}</div>
+        <div class="desc-text" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">${desc}</div>
       </div>
       <div class="carousel-col-cover">
         <img src="${coverImg}" alt="${p.title}">

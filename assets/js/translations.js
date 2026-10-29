@@ -64,22 +64,62 @@ const TRANSLATIONS = {
     address: "முழு டெலிவரி முகவரி",
     product_enquiry: "பொருள் விசாரணை",
     back: "← பின்செல்",
-    remove: "நீக்கு"
+    remove: "நீக்கு",
+    
+    // Category Dictionary
+    cat_sarees: "புடவைகள்",
+    cat_necklaces: "நெக்லஸ்கள்",
+    cat_earrings: "காதணிகள்",
+    cat_bangles: "வளையல்கள்",
+    cat_rings: "மோதிரங்கள்",
+    cat_ornaments: "அலங்காரங்கள்",
+    cat_accessories: "பாகங்கள்",
+    sub_silk: "பட்டு",
+    sub_cotton: "பருத்தி",
+    sub_designer: "டிசைனர்",
+    sub_choker: "சோக்கர்",
+    sub_jhumka: "ஜிமிக்கி"
   }
 };
+
+function t(key) {
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) ? TRANSLATIONS[lang][key] : key;
+}
+
+function translateCategory(cat) {
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  if (lang !== "ta") return cat;
+  const map = {
+    "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
+    "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
+    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", "Designer": "டிசைனர்"
+  };
+  return map[cat] || cat;
+}
+
+function getCurrency() {
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  return lang === "ta" ? "ரூ" : "₹";
+}
 
 function setLanguage(lang) {
   localStorage.setItem("moms_pick_lang", lang);
   document.documentElement.lang = lang;
   applyTranslations();
+  
+  // Refresh dynamic content
+  if (typeof renderFiltered === 'function') renderFiltered();
+  if (typeof renderProducts === 'function') renderProducts();
+  if (typeof renderCategoryCards === 'function') renderCategoryCards();
+  if (typeof initCarousel === 'function') initCarousel();
+  if (typeof renderSubcategories === 'function') renderSubcategories();
 }
 
 function toggleLanguage() {
   const current = localStorage.getItem("moms_pick_lang") || "en";
   const next = current === "en" ? "ta" : "en";
   setLanguage(next);
-  if (typeof renderFiltered === 'function') renderFiltered();
-  if (typeof renderProducts === 'function') renderProducts();
 }
 
 function applyTranslations() {

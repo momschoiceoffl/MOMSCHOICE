@@ -63,8 +63,14 @@ function renderSubcategories() {
   if (activeCat === "all") { bar.innerHTML = ""; return; }
   
   const subs = storeCategories[activeCat] || ["General"];
-  bar.innerHTML = `<button class="sub-btn ${activeSubCat === 'all' ? 'active' : ''}" onclick="setSubCat('all')">All</button>` + 
-    subs.map(s => `<button class="sub-btn ${activeSubCat === s ? 'active' : ''}" onclick="setSubCat('${s}')">${s}</button>`).join("");
+  const isTa = (localStorage.getItem("moms_pick_lang") || "en") === "ta";
+  const allTxt = isTa ? "அனைத்தும்" : "All";
+
+  bar.innerHTML = `<button class="sub-btn ${activeSubCat === 'all' ? 'active' : ''}" onclick="setSubCat('all')">${allTxt}</button>` + 
+    subs.map(s => {
+      const sName = typeof translateCategory === 'function' ? translateCategory(s) : s;
+      return `<button class="sub-btn ${activeSubCat === s ? 'active' : ''}" onclick="setSubCat('${s}')">${sName}</button>`;
+    }).join("");
 }
 
 function setSubCat(sub) {
@@ -88,26 +94,34 @@ function renderProducts() {
   list.sort((a, b) => a.title.localeCompare(b.title));
   const c = document.getElementById("productsContainer");
   if (!list.length) { c.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 0;">No products.</p>`; return; }
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  const btnCart = typeof t === 'function' ? t("add_to_cart") : "Add to Cart";
+  const btnWa = typeof t === 'function' ? t("send_wa") : "Send Order on WhatsApp";
+
   c.innerHTML = list.map(p => {
     const thumb = (p.images && p.images[0]) || p.image || "";
     const badge = (p.tags && p.tags[0]) ? p.tags[0].replace("_"," ") : "";
+    const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+    const catName = typeof translateCategory === 'function' ? translateCategory(p.category) : p.category;
+
     return `
       <div class="product-card">
         <div class="img-box" onclick="location.href='product.html?id=${p.id}'" style="cursor:pointer;">
-          <img src="${thumb}" alt="${p.title}" loading="lazy">
+          <img src="${thumb}" alt="${title}" loading="lazy">
           ${badge ? `<span class="product-badge">${badge}</span>` : ""}
         </div>
         <div class="product-info">
           <div>
-            <h4>${p.title}</h4>
-            <div class="category-label">${p.category}</div>
+            <h4>${title}</h4>
+            <div class="category-label">${catName}</div>
             <div class="price-row">
-              <span class="current-price">₹${p.price.toLocaleString("en-IN")}</span>
-              <span class="mrp-price">₹${(p.originalPrice||p.price).toLocaleString("en-IN")}</span>
+              <span class="current-price">${sym}${p.price.toLocaleString("en-IN")}</span>
+              <span class="mrp-price">${sym}${(p.originalPrice||p.price).toLocaleString("en-IN")}</span>
             </div>
           </div>
-          <button class="btn-add" onclick="addToCart('${p.id}')" data-i18n="add_to_cart">Add to Cart</button>
-          <button class="btn-wa-card" onclick="checkoutSingleProduct('${p.id}')" data-i18n="send_wa">Send Order on WhatsApp</button>
+          <button class="btn-add" onclick="addToCart('${p.id}')">${btnCart}</button>
+          <button class="btn-wa-card" onclick="checkoutSingleProduct('${p.id}')">${btnWa}</button>
         </div>
       </div>`;
   }).join("");

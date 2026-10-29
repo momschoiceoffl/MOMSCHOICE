@@ -26,12 +26,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 function renderProduct() {
   const p = currentProduct;
   const imgs = (p.images && p.images.length) ? p.images : [p.image];
-  document.title = p.title + " | Mahadev Fashion Hub";
-  document.getElementById("pdHeaderTitle").innerText = p.title;
-  document.getElementById("pdTitle").innerText = p.title;
-  document.getElementById("pdPrice").innerText = "₹" + p.price.toLocaleString("en-IN");
-  document.getElementById("pdMrp").innerText = "₹" + (p.originalPrice || p.price).toLocaleString("en-IN");
-  document.getElementById("pdDesc").innerText = p.description || "";
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  
+  const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+  const desc = (lang === "ta" && p.description_ta) ? p.description_ta : (p.description || "");
+
+  document.title = title + " | Mom's Pick";
+  document.getElementById("pdHeaderTitle").innerText = title;
+  document.getElementById("pdTitle").innerText = title;
+  document.getElementById("pdPrice").innerText = sym + p.price.toLocaleString("en-IN");
+  document.getElementById("pdMrp").innerText = sym + (p.originalPrice || p.price).toLocaleString("en-IN");
+  document.getElementById("pdDesc").innerText = desc;
   const tag = (p.tags && p.tags[0]) ? p.tags[0].replace("_"," ") : (p.tag || "");
   const tagEl = document.getElementById("pdTag");
   if (tag) { tagEl.innerText = tag; tagEl.style.display = "inline-block"; }
