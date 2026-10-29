@@ -242,15 +242,26 @@ function toggleSidebarCategories(e) {
     for (const cat in storeCategories) {
       if (cat === "_translations") continue;
       
+      // Only show categories that have at least 1 product
+      if (typeof products !== 'undefined' && products.filter(p => p.category === cat).length === 0) {
+        continue;
+      }
+      
       const catName = typeof translateCategory === 'function' ? translateCategory(cat) : cat;
+      const safeCatId = cat.replace(/\s+/g, '_');
       
-      // 1. Main Category Link
-      html += `<a href="category.html?cat=${encodeURIComponent(cat)}" class="sidebar-sublink" style="font-weight:bold; color:var(--gold-glow); display:block; padding: 8px 16px;">${catName}</a>`;
+      // 1. Main Category Link (Acts as a toggle)
+      html += `<a href="#" class="sidebar-sublink" onclick="event.preventDefault(); const el = document.getElementById('subcat-${safeCatId}'); if(el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';" style="font-weight:bold; color:var(--gold-glow); display:block; padding: 8px 16px;">${catName}</a>`;
       
-      // 2. Subcategories
+      // 2. Subcategories (Hidden by default)
       const subs = storeCategories[cat];
       if (subs && subs.length > 0) {
-        html += `<div style="padding-left: 16px; display: flex; flex-direction: column;">`;
+        html += `<div id="subcat-${safeCatId}" style="padding-left: 16px; display: none; flex-direction: column;">`;
+        
+        // Add an "All [Category]" link just in case
+        const allTxt = localStorage.getItem("moms_pick_lang") === "ta" ? "அனைத்தும்" : "All";
+        html += `<a href="category.html?cat=${encodeURIComponent(cat)}" class="sidebar-sublink" style="font-size:0.8rem; color:var(--text-muted); display:block; padding: 4px 16px; font-style:italic;">↳ ${allTxt}</a>`;
+        
         subs.forEach(sub => {
           const subName = typeof translateCategory === 'function' ? translateCategory(sub) : sub;
           html += `<a href="category.html?cat=${encodeURIComponent(cat)}&sub=${encodeURIComponent(sub)}" class="sidebar-sublink" style="font-size:0.8rem; color:var(--text-muted); display:block; padding: 4px 16px;">↳ ${subName}</a>`;
