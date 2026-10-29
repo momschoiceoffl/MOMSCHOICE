@@ -16,7 +16,7 @@
       <a href="index.html" class="sidebar-link">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🏠</span> Home
       </a>
-      <a href="category.html" class="sidebar-link">
+      <a href="#" class="sidebar-link" onclick="goToFirstCategoryFromProduct(event)">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🗂️</span> Categories
       </a>
       
@@ -106,5 +106,16 @@
 
   <script src="assets/js/translations.js"></script>
   <script src="assets/js/product.js"></script>
+  <script>
+    function goToFirstCategoryFromProduct(e) {
+      if (e) e.preventDefault();
+      if (typeof products !== 'undefined' && products.length > 0) {
+        const firstCat = products[0].category;
+        window.location.href = 'category.html?cat=' + encodeURIComponent(firstCat);
+      } else {
+        window.location.href = 'category.html?cat=Sarees'; // Fallback
+      }
+    }
+  </script>
 </body>
 </html>

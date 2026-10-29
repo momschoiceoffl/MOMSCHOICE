@@ -17,7 +17,7 @@
       <a href="index.html" class="sidebar-link">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🏠</span> Home
       </a>
-      <a href="category.html" class="sidebar-link active">
+      <a href="#" class="sidebar-link active" onclick="goToFirstCategoryFromCategory(event)">
         <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🗂️</span> Categories
       </a>
       <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
@@ -145,5 +145,16 @@
   <script src="assets/js/firebase-config.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/category.js"></script>
+  <script>
+    function goToFirstCategoryFromCategory(e) {
+      if (e) e.preventDefault();
+      if (typeof products !== 'undefined' && products.length > 0) {
+        const firstCat = products[0].category;
+        window.location.href = 'category.html?cat=' + encodeURIComponent(firstCat);
+      } else {
+        window.location.href = 'category.html?cat=Sarees'; // Fallback
+      }
+    }
+  </script>
 </body>
 </html>
