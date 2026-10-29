@@ -838,12 +838,12 @@
       }
 
       // 2. Build product object
-      // Extract the ID directly from the uploaded image URL
-      let finalId = editId;
+      // Extract the ID directly from the uploaded image URL (matches image filename perfectly)
+      let finalId = document.getElementById("editProductId").value;
       if (!finalId && finalImages.length > 0) {
         const urlParts = finalImages[0].split('/');
         const filename = urlParts[urlParts.length - 1];
-        finalId = filename.split('_')[0]; // Gets "SS261029A1S1"
+        finalId = filename.split('_')[0]; 
       }
 
       const productObj = {
