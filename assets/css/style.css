@@ -700,28 +700,36 @@ body > * { position: relative; z-index: 1; }
 
 .carousel-dots {
   position: absolute;
-  bottom: 6px;
+  bottom: 12px;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
-  gap: 5px;
+  gap: 10px; /* More spacing between dots */
   z-index: 3;
 }
 
 .carousel-dot {
-  width: 6px;
-  height: 6px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: rgba(217,160,139,0.4);
-  border: none;
+  border: 2px solid transparent;
   padding: 0;
   cursor: pointer;
-  transition: background 0.3s, transform 0.3s;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
+
+.carousel-dot:hover {
+  background: rgba(217,160,139,0.8);
+}
+
 .carousel-dot.active {
   background: var(--gold-glow);
   transform: scale(1.3);
+  border-color: var(--bg); /* Gives a nice ring effect */
+  box-shadow: 0 0 10px rgba(217,160,139,0.8);
 }
 
 
