@@ -610,11 +610,11 @@ body > * { position: relative; z-index: 1; }
 }
 
 
-/* ─── CAROUSEL (FLUID LIQUID LAYOUT - FIXED) ─── */
+/* ─── CAROUSEL (DESKTOP FIXED HEIGHT) ─── */
 .hero-carousel {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: 420px; /* Fixed height for desktop */
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: var(--gap);
@@ -686,6 +686,8 @@ body > * { position: relative; z-index: 1; }
     grid-template-columns: 35% 32.5% 32.5%;
     gap: 8px;
     padding: 8px;
+    height: 100%;
+    box-sizing: border-box;
   }
   .carousel-col-text {
     display: flex;
@@ -694,11 +696,21 @@ body > * { position: relative; z-index: 1; }
     padding: 4px;
     overflow: hidden;
   }
+  .carousel-col-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.2); /* Slight background for contained images */
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+  }
   .carousel-col-track {
     display: block;
     overflow: hidden;
     position: relative;
     border-radius: 8px;
+    height: 100%;
   }
   .carousel-inner-track {
     display: flex;
@@ -706,11 +718,14 @@ body > * { position: relative; z-index: 1; }
     height: 100%;
     transition: transform 0.6s ease-in-out;
   }
+  /* Apply contain to prevent cropping in desktop carousel */
+  .carousel-col-cover img,
   .carousel-inner-track img {
     flex: 0 0 100%;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Prevents image from cropping */
+    display: block;
   }
   .carousel-card-desc h4 {
     font-size: 1rem;
@@ -1806,7 +1821,7 @@ body > * { position: relative; z-index: 1; }
   .carousel-col-cover img {
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important;
+    object-fit: cover !important; /* Mobile keeps cover for full square look */
     display: block !important;
   }
   .carousel-col-text,
