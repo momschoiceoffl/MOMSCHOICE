@@ -811,6 +811,15 @@
           const upData = await upRes.json();
           if (!upData.ok) throw new Error(upData.error);
           uploadedUrls = upData.urls || [upData.url];
+          
+          // Extract the generated ID from the Cloudinary URL filename
+          // Example URL: https://.../SS261029A1S1_0.png -> Extracts "SS261029A1S1"
+          if (uploadedUrls.length > 0) {
+            const urlParts = uploadedUrls[0].split('/');
+            const filename = urlParts[urlParts.length - 1];
+            const newGenId = filename.split('_')[0];
+            document.getElementById("editProductId").value = newGenId;
+          }
         } catch (e) {
           alert("❌ Image upload failed: " + e.message);
           saveBtn.innerText = original;
@@ -830,8 +839,9 @@
       }
 
       // 2. Build product object
+      // Use the extracted ID from the image filename (which matches perfectly)
       const productObj = {
-        id: editId || "AJ-" + Date.now().toString().slice(-4),
+        id: editId || ("SS-" + Date.now().toString().slice(-4)), 
         title,
         title_ta: titleTa,
         price,
