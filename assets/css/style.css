@@ -93,6 +93,43 @@ body > * { position: relative; z-index: 1; }
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.header-stack .top-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-stack .bottom-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Stack tagline text */
+.brand small {
+  line-height: 1.2;
+}
+.brand small span {
+  display: block;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -394,7 +431,7 @@ body > * { position: relative; z-index: 1; }
 /* ─── STICKY CHIPS WRAP (Category Page) ─── */
 .sticky-chips-wrap {
   position: fixed;
-  top: 90px; /* Pushed down safely below the taller header */
+  top: 75px; /* Adjusted to sit flush against header */
   left: 0;
   right: 0;
   z-index: 105;
@@ -402,6 +439,7 @@ body > * { position: relative; z-index: 1; }
   border-bottom: 1px solid var(--border-gold-soft);
   display: flex;
   justify-content: center;
+  padding-top: 4px;
 }
 .sticky-inner {
   width: 100%;
@@ -1702,20 +1740,10 @@ body > * { position: relative; z-index: 1; }
     --icon-size: clamp(60px, 15vw, 95px);
   }
   
-  .app-header { padding: 10px 12px; }
-  .brand { gap: 10px; }
+  .app-header { padding: 8px 12px; }
+  .brand { gap: 8px; }
   .header-actions { gap: 8px; }
-
-  .hero-carousel {
-    height: 480px;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 180px 1fr;
-    gap: 6px;
-    padding: 6px;
-  }
-  .hero-col-carousel { height: auto; }
-  .carousel-pair { display: flex; flex-direction: column; }
-  .carousel-col-cover { height: 180px; }
-  .carousel-col-track { height: 180px; }
-  .carousel-dots { bottom: 4px; }
+  .sticky-chips-wrap { top: 85px; }
+  .hero-carousel { aspect-ratio: 1 / 1; }
+  .carousel-dots { bottom: 8px; }
 }

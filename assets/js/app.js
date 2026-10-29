@@ -528,17 +528,11 @@ function initCarousel() {
 
     return `
     <div class="carousel-pair" data-product-id="${p.id}" data-slide-index="${index}">
-      <div class="carousel-col-text">
-        <h4 style="font-size: 1rem; color: var(--primary); margin-bottom: 8px;">${title}</h4>
-        <div class="desc-price" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 8px;">${sym}${p.price.toLocaleString("en-IN")}</div>
-        <div class="desc-text" style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">${desc}</div>
-      </div>
       <div class="carousel-col-cover">
         <img src="${coverImg}" alt="${p.title}">
-      </div>
-      <div class="carousel-col-track">
-        <div class="carousel-inner-track" id="innerTrack-${index}">
-          ${miniTrackHTML}
+        <div class="carousel-overlay-info">
+          <h4>${title}</h4>
+          <div class="desc-price">${sym}${p.price.toLocaleString("en-IN")}</div>
         </div>
       </div>
     </div>
@@ -590,11 +584,9 @@ function updateCarouselText() {
     
     const h4 = slide.querySelector("h4");
     const priceDiv = slide.querySelector(".desc-price");
-    const descDiv = slide.querySelector(".desc-text");
     
     if (h4) h4.innerText = title;
     if (priceDiv) priceDiv.innerText = `${sym}${p.price.toLocaleString("en-IN")}`;
-    if (descDiv) descDiv.innerText = desc;
   });
 }
 

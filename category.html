@@ -41,26 +41,28 @@
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <header class="app-header">
-    <button class="hamburger" id="hamburgerBtn">☰</button>
-    <div class="brand">
-      <img src="https://res.cloudinary.com/ft8zlz5x/image/upload/v1793235967/moms_pick/logo/MOMS%20CHOICE.png" alt="Mom's Choice" class="brand-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-      <span class="logo-icon-fallback">✨</span>
-      <div>
-        <h1 id="catPageTitle">Category</h1>
-        <small>Ethnic Wardrobe · Jewels & Accessories</small>
+    <div class="header-left-group">
+      <button class="hamburger" id="hamburgerBtn">☰</button>
+      <div class="brand">
+        <img src="https://res.cloudinary.com/ft8zlz5x/image/upload/v1793235967/moms_pick/logo/MOMS%20CHOICE.png" alt="Mom's Choice" class="brand-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="logo-icon-fallback">✨</span>
+        <div>
+          <h1 id="catPageTitle">Category</h1>
+          <small><span>Ethnic Wardrobe</span><span>Jewels & Accessories</span></small>
+        </div>
       </div>
     </div>
     <div class="header-actions">
       <div class="header-stack">
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="top-row">
           <div style="display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border-gold); border-radius: 16px; overflow: hidden;">
             <button onclick="setLanguage('en')" id="btnLangEn" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">EN</button>
             <button onclick="setLanguage('ta')" id="btnLangTa" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">தமிழ்</button>
           </div>
-          <button class="cart-trigger" id="cartOpenBtn">🛒 <span class="cart-counter" id="cartCount">0</span></button>
         </div>
-        <div class="icon-row" style="justify-content: flex-end;">
+        <div class="bottom-row">
           <button class="icon-btn" id="searchToggle">🔍</button>
+          <button class="cart-trigger" id="cartOpenBtn">🛒 <span class="cart-counter" id="cartCount">0</span></button>
         </div>
       </div>
     </div>
