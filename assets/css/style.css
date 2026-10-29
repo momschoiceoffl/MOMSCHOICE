@@ -533,7 +533,6 @@ body > * { position: relative; z-index: 1; }
   position: relative;
   width: 100%;
   height: 420px;               
-  min-height: 420px; /* FORCES height so it never collapses */
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: var(--gap);
@@ -542,7 +541,7 @@ body > * { position: relative; z-index: 1; }
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid var(--border-gold);
   user-select: none;
-  display: flex;
+  display: block; /* Changed from flex to block */
   padding: 8px;
   box-sizing: border-box;
   box-shadow:
@@ -563,6 +562,7 @@ body > * { position: relative; z-index: 1; }
 
 .hero-col {
   height: 100%;
+  width: 100%; /* Fill the block container */
   border-radius: 12px;
   overflow: hidden;
   position: relative;
@@ -596,23 +596,20 @@ body > * { position: relative; z-index: 1; }
   display: flex;
   width: 100%;
   height: 100%;
-  min-height: 100%; /* Forces height */
   transition: transform 0.6s ease-in-out;
   will-change: transform;
-  overflow: hidden; 
 }
 
 .carousel-pair {
   flex: 0 0 100%;
   width: 100%;
   height: 100%;
-  min-height: 100%; /* Forces height */
   padding: 8px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 35% 32.5% 32.5%; 
   gap: 8px;
-  overflow: hidden; 
+  overflow: hidden;
 }
 .carousel-col-text {
   display: flex;

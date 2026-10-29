@@ -142,6 +142,9 @@ function setLanguage(lang) {
   // Cart Drawer (on all pages)
   if (typeof updateCartUI === 'function') updateCartUI();
 
+  // Close sidebar menu if open so it rebuilds in the new language
+  const subnav = document.getElementById("sidebarSubnav");
+  if (subnav) subnav.style.display = "none";
 }
 
 
