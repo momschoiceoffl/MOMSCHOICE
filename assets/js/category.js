@@ -38,6 +38,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   activeCat = new URLSearchParams(location.search).get("cat") || "all";
   activeSubCat = new URLSearchParams(location.search).get("sub") || "all";
   
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const catName = (typeof translateCategoryLocal === 'function') ? translateCategoryLocal(activeCat) : activeCat;
+  document.getElementById("catPageTitle").innerText = activeCat === "all" ? (lang === "ta" ? "அனைத்து பொருட்கள்" : "All Products") : catName;
 
 
   try {
