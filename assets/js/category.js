@@ -35,10 +35,18 @@ let storeCategories = {};
 function translateCategoryLocal(cat) {
   const lang = localStorage.getItem("moms_pick_lang") || "en";
   if (lang !== "ta") return cat;
+  
+  // If the admin added a translation in categories.json, use it
+  if (typeof storeCategories !== 'undefined' && storeCategories && storeCategories["_translations"] && storeCategories["_translations"][cat]) {
+    return storeCategories["_translations"][cat];
+  }
+
   const map = {
     "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
     "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
-    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", "Designer": "டிசைனர்",
+    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", 
+    "Designer": "டிசைனர்", "Polyester": "பாலியஸ்டர்", "Georgette": "ஜார்ஜெட்",
+    "Chiffon": "ஷிஃபான்", "Linen": "லினன்", "Chanderi": "சந்தேரி",
     "Choker": "சோக்கர்", "Long": "நீளமானது", "Pendant": "பெண்டென்ட்", "Set": "செட்",
     "Jhumka": "ஜிமிக்கி", "Studs": "ஸ்டட்ஸ்", "Drops": "டிராப்ஸ்", "Hoops": "ஹூப்ஸ்",
     "Kada": "கடா", "Bracelet": "ப்ரேஸ்லெட்", "Adjustable": "அட்ஜஸ்டபிள்", "Statement": "ஸ்டேட்மென்ட்",
