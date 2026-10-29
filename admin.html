@@ -813,7 +813,6 @@
           uploadedUrls = upData.urls || [upData.url];
           
           // Extract the generated ID from the Cloudinary URL filename
-          // Example URL: https://.../SS261029A1S1_0.png -> Extracts "SS261029A1S1"
           if (uploadedUrls.length > 0) {
             const urlParts = uploadedUrls[0].split('/');
             const filename = urlParts[urlParts.length - 1];
@@ -839,9 +838,16 @@
       }
 
       // 2. Build product object
-      // Use the extracted ID from the image filename (which matches perfectly)
+      // Extract the ID directly from the uploaded image URL
+      let finalId = editId;
+      if (!finalId && finalImages.length > 0) {
+        const urlParts = finalImages[0].split('/');
+        const filename = urlParts[urlParts.length - 1];
+        finalId = filename.split('_')[0]; // Gets "SS261029A1S1"
+      }
+
       const productObj = {
-        id: editId || ("SS-" + Date.now().toString().slice(-4)), 
+        id: finalId || ("SS-" + Date.now().toString().slice(-4)), 
         title,
         title_ta: titleTa,
         price,

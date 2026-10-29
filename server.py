@@ -157,15 +157,55 @@ class Handler(SimpleHTTPRequestHandler):
                 elif "accessor" in cat_lower: prefix = "AC"
                 else: prefix = "MM"
 
-                import datetime, random
+                import datetime, os
                 now = datetime.datetime.now()
                 yy = str(now.year)[-2:]
                 mm = f"{now.month:02d}"
                 dd = f"{now.day:02d}"
+                date_str = f"{yy}{mm}{dd}"
                 
-                # Generate a unique 4-digit random number to prevent clashes
-                base_id = f"{prefix}{yy}{mm}{dd}"
-                product_id = f"{base_id}{random.randint(1000, 9999)}"
+                # Read existing IDs to find the next sequence
+                existing_ids = []
+                if os.path.exists(PRODUCTS):
+                    try:
+                        with open(PRODUCTS, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                            for p in data:
+                                existing_ids.append(p.get("id", ""))
+                    except:
+                        pass
+                
+                cat_codes = {
+                    "Sarees": "S", "Necklaces": "N", "Earrings": "E", 
+                    "Bangles": "B", "Rings": "R", "Ornaments": "O", "Accessories": "A"
+                }
+                cat_letter = cat_codes.get(category, "X")
+                
+                # Count how many items of this category already exist for today
+                cat_count = 0
+                for existing_id in existing_ids:
+                    if f"{prefix}{date_str}" in existing_id and f"{cat_letter}" in existing_id:
+                        cat_count += 1
+                cat_num = cat_count + 1
+                cat_code = f"{cat_letter}{cat_num}"  # e.g., S1, S2
+                
+                # Find next primary serial (A1, A2... A9, B1...)
+                letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                primary_serial = "A1"
+                found = False
+                for letter in letters:
+                    for num in range(1, 10):
+                        test_serial = f"{letter}{num}"
+                        test_id = f"{prefix}{date_str}{test_serial}{cat_code}"
+                        if test_id not in existing_ids:
+                            primary_serial = test_serial
+                            found = True
+                            break
+                    if found:
+                        break
+                
+                # Final ID: e.g., SS261029A1S1
+                product_id = f"{prefix}{date_str}{primary_serial}{cat_code}"
                 folder_path = f"moms_pick/{category}"
                 
                 urls = []
