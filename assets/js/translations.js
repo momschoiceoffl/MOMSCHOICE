@@ -110,15 +110,24 @@ function setLanguage(lang) {
   document.documentElement.lang = lang;
   applyTranslations();
   
-  // Refresh dynamic content based on which page we are on
-  if (typeof renderProducts === 'function') renderProducts(); // Category page
-  if (typeof renderProduct === 'function') renderProduct();   // Product page
-  if (typeof renderAlsoLike === 'function') renderAlsoLike(); // Product page
+  // 1. Update the UI text (Header, Buttons, etc.)
+  applyTranslations();
+
+  // 2. Refresh Home Page Dynamic Content (Carousel, Categories, Sidebar)
+  if (typeof renderFiltered === 'function') renderFiltered(); 
+  if (typeof renderCategoryCards === 'function') renderCategoryCards(); 
+  if (typeof initCarousel === 'function') initCarousel();     
+
+  // 3. Refresh Category Page Dynamic Content (Product Grid & Filter Chips)
+  if (typeof renderProducts === 'function') renderProducts(); 
+  if (typeof renderSubcategories === 'function') renderSubcategories(); 
   
-  if (typeof renderFiltered === 'function') renderFiltered(); // Home page
-  if (typeof renderCategoryCards === 'function') renderCategoryCards(); // Home page
-  if (typeof initCarousel === 'function') initCarousel();     // Home page
-  if (typeof renderSubcategories === 'function') renderSubcategories(); // Category page
+  // 4. Refresh Product Page Dynamic Content (Details & Related Items)
+  if (typeof renderProduct === 'function') renderProduct();   
+  if (typeof renderAlsoLike === 'function') renderAlsoLike(); 
+
+  // 5. Update Cart UI language
+  if (typeof updateCartUI === 'function') updateCartUI();
 }
 
 

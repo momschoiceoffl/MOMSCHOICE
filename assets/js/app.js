@@ -296,19 +296,20 @@ function renderSidebarSubnav(cats) {
     return;
   }
   
-  // Create a drill-down menu grouped by category name
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const noSubText = lang === "ta" ? "துணை வகைகள் இல்லை" : "No subcategories";
+  const noCatText = lang === "ta" ? "வகைகள் இல்லை" : "No categories yet";
+
   let html = "";
   cats.forEach(cat => {
     const count = products.filter(p => p.category === cat).length;
     const subcats = storeCategories[cat] || [];
     
-    // Translate category name
     const catName = typeof translateCategory === 'function' ? translateCategory(cat) : cat;
     
     html += `<div style="padding: 4px 16px;">`;
     html += `<a href="category.html?cat=${encodeURIComponent(cat)}" style="color: var(--primary); font-weight: bold; text-decoration: none; display: block; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">${catName} (${count})</a>`;
     
-    // Add subcategory drill down
     if (subcats.length) {
         html += `<div style="padding-left: 12px; margin-top: 4px;">`;
         subcats.forEach(sub => {

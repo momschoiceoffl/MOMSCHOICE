@@ -71,6 +71,7 @@ function renderSubcategories() {
 
   bar.innerHTML = `<button class="sub-btn ${activeSubCat === 'all' ? 'active' : ''}" onclick="setSubCat('all')">${allTxt}</button>` + 
     subs.map(s => {
+      // Use translateCategory to get the Tamil name from the dictionary
       const sName = typeof translateCategory === 'function' ? translateCategory(s) : s;
       return `<button class="sub-btn ${activeSubCat === s ? 'active' : ''}" onclick="setSubCat('${s}')">${sName}</button>`;
     }).join("");
