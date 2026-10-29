@@ -253,6 +253,7 @@ body > * { position: relative; z-index: 1; }
 
 .sidebar-head {
   padding: clamp(14px, 2vw, 18px) clamp(16px, 2.4vw, 20px);
+  padding-top: 75px; /* Push down to clear the fixed header */
   border-bottom: 1px solid var(--border-gold-soft);
   display: flex;
   align-items: center;

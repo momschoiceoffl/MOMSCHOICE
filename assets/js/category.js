@@ -332,11 +332,27 @@ function setupSidebar() {
 }
 
 function setupSearch() {
-  const t = document.getElementById("searchToggle"), bar = document.getElementById("searchBar"), inp = document.getElementById("searchInput"), c = document.getElementById("searchClose");
-  if (!t || !bar) return;
-  t.addEventListener("click", () => { bar.classList.toggle("open"); if (bar.classList.contains("open")) inp.focus(); });
-  c.addEventListener("click", () => { bar.classList.remove("open"); inp.value = ""; searchQuery = ""; renderProducts(); });
-  inp.addEventListener("input", () => { searchQuery = inp.value.trim(); renderProducts(true); });
+  const searchBtn = document.getElementById("searchToggle");
+  const bar = document.getElementById("searchBar");
+  const inp = document.getElementById("searchInput");
+  const closeBtn = document.getElementById("searchClose");
+  
+  if (!searchBtn || !bar) return;
+  
+  searchBtn.addEventListener("click", () => { 
+    bar.classList.toggle("open"); 
+    if (bar.classList.contains("open")) inp.focus(); 
+  });
+  closeBtn.addEventListener("click", () => { 
+    bar.classList.remove("open"); 
+    inp.value = ""; 
+    searchQuery = ""; 
+    renderProducts(); 
+  });
+  inp.addEventListener("input", () => { 
+    searchQuery = inp.value.trim(); 
+    renderProducts(true); 
+  });
 }
 
 function setupCart() {
