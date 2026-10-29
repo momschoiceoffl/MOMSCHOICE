@@ -625,10 +625,11 @@ function startCarouselTimer() {
   carouselTimer = setInterval(() => {
     carouselIndex = (carouselIndex + 1) % carouselSlides.length;
     updateCarouselPosition();
-  }, 15000); // 15 seconds per main product set
+  }, 10000); // 10 seconds per main product set
 }
 
-// The running inner images (4 seconds)
+// The running inner images (3 seconds)
+if (miniCarouselTimer) clearInterval(miniCarouselTimer);
 miniCarouselTimer = setInterval(() => {
   const activePair = document.querySelector(`.carousel-pair[data-slide-index="${carouselIndex}"]`);
   if (!activePair) return;
@@ -639,7 +640,7 @@ miniCarouselTimer = setInterval(() => {
 
   miniCarouselIndex = (miniCarouselIndex + 1) % totalImgs;
   innerTrack.style.transform = `translateX(-${miniCarouselIndex * 100}%)`;
-}, 4000); // 4 seconds per inner image
+}, 3000); // 3 seconds per inner image
 
 function stopCarouselTimer() {
   if (carouselTimer) {
