@@ -74,7 +74,7 @@ body {
 body > * { position: relative; z-index: 1; }
 
 
-/* ─── HEADER (FIXED) ─── */
+/* ─── HEADER (FIXED FLUID) ─── */
 .app-header {
   position: fixed;
   top: 0;
@@ -85,12 +85,51 @@ body > * { position: relative; z-index: 1; }
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border-bottom: 1px solid var(--border-gold-soft);
-  padding: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 16px);
+  padding: 8px clamp(10px, 2vw, 16px);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: clamp(6px, 1.5vw, 12px);
+  gap: 10px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  height: 75px; /* Fixed height for exact sticky alignment */
+  box-sizing: border-box;
+}
+
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.header-stack .top-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.header-stack .bottom-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Stack tagline text perfectly */
+.brand small {
+  line-height: 1.15;
+}
+.brand small span {
+  display: block;
 }
 
 .header-left-group {
@@ -1740,10 +1779,10 @@ body > * { position: relative; z-index: 1; }
     --icon-size: clamp(60px, 15vw, 95px);
   }
   
-  .app-header { padding: 8px 12px; }
+  .app-header { padding: 8px 12px; height: 75px; }
   .brand { gap: 8px; }
   .header-actions { gap: 8px; }
-  .sticky-chips-wrap { top: 85px; }
-  .hero-carousel { aspect-ratio: 1 / 1; }
-  .carousel-dots { bottom: 8px; }
+  .sticky-chips-wrap { top: 75px; }
+  .hero-carousel { aspect-ratio: 4 / 5; width: 100%; height: auto; }
+  .carousel-dots { bottom: 10px; }
 }
