@@ -52,7 +52,10 @@
     <div class="header-actions">
       <div class="header-stack">
         <div style="display: flex; gap: 8px; align-items: center;">
-          <button class="icon-btn" id="langToggleBtn" onclick="toggleLanguage()" style="font-size: 0.8rem; font-weight: 800; color: var(--gold-glow); padding: 4px 8px; border: 1px solid var(--border-gold); border-radius: 12px;">த / EN</button>
+          <div style="display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border-gold); border-radius: 16px; overflow: hidden;">
+            <button onclick="setLanguage('en')" id="btnLangEn" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">EN</button>
+            <button onclick="setLanguage('ta')" id="btnLangTa" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">தமிழ்</button>
+          </div>
           <button class="cart-trigger" id="cartOpenBtn" aria-label="Shopping Cart">
             🛒 <span class="cart-counter" id="cartCount">0</span>
           </button>

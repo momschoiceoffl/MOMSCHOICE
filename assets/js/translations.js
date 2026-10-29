@@ -121,11 +121,7 @@ function setLanguage(lang) {
   if (typeof renderSubcategories === 'function') renderSubcategories(); // Category page
 }
 
-function toggleLanguage() {
-  const current = localStorage.getItem("moms_pick_lang") || "en";
-  const next = current === "en" ? "ta" : "en";
-  setLanguage(next);
-}
+
 
 function applyTranslations() {
   const lang = localStorage.getItem("moms_pick_lang") || "en";
@@ -145,18 +141,20 @@ function applyTranslations() {
     }
   });
 
-  const btn = document.getElementById("langToggleBtn");
-  if (btn) {
-    btn.innerText = lang === "en" ? "த / EN" : "EN / த";
-    // Highlight button to show active language (Cream for Tamil, Dark for English)
+  const btnEn = document.getElementById("btnLangEn");
+  const btnTa = document.getElementById("btnLangTa");
+  
+  if (btnEn && btnTa) {
     if (lang === "ta") {
-      btn.style.background = "#F1F0E2";
-      btn.style.color = "#14050B";
-      btn.style.borderColor = "#F1F0E2";
+      btnTa.style.background = "#F1F0E2";
+      btnTa.style.color = "#14050B";
+      btnEn.style.background = "transparent";
+      btnEn.style.color = "var(--text-muted)";
     } else {
-      btn.style.background = "transparent";
-      btn.style.color = "var(--gold-glow)";
-      btn.style.borderColor = "var(--border-gold)";
+      btnEn.style.background = "#F1F0E2";
+      btnEn.style.color = "#14050B";
+      btnTa.style.background = "transparent";
+      btnTa.style.color = "var(--text-muted)";
     }
   }
 }
