@@ -9,6 +9,15 @@ let currentProduct = null;
 let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Setup sidebar open/close logic
+  const h = document.getElementById("hamburgerBtn");
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (h && s && b) {
+    h.onclick = () => { s.classList.add("open"); b.classList.add("open"); };
+    b.onclick = () => { s.classList.remove("open"); b.classList.remove("open"); };
+  }
+
   const id = new URLSearchParams(location.search).get("id");
   if (!id) { document.getElementById("pdTitle").innerText = "Product not found"; return; }
   try {

@@ -9,7 +9,34 @@
   <meta name="theme-color" content="#d97706">
 </head>
 <body>
+  <!-- SIDEBAR ADDED TO PRODUCT PAGE -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head"><span class="sidebar-logo">✨</span><strong>Mom's Choice</strong></div>
+    <nav class="sidebar-nav">
+      <a href="index.html" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🏠</span> Home
+      </a>
+      <a href="category.html" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🗂️</span> Categories
+      </a>
+      
+      <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
+      
+      <a href="#" class="sidebar-link" onclick="openFavsModal()">
+        <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">❤</span> Favorites
+      </a>
+      <a href="#" class="sidebar-link" onclick="openWishModal()">
+        <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🔖</span> Wishlist
+      </a>
+      <a href="#" class="sidebar-link" onclick="shareStore()">
+        <span class="nav-icon" aria-hidden="true" style="font-size: 1.1rem;">🔗</span> Share Store
+      </a>
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="document.getElementById('sidebar').classList.remove('open'); this.classList.remove('open');"></div>
+
   <header class="pd-header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999;">
+    <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarBackdrop').classList.add('open');" style="margin-right: 8px;">☰</button>
     <button class="pd-back" id="pdBackBtn" onclick="if(document.referrer && document.referrer.includes('category.html')) { window.history.back(); } else { const cat = new URLSearchParams(location.search).get('cat') || sessionStorage.getItem('lastCat') || 'all'; window.location.href = 'category.html?cat=' + encodeURIComponent(cat); }" data-i18n="back">← Back</button>
     <h1 id="pdHeaderTitle">Product</h1>
     <div style="display: flex; gap: 8px; align-items: center;">

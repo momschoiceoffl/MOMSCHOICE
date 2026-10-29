@@ -319,11 +319,16 @@ function checkoutSingleProduct(id) {
 
 function setupSidebar() {
   const s = document.getElementById("sidebar"), b = document.getElementById("sidebarBackdrop"), h = document.getElementById("hamburgerBtn");
-  if (!s) return;
-  const open = () => { s.classList.add("open"); b.classList.add("open"); };
-  const close = () => { s.classList.remove("open"); b.classList.remove("open"); };
-  h.addEventListener("click", () => s.classList.contains("open") ? close() : open());
-  b.addEventListener("click", close);
+  if (!s || !b || !h) return;
+  h.addEventListener("click", (e) => {
+    e.preventDefault();
+    s.classList.add("open"); 
+    b.classList.add("open"); 
+  });
+  b.addEventListener("click", () => { 
+    s.classList.remove("open"); 
+    b.classList.remove("open"); 
+  });
 }
 
 function setupSearch() {
