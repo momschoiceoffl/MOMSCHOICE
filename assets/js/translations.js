@@ -110,12 +110,15 @@ function setLanguage(lang) {
   document.documentElement.lang = lang;
   applyTranslations();
   
-  // Refresh dynamic content
-  if (typeof renderFiltered === 'function') renderFiltered();
-  if (typeof renderProducts === 'function') renderProducts();
-  if (typeof renderCategoryCards === 'function') renderCategoryCards();
-  if (typeof initCarousel === 'function') initCarousel();
-  if (typeof renderSubcategories === 'function') renderSubcategories();
+  // Refresh dynamic content based on which page we are on
+  if (typeof renderProducts === 'function') renderProducts(); // Category page
+  if (typeof renderProduct === 'function') renderProduct();   // Product page
+  if (typeof renderAlsoLike === 'function') renderAlsoLike(); // Product page
+  
+  if (typeof renderFiltered === 'function') renderFiltered(); // Home page
+  if (typeof renderCategoryCards === 'function') renderCategoryCards(); // Home page
+  if (typeof initCarousel === 'function') initCarousel();     // Home page
+  if (typeof renderSubcategories === 'function') renderSubcategories(); // Category page
 }
 
 function toggleLanguage() {
@@ -143,7 +146,19 @@ function applyTranslations() {
   });
 
   const btn = document.getElementById("langToggleBtn");
-  if (btn) btn.innerText = lang === "en" ? "த / EN" : "EN / த";
+  if (btn) {
+    btn.innerText = lang === "en" ? "த / EN" : "EN / த";
+    // Highlight button to show active language (Cream for Tamil, Dark for English)
+    if (lang === "ta") {
+      btn.style.background = "#F1F0E2";
+      btn.style.color = "#14050B";
+      btn.style.borderColor = "#F1F0E2";
+    } else {
+      btn.style.background = "transparent";
+      btn.style.color = "var(--gold-glow)";
+      btn.style.borderColor = "var(--border-gold)";
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", applyTranslations);

@@ -97,19 +97,26 @@ function updateCartUI() {
   const countEl = document.getElementById("cartCount");
   if (countEl) countEl.innerText = cart.reduce((s,i) => s + i.qty, 0);
   const list = document.getElementById("cartItemsList");
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  
   if (!list) return;
   if (cart.length === 0) {
-    list.innerHTML = `<p class="empty-msg">Your shopping bag is empty.</p>`;
+    const emptyMsg = lang === "ta" ? "உங்கள் ஷாப்பிங் பேக் காலியாக உள்ளது." : "Your shopping bag is empty.";
+    list.innerHTML = `<p class="empty-msg">${emptyMsg}</p>`;
   } else {
-    list.innerHTML = cart.map((i, idx) => `
+    list.innerHTML = cart.map((i, idx) => {
+      const title = (lang === "ta" && i.title_ta) ? i.title_ta : i.title;
+      return `
       <div class="cart-item">
-        <div><strong>${i.title}</strong><div>₹${i.price} × ${i.qty}</div></div>
+        <div><strong>${title}</strong><div>${sym}${i.price} × ${i.qty}</div></div>
         <button onclick="removeFromCart(${idx})" style="background:none;border:none;color:red;cursor:pointer;">✕</button>
-      </div>`).join("");
+      </div>`;
+    }).join("");
   }
   const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
   const totalEl = document.getElementById("cartTotalDisplay");
-  if (totalEl) totalEl.innerText = "₹" + total.toLocaleString("en-IN");
+  if (totalEl) totalEl.innerText = sym + total.toLocaleString("en-IN");
 }
 
 function setupListeners() {

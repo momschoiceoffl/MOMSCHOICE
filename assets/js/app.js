@@ -682,18 +682,24 @@ function updateCartUI() {
   document.getElementById("cartCount").innerText = cart.reduce((sum, i) => sum + i.qty, 0);
 
   const cartList = document.getElementById("cartItemsList");
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  
   if (cart.length === 0) {
-    cartList.innerHTML = `<p class="empty-msg">Your shopping bag is empty.</p>`;
+    const emptyMsg = lang === "ta" ? "உங்கள் ஷாப்பிங் பேக் காலியாக உள்ளது." : "Your shopping bag is empty.";
+    cartList.innerHTML = `<p class="empty-msg">${emptyMsg}</p>`;
   } else {
-    cartList.innerHTML = cart.map((i, index) => `
+    cartList.innerHTML = cart.map((i, index) => {
+      const title = (lang === "ta" && i.title_ta) ? i.title_ta : i.title;
+      return `
       <div class="cart-item">
         <div>
-          <strong>${i.title}</strong>
-          <div>₹${i.price} × ${i.qty}</div>
+          <strong>${title}</strong>
+          <div>${sym}${i.price} × ${i.qty}</div>
         </div>
         <button onclick="removeFromCart(${index})" style="background:none; border:none; color:red; cursor:pointer;">✕</button>
-      </div>
-    `).join("");
+      </div>`;
+    }).join("");
   }
 
   updateShippingTotals();
