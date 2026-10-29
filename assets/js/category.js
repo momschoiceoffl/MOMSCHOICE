@@ -44,7 +44,7 @@ function translateCategoryLocal(cat) {
   const map = {
     "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
     "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
-    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", 
+    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "காட்டன்", 
     "Designer": "டிசைனர்", "Polyester": "பாலியஸ்டர்", "Georgette": "ஜார்ஜெட்",
     "Chiffon": "ஷிஃபான்", "Linen": "லினன்", "Chanderi": "சந்தேரி",
     "Choker": "சோக்கர்", "Long": "நீளமானது", "Pendant": "பெண்டென்ட்", "Set": "செட்",

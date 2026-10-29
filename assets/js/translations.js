@@ -101,7 +101,7 @@ function translateCategory(cat) {
   const map = {
     "Sarees": "புடவைகள்", "Necklaces": "நெக்லஸ்கள்", "Earrings": "காதணிகள்",
     "Bangles": "வளையல்கள்", "Rings": "மோதிரங்கள்", "Ornaments": "அலங்காரங்கள்",
-    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "பருத்தி", "Designer": "டிசைனர்", "Polyester": "பாலிஎஸ்டர்"
+    "Accessories": "பாகங்கள்", "Silk": "பட்டு", "Cotton": "காட்டன்", "Designer": "டிசைனர்", "Polyester": "பாலிஎஸ்டர்"
   };
   return map[cat] || cat;
 }
