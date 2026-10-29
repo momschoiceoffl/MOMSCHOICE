@@ -393,7 +393,7 @@ body > * { position: relative; z-index: 1; }
 /* ─── STICKY CHIPS WRAP (Category Page) ─── */
 .sticky-chips-wrap {
   position: fixed;
-  top: 75px; /* Pushed down safely below the header */
+  top: 90px; /* Pushed down safely below the taller header */
   left: 0;
   right: 0;
   z-index: 105;

@@ -2,7 +2,7 @@
 /* [CONFIG] Store settings — EDIT THESE WITH YOUR REAL DETAILS     */
 /* ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  storeName: "MOM'S PICK",
+  storeName: "MOM'S CHOICE",
   upiId: "yourname@okhdfcbank",       // ← CHANGE: your real UPI ID
   whatsappNumber: "919876543210"      // ← CHANGE: 91 + 10-digit number
 };

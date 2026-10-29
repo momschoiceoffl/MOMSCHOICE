@@ -1,4 +1,4 @@
-const CONFIG = { storeName: "MOM'S PICK", upiId: "yourname@okhdfcbank", whatsappNumber: "919876543210" };
+const CONFIG = { storeName: "MOM'S CHOICE", upiId: "yourname@okhdfcbank", whatsappNumber: "919876543210" };
 
 const SAVED_CUSTOMER_KEY = "ma_fashion_customer";
 const FREE_SHIPPING_ABOVE = 999;
