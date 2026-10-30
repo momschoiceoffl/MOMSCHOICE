@@ -801,9 +801,19 @@
       sortedCategories.forEach(cat => {
         const items = grouped[cat];
         const catSafeId = cat.replace(/\s+/g, '_');
+        
+        // Preserve category open/close state
+        const isCatOpen = document.getElementById(`cat-${catSafeId}`)?.classList.contains('open');
+        const catOpenClass = isCatOpen ? 'open' : '';
+        const catContentClass = isCatOpen ? 'open' : '';
 
         html += `<div class="category-group">`;
-        html += `<div class="category-title">🗂️ ${cat} (${items.length})</div>`;
+        html += `<div class="date-header ${catOpenClass}" onclick="toggleCatFolder('${catSafeId}')" style="background: #fef3c7; border-left-color: var(--primary); margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border);">
+          <span style="font-size: 1rem;">📁 ${cat} (${items.length})</span>
+          <span class="arrow">▼</span>
+        </div>`;
+        
+        html += `<div class="category-content ${catContentClass}" id="cat-${catSafeId}" style="padding-left: 10px;">`;
 
         // 3. Group by Date within the category
         const dateGrouped = {};
@@ -863,9 +873,9 @@
                 </div>
               </div>
               <div class="item-actions">
-                <button class="btn-sm btn-edit" onclick="editProduct(${originalIndex})">Edit</button>
-                <button class="btn-sm ${hideBtnClass}" onclick="toggleVisibility(${originalIndex})">${hideBtnText}</button>
-                <button class="btn-sm btn-del" onclick="deleteProduct(${originalIndex})">Delete</button>
+                <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${originalIndex})">Edit</button>
+                <button class="btn-sm ${hideBtnClass}" onclick="confirmAction('${isHidden ? 'show' : 'hide'}', ${originalIndex})">${hideBtnText}</button>
+                <button class="btn-sm btn-del" onclick="confirmAction('delete', ${originalIndex})">Delete</button>
               </div>
             </div>
           `;
@@ -873,11 +883,19 @@
           
           html += `</div></div>`; // Close date-content and date-folder
         });
-
+        
+        html += `</div>`; // Close category-content
         html += `</div>`; // Close category-group
       });
 
       container.innerHTML = html;
+    }
+
+    function toggleCatFolder(id) {
+      const content = document.getElementById(`cat-${id}`);
+      const header = content.previousElementSibling;
+      if (content) content.classList.toggle('open');
+      if (header) header.classList.toggle('open');
     }
 
     function toggleDateFolder(id) {
@@ -885,6 +903,21 @@
       const header = content.previousElementSibling;
       if (content) content.classList.toggle('open');
       if (header) header.classList.toggle('open');
+    }
+
+    function confirmAction(action, index) {
+      const item = productsList[index];
+      if (!item) return;
+
+      if (action === 'edit') {
+        if (confirm(`Edit "${item.title}"?`)) editProduct(index);
+      } else if (action === 'delete') {
+        if (confirm(`Are you sure you want to PERMANENTLY DELETE "${item.title}"?`)) deleteProduct(index);
+      } else if (action === 'hide') {
+        if (confirm(`Hide "${item.title}" from the store?`)) toggleVisibility(index);
+      } else if (action === 'show') {
+        if (confirm(`Show "${item.title}" on the store?`)) toggleVisibility(index);
+      }
     }
 
     async function toggleVisibility(index) {
