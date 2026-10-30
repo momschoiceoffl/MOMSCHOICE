@@ -206,6 +206,9 @@ async function fetchProducts() {
       storeCategories = await catRes.json();
     } catch(e) { console.warn("No categories.json found, using fallback."); }
 
+    // Filter out hidden products
+    products = products.filter(p => p.visible !== false);
+
     // Backwards compatibility: if a product has old single "tag"
     // but no "tags" array, convert it.
     products.forEach(p => {
