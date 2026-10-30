@@ -1299,6 +1299,9 @@ body > * { position: relative; z-index: 1; }
   flex: 1;
   overflow-y: auto;
   padding: clamp(12px, 2vw, 16px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Pushes the empty message to the bottom */
 }
 
 .cart-item {

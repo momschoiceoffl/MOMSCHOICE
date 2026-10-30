@@ -723,7 +723,7 @@ function updateCartUI() {
   
   if (cart.length === 0) {
     const emptyMsg = lang === "ta" ? "உங்கள் ஷாப்பிங் பேக் காலியாக உள்ளது." : "Your shopping bag is empty.";
-    cartList.innerHTML = `<p class="empty-msg">${emptyMsg}</p>`;
+    cartList.innerHTML = `<p class="empty-msg" style="margin-top: auto; padding-bottom: 20px; text-align: center; color: var(--text-muted);">${emptyMsg}</p>`;
   } else {
     cartList.innerHTML = cart.map((i, index) => {
       const title = (lang === "ta" && i.title_ta) ? i.title_ta : i.title;
