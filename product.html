@@ -6,52 +6,86 @@
   <title>Product | Mom's Choice</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#d97706">
+  <meta name="theme-color" content="#14050B">
 </head>
 <body>
-  <!-- SIDEBAR ADDED TO PRODUCT PAGE -->
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- [SIDEBAR]                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
-      
       <strong data-i18n="store_name">Mom's Choice</strong>
     </div>
     <nav class="sidebar-nav">
       <a href="index.html" class="sidebar-link">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> <span data-i18n="home">Home</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span data-i18n="home">Home</span>
       </a>
       <a href="#" class="sidebar-link" id="sidebarCategoriesToggle" onclick="toggleSidebarCategories(event)">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg> <span data-i18n="categories">Categories</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span data-i18n="categories">Categories</span>
       </a>
       <div class="sidebar-subnav" id="sidebarSubnav" style="display: none;"></div>
-      
+
       <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
-      
+
       <a href="#" class="sidebar-link" onclick="openFavsModal()">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> <span data-i18n="favorites">Favorites</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span data-i18n="favorites">Favorites</span>
       </a>
       <a href="#" class="sidebar-link" onclick="openWishModal()">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg> <span data-i18n="wishlist">Wishlist</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span data-i18n="wishlist">Wishlist</span>
       </a>
       <a href="#" class="sidebar-link" onclick="shareStore()">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg> <span data-i18n="share_store">Share Store</span>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; margin-right: 8px;">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+        </svg>
+        <span data-i18n="share_store">Share Store</span>
       </a>
     </nav>
   </aside>
-  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="document.getElementById('sidebar').classList.remove('open'); this.classList.remove('open');"></div>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-  <header class="pd-header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999;">
-    <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarBackdrop').classList.add('open');" style="margin-right: 8px;">☰</button>
-    <button class="pd-back" id="pdBackBtn" onclick="if(document.referrer && document.referrer.includes('category.html')) { window.history.back(); } else { const cat = new URLSearchParams(location.search).get('cat') || sessionStorage.getItem('lastCat') || 'all'; window.location.href = 'category.html?cat=' + encodeURIComponent(cat); }" data-i18n="back">← Back</button>
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- [HEADER] Product Detail                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <header class="pd-header">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">☰</button>
+    <button class="pd-back" id="pdBackBtn" data-i18n="back">← Back</button>
     <h1 id="pdHeaderTitle">Product</h1>
     <div style="display: flex; gap: 8px; align-items: center;">
       <div style="display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border-gold); border-radius: 16px; overflow: hidden;">
         <button onclick="setLanguage('en')" id="btnLangEn" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">EN</button>
         <button onclick="setLanguage('ta')" id="btnLangTa" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">தமிழ்</button>
       </div>
-      <button class="cart-trigger" id="cartOpenBtn">🛒 <span class="cart-counter" id="cartCount">0</span></button>
+      <button class="cart-trigger" id="cartOpenBtn" aria-label="Shopping Cart">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <span class="cart-counter" id="cartCount">0</span>
+      </button>
     </div>
   </header>
 
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- [MAIN] Product Detail                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
   <main class="pd-container" style="padding-top: 55px;">
 
     <section class="pd-gallery-wrap">
@@ -66,7 +100,7 @@
         <span class="pd-mrp" id="pdMrp">₹0</span>
         <span class="pd-tag" id="pdTag" style="display:none;"></span>
       </div>
-      
+
       <div class="product-actions-row" style="margin-bottom: 16px;">
         <button class="action-icon-btn fav-btn" id="pdFavBtn" title="Favorite">
           <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -78,7 +112,7 @@
           <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
         </button>
       </div>
-      
+
       <p class="pd-desc" id="pdDesc"></p>
     </section>
 
@@ -90,20 +124,30 @@
     <div style="height:80px;"></div>
   </main>
 
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- [BOTTOM BAR] Add to Cart / WhatsApp                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="pd-bottom-bar">
     <button class="pd-btn-add" id="pdAddBtn" data-i18n="add_to_cart">🛒 Add to Cart</button>
     <button class="pd-btn-wa" id="pdWaBtn" data-i18n="send_wa">📲 Send Order on WhatsApp</button>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- [CART DRAWER]                                               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="cart-overlay" id="cartOverlay">
     <aside class="cart-drawer">
-      <div class="cart-header" style="display: flex; justify-content: flex-start; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-gold-soft); padding-bottom: 10px;">
-        <button class="close-btn" id="cartCloseBtn" aria-label="Close cart" style="font-size: 1.5rem; line-height: 1;">
+      <div class="cart-header" style="display: flex; justify-content: flex-start; align-items: center; gap: 12px;">
+        <button class="close-btn" id="cartCloseBtn" aria-label="Close cart" style="background: none; border: none; cursor: pointer; color: var(--gold-glow);">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
         <h3 data-i18n="shopping_bag" style="margin: 0;">Your Shopping Bag</h3>
       </div>
-      <div class="cart-body" id="cartItemsList"><p class="empty-msg" data-i18n="empty_bag">Your shopping bag is empty.</p></div>
+
+      <div class="cart-body" id="cartItemsList">
+        <p class="empty-msg" data-i18n="empty_bag">Your shopping bag is empty.</p>
+      </div>
+
       <div class="cart-footer">
         <div class="cart-total-row"><span data-i18n="subtotal">Subtotal</span><strong id="cartTotalDisplay">₹0</strong></div>
         <div class="checkout-fields">
@@ -116,18 +160,10 @@
     </aside>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- [SCRIPTS]                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
   <script src="assets/js/translations.js"></script>
   <script src="assets/js/product.js"></script>
-  <script>
-    function goToFirstCategoryFromProduct(e) {
-      if (e) e.preventDefault();
-      if (typeof products !== 'undefined' && products.length > 0) {
-        const firstCat = products[0].category;
-        window.location.href = 'category.html?cat=' + encodeURIComponent(firstCat);
-      } else {
-        window.location.href = 'category.html?cat=Sarees'; // Fallback
-      }
-    }
-  </script>
 </body>
 </html>
