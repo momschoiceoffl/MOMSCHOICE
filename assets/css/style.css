@@ -683,11 +683,20 @@ body > * { position: relative; z-index: 1; }
 @media (min-width: 701px) {
   .carousel-pair {
     display: grid;
-    grid-template-columns: 30% 35% 35%; /* Text shrunk to 30%, images expanded */
+    grid-template-columns: 25% 40% 35%; /* Changed widths */
     gap: 8px;
     padding: 8px;
     height: 100%;
     box-sizing: border-box;
+  }
+  .carousel-col-text {
+    padding: 12px; /* Slightly smaller padding to fit the narrower 25% column */
+  }
+  .carousel-col-text h4 {
+    font-size: 0.95rem; /* Adjust font size for narrower column */
+  }
+  .carousel-col-text .desc-text {
+    font-size: 0.8rem;
   }
   .carousel-col-text {
     display: flex;
@@ -735,9 +744,10 @@ body > * { position: relative; z-index: 1; }
   /* Ensure images fill the space exactly like the grid tiles */
   .carousel-inner-track img,
   .carousel-col-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Stretches to match the other image perfectly */
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Forces the image to fill the box and crop if needed */
+    display: block !important;
   }
   
   /* Hide the overlay info on desktop so it doesn't block the image */

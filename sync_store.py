@@ -79,6 +79,10 @@ def push_to_github(commit_msg="Update products catalog"):
     remote_url = f"https://{GH_USER}:{GH_TOKEN}@github.com/{GH_USER}/{GH_REPO}.git"
 
     try:
+        # Auto-configure Git identity so it never asks for a name/email
+        subprocess.run(["git", "config", "user.email", "admin@momschoice.com"], check=True)
+        subprocess.run(["git", "config", "user.name", "Admin"], check=True)
+
         subprocess.run(["git", "add", "."], check=True)
         # Only commit if there are staged changes
         status = subprocess.run(["git", "status", "--porcelain"],
