@@ -159,6 +159,10 @@
     
     .date-content { display: none; padding: 10px; border-top: 1px solid var(--border); background: #fff; }
     .date-content.open { display: block; }
+
+    /* Hide the category list by default until clicked */
+    .category-content { display: none; padding-top: 8px; }
+    .category-content.open { display: block; }
     
     /* Compact Item Card (2 lines max) */
     .item-card { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); padding: 8px 0; transition: opacity 0.3s; }
@@ -847,7 +851,7 @@
 
           html += `<div class="date-folder">`;
           html += `<div class="date-header ${openClass}" onclick="toggleDateFolder('${dateSafeId}')">
-            <span>📅 ${date}</span>
+            <span>📅 ${date} (${dateGrouped[date].length})</span>
             <span class="arrow">▼</span>
           </div>`;
           
