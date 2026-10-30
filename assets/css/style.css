@@ -1062,14 +1062,23 @@ body > * { position: relative; z-index: 1; }
   border: 1px solid var(--border-gold-soft);
   color: var(--gold-glow);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+}
+.action-icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition: transform 0.2s ease;
+}
+.action-icon-btn:hover svg {
+  transform: scale(1.1);
 }
 
 .action-icon-btn:hover {
