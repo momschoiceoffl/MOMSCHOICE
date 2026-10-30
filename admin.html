@@ -335,7 +335,7 @@
     <!-- [CATALOG LIST] Current live catalog                          -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="card">
-      <h2>📦 Store Catalog (<span id="countDisplay">0</span>)</h2>
+      <h2>📦 Store Catalog</h2>
       <p class="sub">Live products currently visible to customers</p>
 
       <div id="itemsContainer">Loading products...</div>
@@ -782,7 +782,6 @@
     /* [RENDER] Catalog list                                        */
     /* ═══════════════════════════════════════════════════════════ */
     function renderCatalog() {
-      document.getElementById("countDisplay").innerText = productsList.length;
       const container = document.getElementById("itemsContainer");
 
       if (productsList.length === 0) {
