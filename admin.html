@@ -201,7 +201,7 @@
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
-        <h2>✨ Mom's Pick</h2>
+        <h2>Mom's Pick</h2>
         <small style="color:var(--muted)">Admin Product & Inventory Studio</small>
       </div>
       <span id="syncStatusBadge" style="display:inline-flex; align-items:center; gap:6px; background:#dcfce7; color:#166534; font-size:0.75rem; font-weight:600; padding:6px 10px; border-radius:6px;">🟢 Auto-Sync Active</span>
@@ -214,7 +214,7 @@
     <!-- [BRAND LOGO] Upload logo → Cloudinary folder "logo"         -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="card">
-      <h2>🔱 Brand Logo</h2>
+      <h2>Brand Logo</h2>
       <p class="sub">Upload your store logo — saved to Cloudinary folder <code>MMW/logo</code></p>
 
       <div class="preview-grid" id="logoPreview" style="min-height:100px; grid-template-columns: 1fr;">
@@ -235,7 +235,7 @@
     <!-- [PRODUCT FORM] Add / edit product                            -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="card">
-      <h2 id="formTitle">✨ Add New Product</h2>
+      <h2 id="formTitle">Add New Product</h2>
       <p class="sub">Upload item photo and set price details</p>
 
       <input type="hidden" id="editProductId" value="">
@@ -335,7 +335,7 @@
     <!-- [CATALOG LIST] Current live catalog                          -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="card">
-      <h2>📦 Store Catalog</h2>
+      <h2>Store Catalog</h2>
       <p class="sub">Live products currently visible to customers</p>
 
       <div id="itemsContainer">Loading products...</div>
@@ -346,7 +346,7 @@
     <!-- [CATEGORY MANAGER] Add Categories & Subcategories            -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="card">
-      <h2>🗂️ Category Manager</h2>
+      <h2>Category Manager</h2>
       <p class="sub">Add new categories or subcategories for your store</p>
 
       <div class="row">
@@ -812,7 +812,7 @@
 
         html += `<div class="category-group">`;
         html += `<div class="date-header ${catOpenClass}" onclick="toggleCatFolder('${catSafeId}')" style="background: #fef3c7; border-left-color: var(--primary); margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border);">
-          <span style="font-size: 1rem;">📁 ${cat} (${items.length})</span>
+          <span style="font-size: 1rem;">${cat} (${items.length})</span>
           <span class="arrow">▼</span>
         </div>`;
         
@@ -850,7 +850,7 @@
 
           html += `<div class="date-folder">`;
           html += `<div class="date-header ${openClass}" onclick="toggleDateFolder('${dateSafeId}')">
-            <span>📅 ${date} (${dateGrouped[date].length})</span>
+            <span>${date} (${dateGrouped[date].length})</span>
             <span class="arrow">▼</span>
           </div>`;
           
