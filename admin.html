@@ -135,29 +135,40 @@
     .btn-hide { background: #fef08a; color: #854d0e; }
     .btn-show { background: #dcfce7; color: #166534; }
     
-    /* Grouping Styles (Folder Accordion) */
-    .category-group { margin-bottom: 12px; background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .category-header { 
-      font-size: 1.05rem; 
+    /* Grouping Styles (Date Folders) */
+    .category-group { margin-bottom: 24px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+    .category-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+    
+    .date-folder { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; background: #fafaf9; }
+    .date-header { 
+      font-size: 0.9rem; 
       font-weight: 700; 
       color: var(--primary); 
       background: #fef3c7; 
-      padding: 14px 16px; 
+      padding: 10px 14px; 
       cursor: pointer; 
       display: flex; 
       justify-content: space-between; 
       align-items: center;
-      border-left: 4px solid var(--accent);
-      margin: 0;
       user-select: none;
+      border-left: 4px solid var(--accent);
     }
-    .category-header:hover { background: #fde68a; }
-    .category-content { display: none; padding: 0 16px; border-top: 1px solid var(--border); }
-    .category-content.open { display: block; }
-    .category-header .arrow { transition: transform 0.3s ease; font-size: 0.8rem; }
-    .category-header.open .arrow { transform: rotate(180deg); }
+    .date-header:hover { background: #fde68a; }
+    .date-header .arrow { transition: transform 0.3s ease; font-size: 0.7rem; }
+    .date-header.open .arrow { transform: rotate(180deg); }
     
-    .date-header { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px 0; padding-bottom: 4px; border-bottom: 1px dashed var(--border); }
+    .date-content { display: none; padding: 10px; border-top: 1px solid var(--border); background: #fff; }
+    .date-content.open { display: block; }
+    
+    /* Compact Item Card (2 lines max) */
+    .item-card { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); padding: 8px 0; transition: opacity 0.3s; }
+    .item-card:last-child { border-bottom: none; }
+    .item-card img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+    .item-meta { flex: 1; min-width: 0; }
+    .item-meta strong { display: block; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+    .item-meta .sub-text { color: var(--muted); font-size: 0.7rem; display: flex; justify-content: space-between; margin-top: 2px; }
+    .item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .btn-sm { padding: 4px 8px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.65rem; font-weight: 600; }
     
     .item-card.hidden-item { opacity: 0.5; background: #f8fafc; }
     .item-card.hidden-item img { filter: grayscale(100%); }
@@ -791,25 +802,16 @@
         const items = grouped[cat];
         const catSafeId = cat.replace(/\s+/g, '_');
 
-        // Save open/close state during re-renders
-        const isCurrentlyOpen = document.getElementById(`folder-${catSafeId}`)?.classList.contains('open');
-        const openClass = isCurrentlyOpen ? 'open' : '';
-        const contentClass = isCurrentlyOpen ? 'open' : '';
-
         html += `<div class="category-group">`;
-        html += `<div class="category-header ${openClass}" onclick="toggleFolder('${catSafeId}')">
-          <span>📁 ${cat} (${items.length})</span>
-          <span class="arrow">▼</span>
-        </div>`;
-        
-        html += `<div class="category-content ${contentClass}" id="folder-${catSafeId}">`;
+        html += `<div class="category-title">🗂️ ${cat} (${items.length})</div>`;
 
         // 3. Group by Date within the category
         const dateGrouped = {};
         items.forEach(item => {
           const match = item.id.match(/[A-Z]{2}(\d{6})/);
           const dateStr = match ? match[1] : "000000";
-          // Format date as DD-MM-YYYY for display
+          
+          // Format date as DD-MM-YYYY
           const formattedDate = dateStr !== "000000" 
             ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` 
             : "Unknown Date";
@@ -826,7 +828,20 @@
         });
 
         sortedDates.forEach(date => {
-          html += `<div class="date-header">📅 Uploaded on: ${date}</div>`;
+          const dateSafeId = date.replace(/\//g, '-');
+          
+          // Preserve open/close state
+          const isDateOpen = document.getElementById(`date-${dateSafeId}`)?.classList.contains('open');
+          const openClass = isDateOpen ? 'open' : '';
+          const contentClass = isDateOpen ? 'open' : '';
+
+          html += `<div class="date-folder">`;
+          html += `<div class="date-header ${openClass}" onclick="toggleDateFolder('${dateSafeId}')">
+            <span>📅 ${date}</span>
+            <span class="arrow">▼</span>
+          </div>`;
+          
+          html += `<div class="date-content ${contentClass}" id="date-${dateSafeId}">`;
           
           html += dateGrouped[date].map(item => {
             const originalIndex = productsList.findIndex(p => p.id === item.id);
@@ -835,39 +850,39 @@
             const hideBtnText = isHidden ? "Show" : "Hide";
             const hideBtnClass = isHidden ? "btn-show" : "btn-hide";
 
-            const tagPills = (item.tags || []).map(t =>
-              `<span class="item-tag">${t.replace("_", " ")}</span>`
-            ).join("");
-
             const thumb = (item.images && item.images[0]) || item.image || "";
 
             return `
             <div class="item-card ${hiddenClass}">
               <img src="${thumb}" alt="">
               <div class="item-meta">
-                <strong>${item.title}</strong> ${isHidden ? '<span style="color:red; font-size:0.7rem;">(Hidden)</span>' : ''}
-                <div style="color:var(--muted); font-size:0.75rem;">₹${item.price} • ID: ${item.id}</div>
-                ${tagPills ? `<div class="item-tags">${tagPills}</div>` : ""}
+                <strong>${item.title} ${isHidden ? '<span style="color:red;">(Hidden)</span>' : ''}</strong>
+                <div class="sub-text">
+                  <span>₹${item.price}</span>
+                  <span>${item.id}</span>
+                </div>
               </div>
-              <div class="item-actions" style="flex-direction: column;">
-                <button class="btn-sm btn-edit" onclick="editProduct(${originalIndex})" style="width:100%;">Edit</button>
-                <button class="btn-sm ${hideBtnClass}" onclick="toggleVisibility(${originalIndex})" style="width:100%;">${hideBtnText}</button>
-                <button class="btn-sm btn-del" onclick="deleteProduct(${originalIndex})" style="width:100%;">Delete</button>
+              <div class="item-actions">
+                <button class="btn-sm btn-edit" onclick="editProduct(${originalIndex})">Edit</button>
+                <button class="btn-sm ${hideBtnClass}" onclick="toggleVisibility(${originalIndex})">${hideBtnText}</button>
+                <button class="btn-sm btn-del" onclick="deleteProduct(${originalIndex})">Delete</button>
               </div>
             </div>
           `;
           }).join("");
+          
+          html += `</div></div>`; // Close date-content and date-folder
         });
 
-        html += `</div></div>`; // Close category-content and category-group
+        html += `</div>`; // Close category-group
       });
 
       container.innerHTML = html;
     }
 
-    function toggleFolder(id) {
-      const header = document.querySelector(`#folder-${id}`).previousElementSibling;
-      const content = document.getElementById(`folder-${id}`);
+    function toggleDateFolder(id) {
+      const content = document.getElementById(`date-${id}`);
+      const header = content.previousElementSibling;
       if (content) content.classList.toggle('open');
       if (header) header.classList.toggle('open');
     }
