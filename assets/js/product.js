@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     products = await res.json();
   } catch (e) { document.getElementById("pdTitle").innerText = "Could not load products"; return; }
   currentProduct = products.find(p => p.id === id);
-  if (!currentProduct) { document.getElementById("pdTitle").innerText = "Product not found"; return; }
+  if (!currentProduct || currentProduct.visible === false) { document.getElementById("pdTitle").innerText = "Product not found or hidden"; return; }
   renderProduct();
   renderAlsoLike();
   updateCartUI();

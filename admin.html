@@ -125,13 +125,21 @@
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); margin-top: 6px; }
 
     /* Product List */
-    .item-card { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .item-card { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--border); padding: 12px 0; transition: opacity 0.3s; }
     .item-card img { width: 55px; height: 55px; border-radius: 8px; object-fit: cover; }
     .item-meta { flex: 1; }
     .item-actions { display: flex; gap: 6px; }
     .btn-sm { padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; }
     .btn-edit { background: #e0f2fe; color: #0369a1; }
     .btn-del { background: #fee2e2; color: var(--danger); }
+    .btn-hide { background: #fef08a; color: #854d0e; }
+    .btn-show { background: #dcfce7; color: #166534; }
+    
+    /* Grouping Styles */
+    .category-group { margin-bottom: 24px; }
+    .category-header { font-size: 1.1rem; font-weight: 700; color: var(--primary); background: #fef3c7; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--accent); }
+    .item-card.hidden-item { opacity: 0.5; background: #f8fafc; }
+    .item-card.hidden-item img { filter: grayscale(100%); }
 
     #configBanner { background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.85rem; color: #92400e; }
 
@@ -746,27 +754,75 @@
         return;
       }
 
-      container.innerHTML = productsList.map((item, index) => {
-        const tagPills = (item.tags || []).map(t =>
-          `<span class="item-tag">${t.replace("_", " ")}</span>`
-        ).join("");
+      // 1. Group by Category
+      const grouped = {};
+      productsList.forEach(item => {
+        if (!grouped[item.category]) grouped[item.category] = [];
+        grouped[item.category].push(item);
+      });
 
-        const thumb = (item.images && item.images[0]) || item.image || "";
-        return `
-        <div class="item-card">
-          <img src="${thumb}" alt="">
-          <div class="item-meta">
-            <strong>${item.title}</strong>
-            <div style="color:var(--muted); font-size:0.75rem;">₹${item.price} • ${item.category}</div>
-            ${tagPills ? `<div class="item-tags">${tagPills}</div>` : ""}
+      let html = "";
+
+      // 2. Sort Categories Alphabetically
+      const sortedCategories = Object.keys(grouped).sort();
+
+      sortedCategories.forEach(cat => {
+        const items = grouped[cat];
+
+        // 3. Sort items by ID Date (Newest first)
+        items.sort((a, b) => {
+          // Extract the YYMMDD part from the ID (e.g., SS261029... -> 261029)
+          const getDate = (id) => {
+            const match = id.match(/[A-Z]{2}(\d{6})/);
+            return match ? parseInt(match[1]) : 0;
+          };
+          return getDate(b.id) - getDate(a.id);
+        });
+
+        html += `<div class="category-group">`;
+        html += `<div class="category-header">🗂️ ${cat} (${items.length})</div>`;
+
+        html += items.map(item => {
+          // Find the actual index in the main array for edit/delete functions
+          const originalIndex = productsList.findIndex(p => p.id === item.id);
+          const isHidden = item.visible === false;
+          const hiddenClass = isHidden ? "hidden-item" : "";
+          const hideBtnText = isHidden ? "Show" : "Hide";
+          const hideBtnClass = isHidden ? "btn-show" : "btn-hide";
+
+          const tagPills = (item.tags || []).map(t =>
+            `<span class="item-tag">${t.replace("_", " ")}</span>`
+          ).join("");
+
+          const thumb = (item.images && item.images[0]) || item.image || "";
+
+          return `
+          <div class="item-card ${hiddenClass}">
+            <img src="${thumb}" alt="">
+            <div class="item-meta">
+              <strong>${item.title}</strong> ${isHidden ? '<span style="color:red; font-size:0.7rem;">(Hidden)</span>' : ''}
+              <div style="color:var(--muted); font-size:0.75rem;">₹${item.price} • ID: ${item.id}</div>
+              ${tagPills ? `<div class="item-tags">${tagPills}</div>` : ""}
+            </div>
+            <div class="item-actions" style="flex-direction: column;">
+              <button class="btn-sm btn-edit" onclick="editProduct(${originalIndex})" style="width:100%;">Edit</button>
+              <button class="btn-sm ${hideBtnClass}" onclick="toggleVisibility(${originalIndex})" style="width:100%;">${hideBtnText}</button>
+              <button class="btn-sm btn-del" onclick="deleteProduct(${originalIndex})" style="width:100%;">Delete</button>
+            </div>
           </div>
-          <div class="item-actions">
-            <button class="btn-sm btn-edit" onclick="editProduct(${index})">Edit</button>
-            <button class="btn-sm btn-del" onclick="deleteProduct(${index})">Delete</button>
-          </div>
-        </div>
-      `;
-      }).join("");
+        `;
+        }).join("");
+        html += `</div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    async function toggleVisibility(index) {
+      const item = productsList[index];
+      item.visible = item.visible === false ? true : false;
+      renderCatalog();
+      await pushChangesToGitHub((item.visible === false ? "Hidden" : "Showed") + " product: " + item.title);
     }
     /* [END RENDER] */
 

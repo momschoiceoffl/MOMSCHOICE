@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
     
+    // Filter out hidden products
+    products = products.filter(p => p.visible !== false);
+    
     const catRes = await fetch(`categories.json?_t=${Date.now()}`);
     if (catRes.ok) storeCategories = await catRes.json();
   } catch (e) { console.error(e); return; }
