@@ -265,9 +265,40 @@ function updateCartUI() {
     }).join("");
   }
   
-  const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
-  const totalEl = document.getElementById("cartTotalDisplay");
-  if (totalEl) totalEl.innerText = sym + total.toLocaleString("en-IN");
+  updateShippingTotals();
+}
+
+function updateShippingTotals() {
+  const subtotalEl = document.getElementById("cartSubtotalDisplay");
+  const shippingEl = document.getElementById("cartShippingDisplay");
+  const totalEl    = document.getElementById("cartTotalDisplay");
+  const pinEl      = document.getElementById("custPincode");
+  if (!totalEl) return;
+
+  const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  let shipping = 0, zoneName = "";
+
+  if (subtotal >= 999) {
+    shipping = 0; zoneName = "Free";
+  } else if (pinEl && pinEl.value.trim().length === 6) {
+    const pin = parseInt(pinEl.value.trim(), 10);
+    const zone = [
+      { from: 600001, to: 643999, fee: 60, name: "Tamil Nadu" },
+      { from: 560001, to: 591999, fee: 80, name: "Karnataka" },
+      { from: 670001, to: 695999, fee: 80, name: "Kerala" },
+      { from: 500001, to: 539999, fee: 80, name: "Andhra / Telangana" },
+      { from: 400001, to: 445999, fee: 90, name: "Maharashtra / Goa" },
+      { from: 360001, to: 396999, fee: 90, name: "Gujarat" },
+      { from: 110001, to: 122099, fee: 120, name: "Delhi NCR" }
+    ].find(z => pin >= z.from && pin <= z.to) || { fee: 150, name: "Rest of India" };
+    shipping = zone.fee; zoneName = zone.name;
+  }
+
+  const grand = subtotal + shipping;
+  if (subtotalEl) subtotalEl.innerText = `₹${subtotal.toLocaleString("en-IN")}`;
+  if (shippingEl) shippingEl.innerText = shipping === 0 ? "Free" : `₹${shipping.toLocaleString("en-IN")}${zoneName ? " (" + zoneName + ")" : ""}`;
+  totalEl.innerText = `₹${grand.toLocaleString("en-IN")}`;
+  return { subtotal, shipping, grand, zoneName };
 }
 
 function setupListeners() {
@@ -310,18 +341,35 @@ function setupListeners() {
   };
   document.getElementById("checkoutBtn").onclick = () => {
     if (cart.length === 0) return alert("Your bag is empty!");
-    const name = document.getElementById("custName").value.trim();
-    const phone = document.getElementById("custPhone").value.trim();
-    const addr = document.getElementById("custAddress").value.trim();
-    if (!name || !phone || !addr) return alert("Please fill in your name, phone, and address.");
-    const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+
+    const name     = document.getElementById("custName").value.trim();
+    const phone    = document.getElementById("custPhone").value.trim();
+    const house    = (document.getElementById("custHouse")    || {}).value || "";
+    const area     = (document.getElementById("custArea")     || {}).value || "";
+    const district = (document.getElementById("custDistrict") || {}).value || "";
+    const state    = (document.getElementById("custState")    || {}).value || "";
+    const pincode  = (document.getElementById("custPincode")  || {}).value || "";
+    const save     = (document.getElementById("saveDetails")  || {}).checked;
+
+    if (!name || !phone || !house || !area || !district || !state) {
+      return alert("Please fill in all required fields.");
+    }
+
+    const fullAddr = `${house}, ${area}, ${district}, ${state} - ${pincode}`.trim();
+    if (save) {
+      try { localStorage.setItem("ma_fashion_customer", JSON.stringify({ name, phone, house, area, district, state, pincode: pincode.trim() })); } catch(e) {}
+    }
+
+    const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
     const orderId = "AJ-" + Math.floor(1000 + Math.random() * 9000);
     const itemList = cart.map(i => `• ${i.title} (x${i.qty}) - ₹${i.price * i.qty}`).join("\n");
-    const msg = `🛍️ *NEW ORDER: #${orderId}*\n---------------------------------\n${itemList}\n---------------------------------\n💰 *Total:* ₹${total}\n💳 *Payment:* UPI (${CONFIG.upiId})\n\n📍 *Delivery:*\nName: ${name}\nPhone: ${phone}\nAddress: ${addr}\n\n✅ Attaching payment screenshot below.`;
+    const msg = `🛍️ *NEW ORDER: #${orderId}*\n---------------------------------\n${itemList}\n---------------------------------\n💰 *Total:* ₹${subtotal}\n💳 *Payment:* UPI (${CONFIG.upiId})\n\n📍 *Delivery:*\nName: ${name}\nPhone: ${phone}\nAddress: ${fullAddr}\n\n✅ Attaching payment screenshot below.`;
     window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank");
     cart = [];
     localStorage.setItem("cart", "[]");
     updateCartUI();
     document.getElementById("cartOverlay").classList.remove("open");
+    document.body.classList.remove("cart-open");
+    document.documentElement.classList.remove("cart-open");
   };
 }

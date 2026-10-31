@@ -132,13 +132,22 @@
 
 
       <div class="cart-footer">
-        <div class="cart-total-row"><span data-i18n="subtotal">Subtotal</span><strong id="cartTotalDisplay">₹0</strong></div>
+        <div class="cart-total-row"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotalDisplay">₹0</strong></div>
+        <div class="cart-total-row"><span data-i18n="shipping">Shipping</span><strong id="cartShippingDisplay">—</strong></div>
+        <div class="cart-total-row grand"><span data-i18n="grand_total">Grand Total</span><strong id="cartTotalDisplay">₹0</strong></div>
         <div class="checkout-fields">
-          <input type="text" id="custName" placeholder="Your Full Name" data-i18n="full_name" required>
-          <input type="tel" id="custPhone" placeholder="Mobile / WhatsApp Number" data-i18n="phone" required>
-          <textarea id="custAddress" placeholder="Full Delivery Address with Pincode" data-i18n="address" rows="2" required></textarea>
+          <input type="text" id="custName" placeholder="Full Name" data-i18n="full_name" required>
+          <input type="tel" id="custPhone" placeholder="WhatsApp Number" data-i18n="phone" required>
+          <input type="text" id="custHouse" placeholder="Flat / House No / Street" data-i18n="house" required>
+          <input type="text" id="custArea" placeholder="Area / Locality" data-i18n="area" required>
+          <input type="text" id="custDistrict" placeholder="District" data-i18n="district" required>
+          <input type="text" id="custState" placeholder="State" data-i18n="state" required>
+          <input type="tel" id="custPincode" placeholder="Pincode (6 digits)" data-i18n="pincode" maxlength="6" pattern="[0-9]{6}">
+          <label class="save-checkbox">
+            <input type="checkbox" id="saveDetails"> <span data-i18n="save_details">Save details for next order</span>
+          </label>
         </div>
-        <button class="btn-checkout" id="checkoutBtn" data-i18n="proceed_pay">Proceed to Pay & WhatsApp Order</button>
+        <button class="btn-checkout" id="checkoutBtn" data-i18n="checkout_wa">📲 Send Order on WhatsApp</button>
       </div>
     </aside>
   </div>
