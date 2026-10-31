@@ -782,6 +782,14 @@ function setupListeners() {
 
   document.getElementById("cartOpenBtn").onclick  = () => document.getElementById("cartOverlay").classList.add("open");
   document.getElementById("cartCloseBtn").onclick = () => document.getElementById("cartOverlay").classList.remove("open");
+  
+  // Close when clicking the dark background
+  const overlay = document.getElementById("cartOverlay");
+  if (overlay) {
+    overlay.onclick = (e) => {
+      if (e.target === overlay) overlay.classList.remove("open");
+    };
+  }
 
 
   // Filter chips

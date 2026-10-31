@@ -119,11 +119,11 @@
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="cart-overlay" id="cartOverlay">
     <aside class="cart-drawer">
-      <div class="cart-header" style="display: flex; justify-content: flex-start; align-items: center; gap: 12px;">
-        <button class="close-btn" id="cartCloseBtn" aria-label="Close cart" style="background: none; border: none; cursor: pointer; color: var(--gold-glow);">
-          <img src="assets/icons/close.svg" width="24" height="24" alt="">
-        </button>
+      <div class="cart-header" style="display: flex; justify-content: space-between; align-items: center;">
         <h3 data-i18n="shopping_bag" style="margin: 0;">Your Shopping Bag</h3>
+        <button class="close-btn" id="cartCloseBtn" aria-label="Close cart" style="display: flex !important; background: #6B0F2E; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; align-items: center; gap: 6px; cursor: pointer; z-index: 9999;">
+          <img src="assets/icons/close.svg" width="18" height="18" alt="" style="filter: brightness(0) invert(1);"> Close
+        </button>
       </div>
 
       <div class="cart-body" id="cartItemsList">
