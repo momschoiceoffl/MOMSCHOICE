@@ -49,7 +49,7 @@ const CAROUSEL_INTERVAL = 3000;   // ms between slides (3 seconds)
 /* [STATE] Global app state                                        */
 /* ═══════════════════════════════════════════════════════════════ */
 let products = [];
-let cart = [];
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
 let pendingOrder = null;
 
 let activeTag = "all";       // current filter chip
@@ -697,6 +697,7 @@ function checkoutSingleProduct(productId) {
   const ex = cart.find(c => c.id === productId);
   if (ex) ex.qty += 1;
   else cart.push({ ...p, qty: 1 });
+  localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
   document.getElementById("cartOverlay").classList.add("open");
 }
@@ -711,13 +712,18 @@ function addToCart(productId) {
   } else {
     cart.push({ ...item, qty: 1 });
   }
+  localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
 }
 
 function updateCartUI() {
-  document.getElementById("cartCount").innerText = cart.reduce((sum, i) => sum + i.qty, 0);
-
   const cartList = document.getElementById("cartItemsList");
+  if (!cartList) return; // Might be on a page without a cart drawer
+
+  // Update Cart Counter in Header
+  const cartCountEl = document.getElementById("cartCount");
+  if (cartCountEl) cartCountEl.innerText = cart.reduce((sum, i) => sum + i.qty, 0);
+
   const lang = localStorage.getItem("moms_pick_lang") || "en";
   const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
   
@@ -769,6 +775,7 @@ function updateShippingTotals() {
 
 function removeFromCart(index) {
   cart.splice(index, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
 }
 /* [END CART] */
