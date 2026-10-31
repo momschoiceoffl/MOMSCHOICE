@@ -254,11 +254,13 @@ function updateCartUI() {
 function setupListeners() {
   document.getElementById("cartOpenBtn").onclick = () => {
     document.getElementById("cartOverlay").classList.add("open");
-    document.body.style.overflow = "hidden"; // Lock background scroll
+    document.body.style.overflow = "hidden"; 
+    document.body.style.touchAction = "none"; 
   };
   document.getElementById("cartCloseBtn").onclick = () => {
     document.getElementById("cartOverlay").classList.remove("open");
-    document.body.style.overflow = ""; // Unlock background scroll
+    document.body.style.overflow = ""; 
+    document.body.style.touchAction = ""; 
   };
 
   // Also close cart when clicking outside the drawer (on the overlay)
