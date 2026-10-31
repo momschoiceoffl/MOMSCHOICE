@@ -252,17 +252,30 @@ function updateCartUI() {
 }
 
 function setupListeners() {
-  document.getElementById("cartOpenBtn").onclick = () => document.getElementById("cartOverlay").classList.add("open");
-  document.getElementById("cartCloseBtn").onclick = () => document.getElementById("cartOverlay").classList.remove("open");
+  document.getElementById("cartOpenBtn").onclick = () => {
+    document.getElementById("cartOverlay").classList.add("open");
+    document.body.style.overflow = "hidden"; // Lock background scroll
+  };
+  document.getElementById("cartCloseBtn").onclick = () => {
+    document.getElementById("cartOverlay").classList.remove("open");
+    document.body.style.overflow = ""; // Unlock background scroll
+  };
 
   // Also close cart when clicking outside the drawer (on the overlay)
   const cartOverlay = document.getElementById("cartOverlay");
   if (cartOverlay) {
     cartOverlay.onclick = (e) => {
-      if (e.target === cartOverlay) cartOverlay.classList.remove("open");
+      if (e.target === cartOverlay) {
+        cartOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+      }
     };
   }
-  document.getElementById("pdAddBtn").onclick = () => { addToCart(currentProduct.id); document.getElementById("cartOverlay").classList.add("open"); };
+  document.getElementById("pdAddBtn").onclick = () => { 
+    addToCart(currentProduct.id); 
+    document.getElementById("cartOverlay").classList.add("open"); 
+    document.body.style.overflow = "hidden"; // Lock background scroll
+  };
   document.getElementById("pdWaBtn").onclick = () => {
     const p = currentProduct;
     const msg = `🛍️ *Product Enquiry*\n---------------------------------\n• ${p.title} - ₹${p.price}\n---------------------------------\nHi, I want to order this. Please confirm availability.`;

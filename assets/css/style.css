@@ -1255,6 +1255,7 @@ body > * { position: relative; z-index: 1; }
   background: rgba(0,0,0,0.6);
   z-index: 200;
   justify-content: flex-end;
+  overflow: hidden; /* Prevents overlay scrolling */
 }
 .cart-overlay.open { display: flex; }
 
@@ -1327,8 +1328,9 @@ body > * { position: relative; z-index: 1; }
 .cart-body {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain; /* Stops scroll from bleeding to the background */
   padding: clamp(12px, 2vw, 16px);
-  padding-bottom: 30px; /* Gives breathing room on desktop so it doesn't hide behind fields */
+  padding-bottom: 30px; 
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

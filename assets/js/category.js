@@ -265,6 +265,7 @@ function restoreSavedCustomer() {
 
 function openCheckout() {
   document.getElementById("cartOverlay").classList.add("open");
+  document.body.style.overflow = "hidden"; // Lock background scroll
 }
 
 // ── Sidebar Actions (Favourites, Wishlist, Share) ──────────────
@@ -339,13 +340,19 @@ function setupCartDrawer() {
   const cartBtn = document.getElementById("cartOpenBtn");
   if (cartBtn) cartBtn.onclick = openCheckout;
   const closeBtn = document.getElementById("cartCloseBtn");
-  if (closeBtn) closeBtn.onclick = () => document.getElementById("cartOverlay").classList.remove("open");
+  if (closeBtn) closeBtn.onclick = () => {
+    document.getElementById("cartOverlay").classList.remove("open");
+    document.body.style.overflow = "";
+  };
   
   // Also close cart when clicking outside the drawer (on the overlay)
   const cartOverlay = document.getElementById("cartOverlay");
   if (cartOverlay) {
     cartOverlay.onclick = (e) => {
-      if (e.target === cartOverlay) cartOverlay.classList.remove("open");
+      if (e.target === cartOverlay) {
+        cartOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+      }
     };
   }
 
@@ -397,7 +404,10 @@ function checkoutSingleProduct(id) {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
   const drawer = document.getElementById("cartOverlay");
-  if (drawer) drawer.classList.add("open");
+  if (drawer) {
+    drawer.classList.add("open");
+    document.body.style.overflow = "hidden"; // Lock background scroll
+  }
 }
 
 function setupSearch() {
