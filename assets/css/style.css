@@ -1285,11 +1285,28 @@ body > * { position: relative; z-index: 1; }
   .cart-header h3 {
     font-size: 1.1rem;
   }
-  .close-cart-btn {
-    display: flex !important; /* Forces the button to show */
-    align-items: center;
-    gap: 4px;
-  }
+}
+/* Always show the close button, style it cleanly */
+.close-cart-btn,
+#cartCloseBtn {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border-gold-soft);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+.close-cart-btn:hover,
+#cartCloseBtn:hover {
+  background: rgba(217,160,139,0.2);
+  border-color: var(--gold-glow);
+  color: var(--gold-glow);
 }
 
 .cart-header {

@@ -123,6 +123,74 @@ function shareProduct(id) {
   }
 }
 
+// ── Sidebar Actions (Favourites, Wishlist, Share) ──────────────
+function openFavsModal() {
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (s) s.classList.remove("open");
+  if (b) b.classList.remove("open");
+  showItemsModal("moms_choice_favs", "My Favorites");
+}
+
+function openWishModal() {
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (s) s.classList.remove("open");
+  if (b) b.classList.remove("open");
+  showItemsModal("moms_choice_wish", "My Wishlist");
+}
+
+function showItemsModal(storageKey, title) {
+  const modal = document.getElementById("favsModal");
+  const list = document.getElementById("favsModalList");
+  const titleEl = document.getElementById("favsModalTitle");
+  
+  if (!modal) return;
+  titleEl.innerText = title;
+  
+  const savedIds = JSON.parse(localStorage.getItem(storageKey) || "[]");
+  const lang = localStorage.getItem("moms_pick_lang") || "en";
+  const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
+  
+  if (savedIds.length === 0) {
+    list.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No items added yet.</p>`;
+  } else {
+    const savedProducts = products.filter(p => savedIds.includes(p.id));
+    if (savedProducts.length === 0) {
+      list.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">Saved items are not in the current catalog.</p>`;
+    } else {
+      list.innerHTML = savedProducts.map(p => {
+        const img = (p.images && p.images[0]) || p.image;
+        const pTitle = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
+        return `
+        <a href="product.html?id=${p.id}" style="display: flex; gap: 12px; text-decoration: none; color: inherit; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; align-items: center; border: 1px solid var(--border-gold-soft);">
+          <img src="${img}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;">
+          <div style="flex: 1;">
+            <h4 style="font-size: 0.9rem; margin-bottom: 4px; color: var(--text);">${pTitle}</h4>
+            <div style="color: var(--gold-glow); font-weight: 700; font-size: 0.9rem;">${sym}${p.price.toLocaleString("en-IN")}</div>
+          </div>
+        </a>`;
+      }).join("");
+    }
+  }
+  modal.classList.add("open");
+}
+
+function shareStore() {
+  const s = document.getElementById("sidebar");
+  const b = document.getElementById("sidebarBackdrop");
+  if (s) s.classList.remove("open");
+  if (b) b.classList.remove("open");
+  
+  const url = window.location.origin + window.location.pathname.replace('product.html', 'index.html').replace('category.html', 'index.html');
+  if (navigator.share) {
+    navigator.share({ title: 'Check out Mom\'s Choice!', text: 'Premium sarees, jewelry, and ethnic wear.', url: url }).catch(console.error);
+  } else {
+    navigator.clipboard.writeText(url);
+    alert("Store link copied to clipboard!\n" + url);
+  }
+}
+
 function renderAlsoLike() {
   const others = products.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).slice(0, 6);
   if (!others.length) return;
@@ -186,6 +254,14 @@ function updateCartUI() {
 function setupListeners() {
   document.getElementById("cartOpenBtn").onclick = () => document.getElementById("cartOverlay").classList.add("open");
   document.getElementById("cartCloseBtn").onclick = () => document.getElementById("cartOverlay").classList.remove("open");
+
+  // Also close cart when clicking outside the drawer (on the overlay)
+  const cartOverlay = document.getElementById("cartOverlay");
+  if (cartOverlay) {
+    cartOverlay.onclick = (e) => {
+      if (e.target === cartOverlay) cartOverlay.classList.remove("open");
+    };
+  }
   document.getElementById("pdAddBtn").onclick = () => { addToCart(currentProduct.id); document.getElementById("cartOverlay").classList.add("open"); };
   document.getElementById("pdWaBtn").onclick = () => {
     const p = currentProduct;

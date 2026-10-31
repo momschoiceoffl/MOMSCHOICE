@@ -145,6 +145,16 @@
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- [SCRIPTS]                                                   -->
   <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="login-modal-overlay" id="favsModal">
+    <div class="login-card" style="max-width:90%;width:500px;text-align:left; position: relative;">
+      <button class="close-btn" onclick="document.getElementById('favsModal').classList.remove('open')" style="position:absolute; top:16px; right:16px; cursor:pointer; background:none; border:none;">
+        <img src="assets/icons/close.svg" width="20" height="20" alt="">
+      </button>
+      <h2 id="favsModalTitle" style="margin-bottom:12px;">My Items</h2>
+      <div id="favsModalList" style="max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+  </div>
+
   <script src="assets/js/translations.js"></script>
   <script src="assets/js/product.js"></script>
 </body>
