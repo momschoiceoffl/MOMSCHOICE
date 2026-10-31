@@ -301,7 +301,8 @@ function openFavsModal() {
   const b = document.getElementById("sidebarBackdrop");
   if (s) s.classList.remove("open");
   if (b) b.classList.remove("open");
-  showItemsModal("moms_choice_favs", "My Favorites");
+  const title = typeof t === 'function' ? t("my_favorites") : "My Favorites";
+  showItemsModal("moms_choice_favs", title);
 }
 
 function openWishModal() {
@@ -309,7 +310,8 @@ function openWishModal() {
   const b = document.getElementById("sidebarBackdrop");
   if (s) s.classList.remove("open");
   if (b) b.classList.remove("open");
-  showItemsModal("moms_choice_wish", "My Wishlist");
+  const title = typeof t === 'function' ? t("my_wishlist") : "My Wishlist";
+  showItemsModal("moms_choice_wish", title);
 }
 
 function showItemsModal(storageKey, title) {

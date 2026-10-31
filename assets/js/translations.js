@@ -36,7 +36,9 @@ const TRANSLATIONS = {
     address: "Full Delivery Address with Pincode",
     product_enquiry: "Product Enquiry",
     back: "← Back",
-    remove: "Remove"
+    remove: "Remove",
+    my_favorites: "My Favorites",
+    my_wishlist: "My Wishlist"
   },
   ta: {
     store_name: "மாம்ஸ் சாய்ஸ்",
@@ -73,6 +75,8 @@ const TRANSLATIONS = {
     product_enquiry: "பொருள் விசாரணை",
     back: "← பின்செல்",
     remove: "நீக்கு",
+    my_favorites: "எனது பிடித்தவை",
+    my_wishlist: "எனது விருப்பப் பட்டியல்",
     
     // Category Dictionary
     cat_sarees: "புடவைகள்",
