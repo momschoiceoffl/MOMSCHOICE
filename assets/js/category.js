@@ -1,6 +1,6 @@
 const CONFIG = { storeName: "MOM'S CHOICE", upiId: "yourname@okhdfcbank", whatsappNumber: "919876543210" };
 const SAVED_CUSTOMER_KEY = "ma_fashion_customer";
-const FREE_SHIPPING_ABOVE = 999;
+const FREE_SHIPPING_ABOVE = 2000;
 
 const SHIPPING_ZONES = [
   { from: 600001, to: 643999, fee:  60, name: "Tamil Nadu" },
@@ -254,20 +254,22 @@ function updateShippingTotals() {
   if (!totalEl) return;
 
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-  let shipping = 0;
-  let zoneName = "";
+  let shipping = 0, zoneName = "", displayText = "—";
 
   if (subtotal >= FREE_SHIPPING_ABOVE) {
-    shipping = 0;
-    zoneName = "Free";
+    shipping = 0; zoneName = "Free"; displayText = "Free";
   } else if (pinEl && pinEl.value.trim().length === 6) {
     const zone = getShippingZone(pinEl.value.trim());
-    if (zone) { shipping = zone.fee; zoneName = zone.name; }
+    if (zone) { 
+      shipping = zone.fee; 
+      zoneName = zone.name; 
+      displayText = `₹${shipping.toLocaleString("en-IN")} (${zoneName})`; 
+    }
   }
 
   const grand = subtotal + shipping;
   if (subtotalEl) subtotalEl.innerText = `₹${subtotal.toLocaleString("en-IN")}`;
-  if (shippingEl) shippingEl.innerText = shipping === 0 ? "Free" : `₹${shipping.toLocaleString("en-IN")}${zoneName ? " (" + zoneName + ")" : ""}`;
+  if (shippingEl) shippingEl.innerText = displayText;
   totalEl.innerText = `₹${grand.toLocaleString("en-IN")}`;
   return { subtotal, shipping, grand, zoneName };
 }

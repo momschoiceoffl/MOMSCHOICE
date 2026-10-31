@@ -298,8 +298,10 @@ function updateShippingTotals() {
   const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
   let shipping = 0, zoneName = "";
 
-  if (subtotal >= 999) {
-    shipping = 0; zoneName = "Free";
+  let displayText = "—";
+
+  if (subtotal >= 2000) {
+    shipping = 0; zoneName = "Free"; displayText = "Free";
   } else if (pinEl && pinEl.value.trim().length === 6) {
     const pin = parseInt(pinEl.value.trim(), 10);
     const zone = [
@@ -312,11 +314,12 @@ function updateShippingTotals() {
       { from: 110001, to: 122099, fee: 120, name: "Delhi NCR" }
     ].find(z => pin >= z.from && pin <= z.to) || { fee: 150, name: "Rest of India" };
     shipping = zone.fee; zoneName = zone.name;
+    displayText = `₹${shipping.toLocaleString("en-IN")} (${zoneName})`;
   }
 
   const grand = subtotal + shipping;
   if (subtotalEl) subtotalEl.innerText = `₹${subtotal.toLocaleString("en-IN")}`;
-  if (shippingEl) shippingEl.innerText = shipping === 0 ? "Free" : `₹${shipping.toLocaleString("en-IN")}${zoneName ? " (" + zoneName + ")" : ""}`;
+  if (shippingEl) shippingEl.innerText = displayText;
   totalEl.innerText = `₹${grand.toLocaleString("en-IN")}`;
   return { subtotal, shipping, grand, zoneName };
 }
