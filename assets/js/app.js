@@ -422,6 +422,9 @@ function renderProducts(items) {
   const btnCart = typeof t === 'function' ? t("add_to_cart") : "Add to Cart";
   const btnWa = typeof t === 'function' ? t("send_wa") : "Send Order on WhatsApp";
 
+  const savedFavs = JSON.parse(localStorage.getItem("moms_choice_favs") || "[]");
+  const savedWish = JSON.parse(localStorage.getItem("moms_choice_wish") || "[]");
+
   container.innerHTML = pageItems.map(p => {
     const badge = p.tags.includes("bestseller") ? "Bestseller"
                 : p.tags.includes("most_loved") ? "Most Loved"
@@ -432,6 +435,8 @@ function renderProducts(items) {
 
     const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
     const catName = typeof translateCategory === 'function' ? translateCategory(p.category) : p.category;
+    const isFav = savedFavs.includes(p.id) ? "active" : "";
+    const isWish = savedWish.includes(p.id) ? "active" : "";
 
     return `
     <div class="product-card" id="card-${p.id}">
@@ -447,10 +452,10 @@ function renderProducts(items) {
             <span class="mrp-price">${sym}${p.originalPrice.toLocaleString("en-IN")}</span>
           </div>
           <div class="product-actions-row">
-            <button class="action-icon-btn fav-btn" onclick="event.stopPropagation(); toggleFav('${p.id}', this)" title="Favorite">
+            <button class="action-icon-btn fav-btn ${isFav}" onclick="event.stopPropagation(); toggleFav('${p.id}', this)" title="Favorite">
               <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </button>
-            <button class="action-icon-btn wish-btn" onclick="event.stopPropagation(); toggleWish('${p.id}', this)" title="Wishlist">
+            <button class="action-icon-btn wish-btn ${isWish}" onclick="event.stopPropagation(); toggleWish('${p.id}', this)" title="Wishlist">
               <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
             </button>
             <button class="action-icon-btn" onclick="event.stopPropagation(); shareProduct('${p.id}')" title="Share">
