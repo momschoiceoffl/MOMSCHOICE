@@ -81,8 +81,8 @@
     </div>
     <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
       <div style="display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border-gold); border-radius: 16px; overflow: hidden;">
-        <button onclick="setLanguage('en')" id="btnLangEn" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">EN</button>
-        <button onclick="setLanguage('ta')" id="btnLangTa" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">தமிழ்</button>
+        <button onclick="setLanguage('en'); applyTranslations();" id="btnLangEn" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">EN</button>
+        <button onclick="setLanguage('ta'); applyTranslations();" id="btnLangTa" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">தமிழ்</button>
       </div>
       <a href="index.html" class="policy-back-btn">← Back to Store</a>
     </div>
@@ -174,5 +174,12 @@
     </div>
 
   </main>
+
+  <script src="assets/js/translations.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof applyTranslations === 'function') applyTranslations();
+    });
+  </script>
 </body>
 </html>
