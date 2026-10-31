@@ -504,8 +504,12 @@ body > * { position: relative; z-index: 1; }
 }
 
 #toastNotification .toast-icon {
-  font-size: 2rem;
-  color: var(--gold-glow);
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  /* Apply the cream/gold filter */
+  filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
+  -webkit-filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
 }
 
 

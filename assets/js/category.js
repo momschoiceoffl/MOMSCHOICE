@@ -187,18 +187,20 @@ function addToCart(id) {
   if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1 });
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
-  showToast("Added to Cart!");
+  showToast("Added to Cart!", "assets/icons/cart.svg");
 }
 
-function showToast(message) {
+function showToast(message, iconSrc) {
   let toast = document.getElementById("toastNotification");
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toastNotification";
-    toast.innerHTML = `<div class="toast-icon">✨</div><div class="toast-text"></div>`;
+    toast.innerHTML = `<img class="toast-icon" src="" alt=""><div class="toast-text"></div>`;
     document.body.appendChild(toast);
   }
   toast.querySelector(".toast-text").innerText = message;
+  const iconEl = toast.querySelector(".toast-icon");
+  if (iconEl) iconEl.src = iconSrc;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2000);
 }
@@ -464,7 +466,7 @@ function toggleFav(id, btn) {
   } else {
     favs.push(id);
     btn.classList.add("active");
-    if (typeof showToast === 'function') showToast("Added to Favorites!");
+    if (typeof showToast === 'function') showToast("Added to Favorites!", "assets/icons/heart.svg");
   }
   localStorage.setItem("moms_choice_favs", JSON.stringify(favs));
 }
@@ -477,7 +479,7 @@ function toggleWish(id, btn) {
   } else {
     wish.push(id);
     btn.classList.add("active");
-    if (typeof showToast === 'function') showToast("Added to Wishlist!");
+    if (typeof showToast === 'function') showToast("Added to Wishlist!", "assets/icons/bookmark.svg");
   }
   localStorage.setItem("moms_choice_wish", JSON.stringify(wish));
 }
