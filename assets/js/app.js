@@ -2,7 +2,7 @@
 /* [CONFIG] Store settings — EDIT THESE WITH YOUR REAL DETAILS     */
 /* ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  storeName: "FASHION PARADISE",
+  storeName: "MOM'S CHOICE",
   upiId: "yourname@okhdfcbank",       // ← CHANGE THIS LATER TO YOUR UPI ID
   whatsappNumber: "919489938290"      
 };
