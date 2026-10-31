@@ -38,7 +38,11 @@ const TRANSLATIONS = {
     back: "← Back",
     remove: "Remove",
     my_favorites: "My Favorites",
-    my_wishlist: "My Wishlist"
+    my_wishlist: "My Wishlist",
+    follow_us: "Follow Us On",
+    all_rights: "All Rights Reserved.",
+    terms_policies: "Terms & Policies",
+    policy_warning: "No Returns • No Refunds • Online Payment Only • No COD"
   },
   ta: {
     store_name: "மாம்ஸ் சாய்ஸ்",
@@ -77,6 +81,10 @@ const TRANSLATIONS = {
     remove: "நீக்கு",
     my_favorites: "எனது பிடித்தவை",
     my_wishlist: "எனது விருப்பப் பட்டியல்",
+    follow_us: "எங்களை பின்தொடரவும்",
+    all_rights: "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.",
+    terms_policies: "விதிமுறைகள் & கொள்கைகள்",
+    policy_warning: "திரும்பப் பெற முடியாது • பணம் திரும்பத் தரப்படாது • ஆன்லைன் பேமெண்ட் மட்டும் • COD இல்லை",
     
     // Category Dictionary
     cat_sarees: "புடவைகள்",
