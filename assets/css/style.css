@@ -1269,6 +1269,7 @@ body > * { position: relative; z-index: 1; }
   flex-direction: column;
   border-left: 1px solid var(--border-gold);
   box-shadow: -10px 0 40px rgba(0,0,0,0.75);
+  position: relative;
 }
 
 /* Fix mobile cart drawer */
@@ -1345,6 +1346,7 @@ body > * { position: relative; z-index: 1; }
 
 .cart-footer {
   padding: clamp(12px, 2vw, 16px);
+  padding-bottom: 80px !important;
   border-top: 1px solid var(--border-gold-soft);
 }
 
