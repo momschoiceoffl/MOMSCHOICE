@@ -3,8 +3,8 @@
 /* ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
   storeName: "MOM'S CHOICE",
-  upiId: "yourname@okhdfcbank",       // ← CHANGE: your real UPI ID
-  whatsappNumber: "919876543210"      // ← CHANGE: 91 + 10-digit number
+  upiId: "yourname@okhdfcbank",       // ← CHANGE THIS LATER TO YOUR UPI ID
+  whatsappNumber: "919489938290"      
 };
 
 const FREE_SHIPPING_ABOVE = 2000;

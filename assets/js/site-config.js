@@ -5,14 +5,14 @@
 // 1. LOGO URL (Paste your new Cloudinary logo link here)
 const STORE_LOGO_URL = "https://res.cloudinary.com/ft8zlz5x/image/upload/v1793448265/moms_pick/logo/MOMSCHOICE.png";
 
-// 2. SOCIAL MEDIA LINKS (Paste your actual links here)
+// 2. SOCIAL MEDIA LINKS
 const SOCIAL_LINKS = {
-  whatsapp: "https://wa.me/919876543210", // Change to your real number (91 + 10 digits)
-  instagram: "https://www.instagram.com/momschoiceoffl/",
-  facebook: "https://www.facebook.com/momschoiceoffl/",
-  youtube: "https://www.youtube.com/@momschoiceoffl",
-  meesho: "https://www.meesho.com/momschoiceoffl",
-  email: "mailto:support@momschoice.com" // Change to your real email
+  whatsapp: "https://wa.me/919489938290", 
+  instagram: "https://www.instagram.com/moms.choice26/",
+  facebook: "https://www.facebook.com/share/1CwQodBTiu/",
+  youtube: "https://youtube.com/@momschoice-26",
+  meesho: "#", // Update this when you have a Meesho link
+  email: "mailto:support@momschoice.com" // Update this when you have a real email
 };
 
 // ─────────────────────────────────────────────
