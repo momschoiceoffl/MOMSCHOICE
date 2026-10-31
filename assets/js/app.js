@@ -719,6 +719,20 @@ function addToCart(productId) {
   }
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
+  showToast("Added to Cart!");
+}
+
+function showToast(message) {
+  let toast = document.getElementById("toastNotification");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toastNotification";
+    toast.innerHTML = `<div class="toast-icon">✨</div><div class="toast-text"></div>`;
+    document.body.appendChild(toast);
+  }
+  toast.querySelector(".toast-text").innerText = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
 }
 
 function updateCartUI() {
@@ -985,6 +999,7 @@ function toggleWish(id, btn) {
   } else {
     wish.push(id);
     btn.classList.add("active");
+    if (typeof showToast === 'function') showToast("Added to Wishlist!");
   }
   localStorage.setItem("moms_choice_wish", JSON.stringify(wish));
 }
