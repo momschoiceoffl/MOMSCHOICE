@@ -79,99 +79,97 @@
         </div>
       </div>
     </div>
-    <div class="header-actions">
+    <div class="header-actions" style="display: flex; gap: 10px; align-items: center;">
+      <div style="display: flex; background: rgba(0,0,0,0.4); border: 1px solid var(--border-gold); border-radius: 16px; overflow: hidden;">
+        <button onclick="setLanguage('en')" id="btnLangEn" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">EN</button>
+        <button onclick="setLanguage('ta')" id="btnLangTa" style="font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border: none; cursor: pointer;">தமிழ்</button>
+      </div>
       <a href="index.html" class="policy-back-btn">← Back to Store</a>
     </div>
   </header>
 
   <main class="policy-container">
     <div class="policy-header">
-      <h1>Terms, Shipping & Returns</h1>
-      <p>Please read our store policies carefully before making a purchase.</p>
+      <h1 data-i18n="pol_title">Terms, Shipping & Returns</h1>
+      <p data-i18n="pol_sub">Please read our store policies carefully before making a purchase.</p>
     </div>
 
     <div class="policy-section">
-      <h2>1. Shipping Policy</h2>
-      <p>We ship across India through trusted courier partners.</p>
+      <h2 data-i18n="pol_s1_t">1. Shipping Policy</h2>
+      <p data-i18n="pol_s1_p">We ship across India through trusted courier partners.</p>
       <ul>
-        <li><strong>Dispatch Time:</strong> Orders are dispatched within <strong>24 to 48 hours</strong> (not exceeding 2 business days).</li>
-        <li><strong>Delivery Time:</strong> Delivery usually takes up to <strong>7 working days</strong> based on transportation. However, it may extend up to <strong>15 days</strong> for remote locations or unforeseen transit delays.</li>
-        <li><strong>Shipping Charges:</strong> Free for orders above ₹2000. Below ₹2000, a flat rate of ₹60–₹150 applies based on your pincode zone.</li>
-        <li><strong>Tracking:</strong> A WhatsApp tracking link will be sent to you within 24 hours of dispatch.</li>
+        <li data-i18n="pol_s1_l1">Dispatch Time: Orders are dispatched within 24 to 48 hours (not exceeding 2 business days).</li>
+        <li data-i18n="pol_s1_l2">Delivery Time: Delivery usually takes up to 7 working days based on transportation. However, it may extend up to 15 days for remote locations or unforeseen transit delays.</li>
+        <li data-i18n="pol_s1_l3">Shipping Charges: Free for orders above ₹2000. Below ₹2000, a flat rate of ₹60–₹150 applies based on your pincode zone.</li>
+        <li data-i18n="pol_s1_l4">Tracking: A WhatsApp tracking link will be sent to you within 24 hours of dispatch.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>2. Return, Exchange & Cancellation Policy</h2>
-      <p><strong>ALL SALES ARE FINAL.</strong> We strictly do not accept returns, exchanges, or cancellations under any circumstances.</p>
+      <h2 data-i18n="pol_s2_t">2. Return, Exchange & Cancellation Policy</h2>
+      <p data-i18n="pol_s2_p">ALL SALES ARE FINAL. We strictly do not accept returns, exchanges, or cancellations under any circumstances.</p>
       <ul>
-        <li><strong>No Cancellations:</strong> Orders cannot be cancelled once placed. Please double-check your cart before checking out.</li>
-        <li><strong>No Returns or Exchanges:</strong> We do not accept returns or exchanges for size issues, change of mind, or colour variations.</li>
-        <li><strong>Damage Claims:</strong> In the extremely rare case of a damaged or wrong item, you must record a clear <strong>parcel opening video</strong> and send it to us on WhatsApp within <strong>24 hours of delivery</strong>. Claims without a video will be rejected. If approved, we will offer a replacement (subject to stock availability) or store credit. No cash refunds will be provided.</li>
+        <li data-i18n="pol_s2_l1">No Cancellations: Orders cannot be cancelled once placed. Please double-check your cart before checking out.</li>
+        <li data-i18n="pol_s2_l2">No Returns or Exchanges: We do not accept returns or exchanges for size issues, change of mind, or colour variations.</li>
+        <li data-i18n="pol_s2_l3">Damage Claims: In the extremely rare case of a damaged or wrong item, you must record a clear parcel opening video and send it to us on WhatsApp within 24 hours of delivery. Claims without a video will be rejected. If approved, we will offer a replacement (subject to stock availability) or store credit. No cash refunds will be provided.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>3. Refund Policy</h2>
-      <p>We do not offer cash refunds.</p>
+      <h2 data-i18n="pol_s3_t">3. Refund Policy</h2>
+      <p data-i18n="pol_s3_p">We do not offer cash refunds.</p>
       <ul>
-        <li>If an order is cancelled by us due to stock unavailability, a full refund will be processed to your original payment method within 5–7 business days.</li>
-        <li>Approved damage claims (with video proof) will be resolved via a replacement or store credit only.</li>
+        <li data-i18n="pol_s3_l1">If an order is cancelled by us due to stock unavailability, a full refund will be processed to your original payment method within 5–7 business days.</li>
+        <li data-i18n="pol_s3_l2">Approved damage claims (with video proof) will be resolved via a replacement or store credit only.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>4. Payment Policy (Manual WhatsApp Checkout)</h2>
-      <p>We operate on a <strong>WhatsApp-first enquiry model</strong> to ensure personal service and order accuracy.</p>
+      <h2 data-i18n="pol_s4_t">4. Payment Policy (Manual WhatsApp Checkout)</h2>
+      <p data-i18n="pol_s4_p">We operate on a WhatsApp-first enquiry model to ensure personal service and order accuracy.</p>
       <ul>
-        <li><strong>How it works:</strong> 
-          <br>1. You send an enquiry via our WhatsApp button. 
-          <br>2. We confirm product availability, final price, and shipping cost through a WhatsApp conversation. 
-          <br>3. Once confirmed, we share our <strong>UPI ID</strong> or <strong>UPI QR code</strong> directly on WhatsApp. 
-          <br>4. You complete the payment and <strong>send a screenshot of the payment confirmation</strong> back to us on WhatsApp.
-          <br>5. Order is processed only after we receive and verify your payment screenshot.
-        </li>
-        <li><strong>Accepted Payment Methods:</strong> UPI transfer (Google Pay, PhonePe, Paytm, or any UPI app) or direct bank transfer via the UPI ID shared on WhatsApp.</li>
-        <li><strong>Not Available:</strong> We do <strong>NOT</strong> offer Cash on Delivery (COD). We do <strong>NOT</strong> accept credit cards, debit cards, net banking, or any third-party payment gateway. All payments are direct UPI transfers only.</li>
-        <li><strong>Order Processing:</strong> Orders are processed only after we have received your payment screenshot and verified the transaction. We will send you a dispatch confirmation on WhatsApp.</li>
-        <li><strong>Security:</strong> We never ask for OTPs, UPI PINs, or card details. If anyone claims to be us and asks for these, please report immediately.</li>
+        <li data-i18n="pol_s4_l1">How it works: 1. You send an enquiry via our WhatsApp button. 2. We confirm product availability, final price, and shipping cost through a WhatsApp conversation. 3. Once confirmed, we share our UPI ID or UPI QR code directly on WhatsApp. 4. You complete the payment and send a screenshot of the payment confirmation back to us on WhatsApp. 5. Order is processed only after we receive and verify your payment screenshot.</li>
+        <li data-i18n="pol_s4_l2">Accepted Payment Methods: UPI transfer (Google Pay, PhonePe, Paytm, or any UPI app) or direct bank transfer via the UPI ID shared on WhatsApp.</li>
+        <li data-i18n="pol_s4_l3">Not Available: We do NOT offer Cash on Delivery (COD). We do NOT accept credit cards, debit cards, net banking, or any third-party payment gateway. All payments are direct UPI transfers only.</li>
+        <li data-i18n="pol_s4_l4">Order Processing: Orders are processed only after we have received your payment screenshot and verified the transaction. We will send you a dispatch confirmation on WhatsApp.</li>
+        <li data-i18n="pol_s4_l5">Security: We never ask for OTPs, UPI PINs, or card details. If anyone claims to be us and asks for these, please report immediately.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>5. Privacy Policy</h2>
+      <h2 data-i18n="pol_s5_t">5. Privacy Policy</h2>
       <ul>
-        <li><strong>We collect:</strong> Name, phone, delivery address, pincode, email (optional), order history, and payment screenshot references.</li>
-        <li><strong>We use this for:</strong> Order fulfilment, delivery, customer support, and order status updates via WhatsApp.</li>
-        <li><strong>We do NOT:</strong> Sell your data, share it with third-party marketers, or store your UPI PIN/bank credentials.</li>
+        <li data-i18n="pol_s5_l1">We collect: Name, phone, delivery address, pincode, email (optional), order history, and payment screenshot references.</li>
+        <li data-i18n="pol_s5_l2">We use this for: Order fulfilment, delivery, customer support, and order status updates via WhatsApp.</li>
+        <li data-i18n="pol_s5_l3">We do NOT: Sell your data, share it with third-party marketers, or store your UPI PIN/bank credentials.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>6. Terms & Conditions</h2>
+      <h2 data-i18n="pol_s6_t">6. Terms & Conditions</h2>
       <ul>
-        <li>All orders are subject to acceptance and availability. We reserve the right to refuse or cancel any order.</li>
-        <li><strong>Colour Disclaimer:</strong> Product colours may vary slightly due to photography, lighting, and screen settings. This is not considered a defect.</li>
-        <li>All product images and store branding are our intellectual property.</li>
-        <li>These terms are governed by the laws of India.</li>
+        <li data-i18n="pol_s6_l1">All orders are subject to acceptance and availability. We reserve the right to refuse or cancel any order.</li>
+        <li data-i18n="pol_s6_l2">Colour Disclaimer: Product colours may vary slightly due to photography, lighting, and screen settings. This is not considered a defect.</li>
+        <li data-i18n="pol_s6_l3">All product images and store branding are our intellectual property.</li>
+        <li data-i18n="pol_s6_l4">These terms are governed by the laws of India.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>7. Disclaimer</h2>
+      <h2 data-i18n="pol_s7_t">7. Disclaimer</h2>
       <ul>
-        <li>All our products are handpicked and may be handcrafted. Slight irregularities in weave, print, or embroidery are characteristic of handmade products and are not defects.</li>
-        <li>Unless explicitly mentioned, sarees come with an unstitched blouse piece. Stitching is not included.</li>
-        <li>We recommend dry cleaning for silk and hand-wash in cold water for cotton/polyester.</li>
+        <li data-i18n="pol_s7_l1">All our products are handpicked and may be handcrafted. Slight irregularities in weave, print, or embroidery are characteristic of handmade products and are not defects.</li>
+        <li data-i18n="pol_s7_l2">Unless explicitly mentioned, sarees come with an unstitched blouse piece. Stitching is not included.</li>
+        <li data-i18n="pol_s7_l3">We recommend dry cleaning for silk and hand-wash in cold water for cotton/polyester.</li>
       </ul>
     </div>
 
     <div class="policy-section">
-      <h2>8. Contact / Customer Support</h2>
+      <h2 data-i18n="pol_s8_t">8. Contact / Customer Support</h2>
       <ul>
-        <li><strong>WhatsApp (fastest):</strong> +91 98765 43210 (replies within 2–4 hours)</li>
-        <li><strong>Email:</strong> support@momschoice.com</li>
-        <li><strong>Business hours:</strong> Monday to Saturday, 10 AM to 8 PM IST. Sunday closed.</li>
+        <li data-i18n="pol_s8_l1">WhatsApp (fastest): +91 98765 43210 (replies within 2–4 hours)</li>
+        <li data-i18n="pol_s8_l2">Email: support@momschoice.com</li>
+        <li data-i18n="pol_s8_l3">Business hours: Monday to Saturday, 10 AM to 8 PM IST. Sunday closed.</li>
       </ul>
     </div>
 
