@@ -1255,7 +1255,11 @@ body > * { position: relative; z-index: 1; }
   background: rgba(0,0,0,0.6);
   z-index: 200;
   justify-content: flex-end;
-  overflow: hidden; /* Prevents overlay scrolling */
+  overflow: hidden; 
+}
+body.cart-open {
+  overflow: hidden !important;
+  height: 100vh !important;
 }
 .cart-overlay.open { display: flex; }
 
@@ -1265,13 +1269,13 @@ body > * { position: relative; z-index: 1; }
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   width: 100%;
   max-width: 400px;
-  height: 100dvh; /* Forces exact screen height */
+  height: 100dvh; 
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-gold);
   box-shadow: -10px 0 40px rgba(0,0,0,0.75);
   padding-top: 75px; 
-  overflow: hidden; /* Prevents the drawer itself from stretching */
+  overflow: hidden; 
 }
 
 /* Fix mobile cart drawer */
@@ -1330,21 +1334,23 @@ body > * { position: relative; z-index: 1; }
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain; 
+  -webkit-overflow-scrolling: touch;
   padding: clamp(12px, 2vw, 16px);
   padding-bottom: 30px; 
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 /* Force the items list to scroll and take up available space */
 .cart-item {
   flex-shrink: 0;
 }
 .cart-footer {
-  flex-shrink: 0; /* Prevents the footer from being squished */
-  max-height: 70vh;
+  flex-shrink: 0; 
+  max-height: 60vh;
   overflow-y: auto;
   overscroll-behavior: contain;
+  background: rgba(20,5,11,0.95);
 }
 
 .cart-item {

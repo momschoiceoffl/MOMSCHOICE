@@ -265,8 +265,7 @@ function restoreSavedCustomer() {
 
 function openCheckout() {
   document.getElementById("cartOverlay").classList.add("open");
-  document.body.style.overflow = "hidden"; 
-  document.body.style.touchAction = "none"; 
+  document.body.classList.add("cart-open");
 }
 
 // ── Sidebar Actions (Favourites, Wishlist, Share) ──────────────
@@ -343,8 +342,7 @@ function setupCartDrawer() {
   const closeBtn = document.getElementById("cartCloseBtn");
   if (closeBtn) closeBtn.onclick = () => {
     document.getElementById("cartOverlay").classList.remove("open");
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
+    document.body.classList.remove("cart-open");
   };
   
   // Also close cart when clicking outside the drawer (on the overlay)
@@ -408,8 +406,7 @@ function checkoutSingleProduct(id) {
   const drawer = document.getElementById("cartOverlay");
   if (drawer) {
     drawer.classList.add("open");
-    document.body.style.overflow = "hidden"; 
-    document.body.style.touchAction = "none"; 
+    document.body.classList.add("cart-open");
   }
 }
 
