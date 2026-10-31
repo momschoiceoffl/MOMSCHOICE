@@ -1,5 +1,5 @@
 const CONFIG = {
-  storeName: "MOM'S CHOICE",
+  storeName: "FASHION PARADISE",
   upiId: "yourname@okhdfcbank",
   whatsappNumber: "919489938290"
 };

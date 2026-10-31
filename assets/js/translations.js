@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 const TRANSLATIONS = {
   en: {
-    store_name: "Mom's Choice",
+    store_name: "Fashion Paradise",
     tagline_ethnic: "Ethnic Wardrobe",
     tagline_jewels: "Jewels & Accessories",
     home: "Home",
