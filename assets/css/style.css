@@ -1271,6 +1271,27 @@ body > * { position: relative; z-index: 1; }
   box-shadow: -10px 0 40px rgba(0,0,0,0.75);
 }
 
+/* Fix mobile cart drawer getting hidden behind the fixed header */
+@media (max-width: 700px) {
+  .cart-drawer {
+    padding-top: 75px;
+  }
+  .cart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .cart-header h3 {
+    font-size: 1.1rem;
+  }
+  .close-cart-btn {
+    display: flex !important; /* Forces the button to show */
+    align-items: center;
+    gap: 4px;
+  }
+}
+
 .cart-header {
   padding: clamp(12px, 2vw, 16px);
   border-bottom: 1px solid var(--border-gold-soft);
@@ -1317,9 +1338,10 @@ body > * { position: relative; z-index: 1; }
   flex: 1;
   overflow-y: auto;
   padding: clamp(12px, 2vw, 16px);
+  padding-bottom: 30px; /* Gives breathing room on desktop so it doesn't hide behind fields */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* Pushes the empty message to the bottom */
+  justify-content: flex-end;
 }
 
 .cart-item {
