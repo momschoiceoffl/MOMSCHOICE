@@ -1277,6 +1277,14 @@ body > * { position: relative; z-index: 1; }
   font-size: clamp(1rem, 2.2vw, 1.15rem);
 }
 
+/* Cart drawer close icon — force cream tint on the <img> */
+.cart-drawer .close-btn img,
+.cart-drawer #cartCloseBtn img,
+.cart-drawer .close-cart-btn img {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
+  display: block;
+}
+
 .close-btn {
   background: none;
   border: none;
