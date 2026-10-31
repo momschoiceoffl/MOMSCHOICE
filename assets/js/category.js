@@ -266,6 +266,7 @@ function restoreSavedCustomer() {
 function openCheckout() {
   document.getElementById("cartOverlay").classList.add("open");
   document.body.classList.add("cart-open");
+  document.documentElement.classList.add("cart-open");
 }
 
 // ── Sidebar Actions (Favourites, Wishlist, Share) ──────────────
@@ -343,6 +344,7 @@ function setupCartDrawer() {
   if (closeBtn) closeBtn.onclick = () => {
     document.getElementById("cartOverlay").classList.remove("open");
     document.body.classList.remove("cart-open");
+    document.documentElement.classList.remove("cart-open");
   };
   
   // Also close cart when clicking outside the drawer (on the overlay)
@@ -351,7 +353,8 @@ function setupCartDrawer() {
     cartOverlay.onclick = (e) => {
       if (e.target === cartOverlay) {
         cartOverlay.classList.remove("open");
-        document.body.style.overflow = "";
+        document.body.classList.remove("cart-open");
+        document.documentElement.classList.remove("cart-open");
       }
     };
   }
@@ -407,6 +410,7 @@ function checkoutSingleProduct(id) {
   if (drawer) {
     drawer.classList.add("open");
     document.body.classList.add("cart-open");
+    document.documentElement.classList.add("cart-open");
   }
 }
 

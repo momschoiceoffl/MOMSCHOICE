@@ -24,6 +24,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
   } catch (e) { document.getElementById("pdTitle").innerText = "Could not load products"; return; }
+  // Wire the "← Back" button
+  const backBtn = document.getElementById("pdBackBtn");
+  if (backBtn) {
+    backBtn.onclick = () => {
+      if (document.referrer && document.referrer.includes(window.location.host)) {
+        history.back();
+      } else {
+        window.location.href = "index.html";
+      }
+    };
+  }
+
   currentProduct = products.find(p => p.id === id);
   if (!currentProduct || currentProduct.visible === false) { document.getElementById("pdTitle").innerText = "Product not found or hidden"; return; }
   renderProduct();
@@ -252,14 +264,20 @@ function updateCartUI() {
 }
 
 function setupListeners() {
-  document.getElementById("cartOpenBtn").onclick = () => {
+  const openCart = () => {
     document.getElementById("cartOverlay").classList.add("open");
     document.body.classList.add("cart-open");
+    document.documentElement.classList.add("cart-open");
   };
-  document.getElementById("cartCloseBtn").onclick = () => {
+  
+  const closeCart = () => {
     document.getElementById("cartOverlay").classList.remove("open");
     document.body.classList.remove("cart-open");
+    document.documentElement.classList.remove("cart-open");
   };
+
+  document.getElementById("cartOpenBtn").onclick = openCart;
+  document.getElementById("cartCloseBtn").onclick = closeCart;
 
   // Also close cart when clicking outside the drawer (on the overlay)
   const cartOverlay = document.getElementById("cartOverlay");
@@ -267,7 +285,8 @@ function setupListeners() {
     cartOverlay.onclick = (e) => {
       if (e.target === cartOverlay) {
         cartOverlay.classList.remove("open");
-        document.body.style.overflow = "";
+        document.body.classList.remove("cart-open");
+        document.documentElement.classList.remove("cart-open");
       }
     };
   }
@@ -275,6 +294,7 @@ function setupListeners() {
     addToCart(currentProduct.id); 
     document.getElementById("cartOverlay").classList.add("open"); 
     document.body.classList.add("cart-open");
+    document.documentElement.classList.add("cart-open");
   };
   document.getElementById("pdWaBtn").onclick = () => {
     const p = currentProduct;

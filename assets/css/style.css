@@ -1257,9 +1257,10 @@ body > * { position: relative; z-index: 1; }
   justify-content: flex-end;
   overflow: hidden; 
 }
-body.cart-open {
+body.cart-open, html.cart-open {
   overflow: hidden !important;
   height: 100vh !important;
+  touch-action: none !important; 
 }
 .cart-overlay.open { display: flex; }
 
