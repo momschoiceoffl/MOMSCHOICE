@@ -190,14 +190,15 @@ function addToCart(id) {
 }
 
 function updateCartUI() {
+  const list = document.getElementById("cartItemsList");
+  if (!list) return;
+
   const el = document.getElementById("cartCount");
   if (el) el.innerText = cart.reduce((s,i) => s + i.qty, 0);
 
-  const list = document.getElementById("cartItemsList");
   const lang = localStorage.getItem("moms_pick_lang") || "en";
   const sym = typeof getCurrency === 'function' ? getCurrency() : "₹";
   
-  if (!list) return;
   if (cart.length === 0) {
     const emptyMsg = lang === "ta" ? "உங்கள் ஷாப்பிங் பேக் காலியாக உள்ளது." : "Your shopping bag is empty.";
     list.innerHTML = `<p class="empty-msg" style="margin-top: auto; padding-bottom: 20px; text-align: center; color: var(--text-muted);">${emptyMsg}</p>`;
@@ -206,7 +207,10 @@ function updateCartUI() {
       const title = (lang === "ta" && i.title_ta) ? i.title_ta : i.title;
       return `
       <div class="cart-item">
-        <div><strong>${title}</strong><div>${sym}${i.price} × ${i.qty}</div></div>
+        <div>
+          <strong>${title}</strong>
+          <div>${sym}${i.price} × ${i.qty}</div>
+        </div>
         <button onclick="removeFromCart(${idx})" style="background:none;border:none;color:red;cursor:pointer;">✕</button>
       </div>`;
     }).join("");

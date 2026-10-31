@@ -718,9 +718,8 @@ function addToCart(productId) {
 
 function updateCartUI() {
   const cartList = document.getElementById("cartItemsList");
-  if (!cartList) return; // Might be on a page without a cart drawer
+  if (!cartList) return;
 
-  // Update Cart Counter in Header
   const cartCountEl = document.getElementById("cartCount");
   if (cartCountEl) cartCountEl.innerText = cart.reduce((sum, i) => sum + i.qty, 0);
 
