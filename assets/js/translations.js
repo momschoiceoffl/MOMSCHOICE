@@ -83,7 +83,21 @@ const TRANSLATIONS = {
     pol_s8_t: "8. Contact / Customer Support",
     pol_s8_l1: "WhatsApp (fastest): +91 98765 43210 (replies within 2–4 hours)",
     pol_s8_l2: "Email: support@momschoice.com",
-    pol_s8_l3: "Business hours: Monday to Saturday, 10 AM to 8 PM IST. Sunday closed."
+    pol_s8_l3: "Business hours: Monday to Saturday, 10 AM to 8 PM IST. Sunday closed.",
+    
+    // Category Dictionary
+    cat_sarees: "புடவைகள்",
+    cat_necklaces: "நெக்லஸ்கள்",
+    cat_earrings: "காதணிகள்",
+    cat_bangles: "வளையல்கள்",
+    cat_rings: "மோதிரங்கள்",
+    cat_ornaments: "அலங்காரங்கள்",
+    cat_accessories: "பாகங்கள்",
+    sub_silk: "பட்டு",
+    sub_cotton: "பருத்தி",
+    sub_designer: "டிசைனர்",
+    sub_choker: "சோக்கர்",
+    sub_jhumka: "ஜிமிக்கி"
   },
   ta: {
     store_name: "மாம்ஸ் சாய்ஸ்",
@@ -166,7 +180,7 @@ const TRANSLATIONS = {
     pol_s8_t: "8. தொடர்பு / வாடிக்கையாளர் சேவை",
     pol_s8_l1: "வாட்ஸ்அப் (விரைவானது): +91 98765 43210 (2-4 மணி நேரத்தில் பதில்)",
     pol_s8_l2: "மின்னஞ்சல்: support@momschoice.com",
-    pol_s8_l3: "வேலை நேரம்: திங்கள் முதல் சனி, காலை 10 - இரவு 8 IST. ஞாயிறு விடுமுறை."
+    pol_s8_l3: "வேலை நேரம்: திங்கள் முதல் சனி, காலை 10 - இரவு 8 IST. ஞாயிறு விடுமுறை",
     
     // Category Dictionary
     cat_sarees: "புடவைகள்",
