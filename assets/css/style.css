@@ -74,6 +74,28 @@ body {
 body > * { position: relative; z-index: 1; }
 
 
+/* ─── GLOBAL SVG-AS-IMG CREAM TINT ─────────────────────────── */
+/* currentColor inside an <img> resolves to black, so we tint
+   every inline-style icon to #D9A08B (--gold-glow) via filter. */
+.icon-btn img,
+.cart-trigger img,
+.nav-icon,
+.close-cart-btn img,
+.close-btn img,
+#cartCloseBtn img,
+.action-icon-btn img,
+.sidebar-link img,
+.search-bar img,
+.search-close img,
+.social-icon img,
+.pd-back img,
+.hamburger img,
+.carousel-dot img {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
+  -webkit-filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
+  background: none !important;
+}
+
 /* ─── HEADER (FIXED FLUID) ─── */
 .app-header {
   position: fixed;
@@ -374,25 +396,9 @@ body > * { position: relative; z-index: 1; }
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  background-color: currentColor;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-}
-.sidebar-link[data-view="home"] .nav-icon {
-  -webkit-mask-image: url("../icons/home.svg");
-  mask-image: url("../icons/home.svg");
-}
-#sidebarCategoriesToggle .nav-icon {
-  -webkit-mask-image: url("../icons/categories.svg");
-  mask-image: url("../icons/categories.svg");
-}
-#sidebarLogin .nav-icon {
-  -webkit-mask-image: url("../icons/home.svg");
-  mask-image: url("../icons/home.svg");
+  display: inline-block;
+  object-fit: contain;
+  background: none;
 }
 
 .sidebar-subnav {
@@ -1297,11 +1303,13 @@ body > * { position: relative; z-index: 1; }
   justify-content: center;
   padding: 4px;
 }
-.close-btn svg {
+.close-btn svg,
+.close-btn img {
   display: block;
   transition: transform 0.2s ease;
 }
-.close-btn:hover svg {
+.close-btn:hover svg,
+.close-btn:hover img {
   transform: scale(1.1) rotate(90deg);
 }
 
@@ -1581,6 +1589,10 @@ body > * { position: relative; z-index: 1; }
   text-decoration: none;
   color: var(--gold-glow);
   transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+.social-icon img {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
+  -webkit-filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(560%) hue-rotate(327deg) brightness(94%) contrast(88%) !important;
 }
 .social-icon svg,
 .social-icon img {
