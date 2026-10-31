@@ -76,6 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const pinEl = document.getElementById("custPincode");
   if (pinEl) pinEl.addEventListener("input", updateShippingTotals);
+
+  // Render the saved cart from localStorage IMMEDIATELY on page load
+  updateCartUI();
 });
 
 function restoreSavedCustomer() {
@@ -700,6 +703,8 @@ function checkoutSingleProduct(productId) {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartUI();
   document.getElementById("cartOverlay").classList.add("open");
+  document.body.classList.add("cart-open");
+  document.documentElement.classList.add("cart-open");
 }
 
 function addToCart(productId) {
@@ -785,15 +790,26 @@ function removeFromCart(index) {
 /* ═══════════════════════════════════════════════════════════════ */
 function setupListeners() {
   // Cart drawers
+  const openCart = () => {
+    document.getElementById("cartOverlay").classList.add("open");
+    document.body.classList.add("cart-open");
+    document.documentElement.classList.add("cart-open");
+    updateCartUI();
+  };
+  const closeCart = () => {
+    document.getElementById("cartOverlay").classList.remove("open");
+    document.body.classList.remove("cart-open");
+    document.documentElement.classList.remove("cart-open");
+  };
 
-  document.getElementById("cartOpenBtn").onclick  = () => document.getElementById("cartOverlay").classList.add("open");
-  document.getElementById("cartCloseBtn").onclick = () => document.getElementById("cartOverlay").classList.remove("open");
+  document.getElementById("cartOpenBtn").onclick  = openCart;
+  document.getElementById("cartCloseBtn").onclick = closeCart;
   
   // Close when clicking the dark background
   const overlay = document.getElementById("cartOverlay");
   if (overlay) {
     overlay.onclick = (e) => {
-      if (e.target === overlay) overlay.classList.remove("open");
+      if (e.target === overlay) closeCart();
     };
   }
 
@@ -858,6 +874,7 @@ function setupListeners() {
       items: [...cart]
     };
     triggerWhatsApp(pendingOrder);
+    closeCart();
   };
 }
 /* [END LISTENERS] */
