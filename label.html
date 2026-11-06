@@ -8,15 +8,18 @@
     @page { size: A4; margin: 0; }
     body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; background: #f0f0f0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
     .label-box { 
-      width: 190mm; 
+      width: 100%;
+      max-width: 190mm;
       min-height: 277mm; 
       background: #fff; 
       box-sizing: border-box; 
       display: flex; 
       flex-direction: column; 
-      border: 2px solid #000; /* Outer Border */
-      margin: 10mm auto; 
-      padding: 8mm; 
+      border: 2px solid #000; 
+      margin: 0 auto; 
+      padding: 6mm; 
+      page-break-after: avoid;
+      page-break-inside: avoid;
     }
     
     /* HEADER */
@@ -66,15 +69,19 @@
     .btn-close { background: #dc2626; color: #fff; }
     
     @media print {
-      body { background: #fff; display: block; margin: 0; padding: 0; }
+      @page { size: A4; margin: 5mm; }
+      body { background: #fff; margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
       .controls { display: none; }
       .label-box { 
-        border: 2px solid #000; /* Outer border on print */
-        margin: 10mm; 
-        width: 190mm; 
-        min-height: 277mm; 
-        padding: 8mm; 
+        border: 2px solid #000; 
+        width: 100%; 
+        min-height: 0; 
+        height: 100%;
+        padding: 5mm; 
+        margin: 0;
         box-sizing: border-box;
+        page-break-after: avoid;
+        page-break-inside: avoid;
       }
     }
   </style>
