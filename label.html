@@ -31,18 +31,23 @@
     
     /* TABLE */
     .middle-body { flex: 1; display: flex; flex-direction: column; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 3mm; text-align: left; font-weight: 900; text-transform: uppercase; background: #f9f9f9; }
-    td { padding: 4mm 3mm; border-bottom: 1px dashed #999; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 5mm; }
+    th { border-top: 2px solid #000; border-bottom: 2px solid #000; border-left: 1px solid #ccc; border-right: 1px solid #ccc; padding: 3mm; text-align: left; font-weight: 900; text-transform: uppercase; background: #eee; }
+    th:first-child { border-left: none; }
+    th:last-child { border-right: none; }
+    td { padding: 4mm 3mm; border-bottom: 1px solid #000; border-left: 1px solid #ccc; border-right: 1px solid #ccc; vertical-align: top; }
+    td:first-child { border-left: none; }
+    td:last-child { border-right: none; }
     
-    .totals-section { margin-top: 8mm; display: flex; justify-content: flex-end; font-size: 14px; line-height: 1.6; }
-    .totals-table { width: 40%; }
-    .totals-table td { border: none; padding: 1mm 0; }
-    .totals-table .grand-total { border-top: 2px solid #000; border-bottom: 4px double #000; font-size: 18px; font-weight: 900; padding-top: 3mm; margin-top: 2mm; }
+    /* BOTTOM TOTALS */
+    .bottom-totals { margin-top: auto; margin-bottom: 8mm; border-top: 2px solid #000; padding-top: 5mm; display: flex; justify-content: flex-end; }
+    .totals-table { width: 50%; font-size: 14px; line-height: 1.6; }
+    .totals-table td { border: none; padding: 2mm 0; }
+    .totals-table .grand-total { border-top: 2px solid #000; border-bottom: 4px double #000; font-size: 20px; font-weight: 900; padding-top: 3mm; margin-top: 2mm; background: #f9f9f9; }
     
     /* FOOTER */
-    .footer-section { margin-top: auto; padding-top: 8mm; border-top: 2px dashed #000; }
-    .policies { font-size: 12px; font-weight: bold; line-height: 1.4; margin-bottom: 5mm; }
+    .footer-section { margin-top: 0; padding-top: 0; }
+    .policies { font-size: 12px; font-weight: bold; line-height: 1.4; margin-bottom: 5mm; border-top: 2px dashed #000; padding-top: 5mm; }
     .return-address { font-size: 12px; line-height: 1.4; text-align: center; background: #f9f9f9; padding: 3mm; border: 1px solid #ccc; }
     
     .controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100; }
@@ -96,40 +101,40 @@
       <table>
         <thead>
           <tr>
-            <th>Product ID</th>
-            <th>Description</th>
-            <th>Qty</th>
-            <th>Rate</th>
-            <th>Amount</th>
+            <th style="width: 15%;">Product ID</th>
+            <th style="width: 45%;">Description</th>
+            <th style="width: 10%; text-align: center;">Qty</th>
+            <th style="width: 15%; text-align: right;">Rate</th>
+            <th style="width: 15%; text-align: right;">Amount</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td id="lblProdId" style="font-weight: bold;">ID</td>
+            <td id="lblProdId" style="font-weight: bold; font-size: 12px;">ID</td>
             <td id="lblProdTitle">Product Name</td>
-            <td id="lblQty">1</td>
-            <td id="lblRate">₹0</td>
-            <td id="lblAmount">₹0</td>
+            <td id="lblQty" style="text-align: center;">1</td>
+            <td id="lblRate" style="text-align: right;">₹0</td>
+            <td id="lblAmount" style="text-align: right; font-weight: bold;">₹0</td>
           </tr>
         </tbody>
       </table>
-      
-      <div class="totals-section">
-        <table class="totals-table">
-          <tr>
-            <td>Subtotal:</td>
-            <td style="text-align: right;" id="lblSubtotal">₹0</td>
-          </tr>
-          <tr>
-            <td>Shipping:</td>
-            <td style="text-align: right;" id="lblShipping">₹0</td>
-          </tr>
-          <tr class="grand-total">
-            <td>GRAND TOTAL:</td>
-            <td style="text-align: right;" id="lblTotal">₹0</td>
-          </tr>
-        </table>
-      </div>
+    </div>
+
+    <div class="bottom-totals">
+      <table class="totals-table">
+        <tr>
+          <td style="text-align: left; font-weight: bold;">Subtotal:</td>
+          <td style="text-align: right;" id="lblSubtotal">₹0</td>
+        </tr>
+        <tr>
+          <td style="text-align: left; font-weight: bold;">Shipping:</td>
+          <td style="text-align: right;" id="lblShipping">₹0</td>
+        </tr>
+        <tr class="grand-total">
+          <td style="text-align: left;">GRAND TOTAL:</td>
+          <td style="text-align: right;" id="lblTotal">₹0</td>
+        </tr>
+      </table>
     </div>
     
     <div class="footer-section">
