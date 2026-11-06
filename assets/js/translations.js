@@ -4,8 +4,8 @@
 const TRANSLATIONS = {
   en: {
     store_name: "Mom's Choice",
-    tagline_ethnic: "Ethnic Wardrobe",
-    tagline_jewels: "Jewels & Accessories",
+    tagline_ethnic: "Ethnic Wearables",
+    tagline_jewels: "and More",
     home: "Home",
     categories: "Categories",
     favorites: "Favorites",
@@ -106,7 +106,7 @@ const TRANSLATIONS = {
   ta: {
     store_name: "மாம்ஸ் சாய்ஸ்",
     tagline_ethnic: "பாரம்பரிய உடைகள்",
-    tagline_jewels: "நகைகள் & பாகங்கள்",
+    tagline_jewels: "மற்றும் பல",
     home: "முகப்பு",
     categories: "வகைகள்",
     favorites: "பிடித்தவை",
