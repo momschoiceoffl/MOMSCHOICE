@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice | Mom's Choice</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 20px; color: #000; }
+    .invoice-box { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.15); border-radius: 8px; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+    .header h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+    .header p { margin: 5px 0 0 0; font-size: 13px; color: #555; }
+    .details { display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .details div { width: 45%; }
+    .details h3 { font-size: 14px; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th { background: #f8f8f8; text-align: left; padding: 10px; border-bottom: 2px solid #ccc; }
+    td { padding: 10px; border-bottom: 1px solid #eee; }
+    .totals { width: 300px; float: right; font-size: 14px; }
+    .totals tr td { padding: 6px 10px; border: none; }
+    .totals .grand-total { border-top: 2px solid #000; font-weight: bold; font-size: 16px; }
+    .btn-print { display: block; width: 200px; margin: 30px auto; padding: 12px; background: #16a34a; color: #fff; text-align: center; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
+    .btn-print:hover { background: #15803d; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .invoice-box { box-shadow: none; padding: 0; max-width: 100%; }
+      .btn-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="invoice-box" id="invoiceBox">
+    <div class="header">
+      <div>
+        <h1>MOM'S CHOICE</h1>
+        <p>Ethnic Wardrobe & Jewels</p>
+        <p>WhatsApp: +91 98765 43210</p>
+      </div>
+      <div style="text-align: right;">
+        <h2 style="margin: 0; font-size: 22px; color: #333;">INVOICE</h2>
+        <p><strong>Invoice #:</strong> <span id="invNumber">INV-XXXX</span></p>
+        <p><strong>Date:</strong> <span id="invDate">-</span></p>
+      </div>
+    </div>
+
+    <div class="details">
+      <div>
+        <h3>Billed To:</h3>
+        <p id="invCustName" style="font-weight: bold;">Customer Name</p>
+        <p id="invCustPhone">Phone</p>
+        <p id="invCustAddress">Address</p>
+      </div>
+      <div style="text-align: right;">
+        <h3>Payment Info:</h3>
+        <p>Method: UPI / WhatsApp</p>
+        <p>Status: Paid</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item Description</th>
+          <th style="text-align: center;">Qty</th>
+          <th style="text-align: right;">Price</th>
+          <th style="text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <tbody id="invTableBody">
+        <!-- Items injected by JS -->
+      </tbody>
+    </table>
+
+    <div style="overflow: hidden;">
+      <table class="totals">
+        <tr>
+          <td>Subtotal:</td>
+          <td style="text-align: right;" id="invSubtotal">₹0</td>
+        </tr>
+        <tr>
+          <td>Shipping:</td>
+          <td style="text-align: right;" id="invShipping">₹0</td>
+        </tr>
+        <tr class="grand-total">
+          <td>Grand Total:</td>
+          <td style="text-align: right;" id="invTotal">₹0</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="clear: both; margin-top: 50px; text-align: center; font-size: 12px; color: #777; border-top: 1px solid #ccc; padding-top: 15px;">
+      <p>Thank you for shopping with Mom's Choice!</p>
+      <p>For any queries, contact us on WhatsApp.</p>
+    </div>
+  </div>
+
+  <button class="btn-print" onclick="window.print()">🖨️ Print / Save PDF</button>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    // [INVOICE LOGIC] Runs when the page loads
+    // ═══════════════════════════════════════════════════════════
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Get the URL parameters (passed from admin.html)
+      const params = new URLSearchParams(window.location.search);
+      
+      const pId = params.get("id") || "Unknown ID";
+      const pTitle = params.get("title") || "Unknown Product";
+      const pPrice = Number(params.get("price")) || 0;
+      const qty = Number(params.get("qty")) || 1;
+      
+      const cName = params.get("cName") || "Walk-in Customer";
+      const cPhone = params.get("cPhone") || "-";
+      const cAddr = params.get("cAddr") || "-";
+
+      // 2. Fill out the header & customer details
+      document.getElementById("invNumber").innerText = "INV-" + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById("invDate").innerText = new Date().toLocaleDateString();
+      
+      document.getElementById("invCustName").innerText = cName;
+      document.getElementById("invCustPhone").innerText = cPhone;
+      document.getElementById("invCustAddress").innerText = cAddr;
+
+      // 3. Fill out the table
+      const itemTotal = pPrice * qty;
+      document.getElementById("invTableBody").innerHTML = `
+        <tr>
+          <td>
+            <strong>${pTitle}</strong><br>
+            <span style="font-size: 11px; color: #666;">ID: ${pId}</span>
+          </td>
+          <td style="text-align: center;">${qty}</td>
+          <td style="text-align: right;">₹${pPrice.toLocaleString("en-IN")}</td>
+          <td style="text-align: right;">₹${itemTotal.toLocaleString("en-IN")}</td>
+        </tr>
+      `;
+
+      // 4. Calculate Totals
+      const shipping = itemTotal > 999 ? 0 : 60;
+      const grandTotal = itemTotal + shipping;
+      
+      document.getElementById("invSubtotal").innerText = "₹" + itemTotal.toLocaleString("en-IN");
+      document.getElementById("invShipping").innerText = shipping === 0 ? "Free" : "₹" + shipping;
+      document.getElementById("invTotal").innerText = "₹" + grandTotal.toLocaleString("en-IN");
+    });
+  </script>
+</body>
+</html>

@@ -330,7 +330,23 @@
       <button class="btn btn-outline" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Cancel Edit</button>
     </div>
     <!-- [END PRODUCT FORM] -->
-
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- [INVOICE GENERATOR] Search by ID or Name                    -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="card" style="background: #fef3c7; border-color: #fde68a;">
+      <h2 style="color: #92400e;">🧾 Create Invoice</h2>
+      <p class="sub" style="color: #b45309;">Search for a product, enter customer details, and generate the bill.</p>
+      
+      <div class="row">
+        <div style="flex: 2;">
+          <label style="color: #92400e;">Product ID or Name</label>
+          <input type="text" id="invSearchInput" placeholder="e.g. SS261029A1S8" style="border-color: #d97706;">
+        </div>
+        <div style="flex: 1; display: flex; align-items: flex-end; padding-bottom: 12px;">
+          <button class="btn" style="background: #d97706; color: #fff; margin: 0; height: 42px;" onclick="promptInvoiceDetails()">🔍 Find & Bill</button>
+        </div>
+      </div>
+    </div>
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- [CATALOG LIST] Current live catalog                          -->
     <!-- ═══════════════════════════════════════════════════════════ -->
@@ -1138,6 +1154,50 @@
       }
     }
     /* [END PUSH] */
+        // ═══════════════════════════════════════════════════════════
+    // [INVOICE GENERATOR] Find product and open invoice.html
+    // ═══════════════════════════════════════════════════════════
+    function promptInvoiceDetails() {
+      const query = document.getElementById("invSearchInput").value.trim().toLowerCase();
+      if (!query) return alert("Please type a Product ID or Name first.");
+
+      // Search the productsList array (which is already loaded in admin.html)
+      const product = productsList.find(p => 
+        p.id.toLowerCase() === query || 
+        p.title.toLowerCase().includes(query)
+      );
+
+      if (!product) {
+        return alert("❌ Product not found. Please check the ID or Name.");
+      }
+
+      // Prompt for customer details
+      const custName = prompt(`Product Found: ${product.title}\n\nEnter Customer Name:`, "Walk-in Customer");
+      if (custName === null) return;
+
+      const custPhone = prompt("Enter Customer Phone:", "");
+      if (custPhone === null) return;
+
+      const custAddress = prompt("Enter Customer Address:", "");
+      if (custAddress === null) return;
+
+      const qty = parseInt(prompt("Enter Quantity:", "1")) || 1;
+
+      // Build the URL with all the data
+      const url = `invoice.html?id=${encodeURIComponent(product.id)}` +
+                  `&title=${encodeURIComponent(product.title)}` +
+                  `&price=${product.price}` +
+                  `&qty=${qty}` +
+                  `&cName=${encodeURIComponent(custName)}` +
+                  `&cPhone=${encodeURIComponent(custPhone)}` +
+                  `&cAddr=${encodeURIComponent(custAddress)}`;
+
+      // Open the invoice page in a new tab
+      window.open(url, '_blank');
+      
+      // Clear the search box
+      document.getElementById("invSearchInput").value = "";
+    }
   </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 const CONFIG = {
   storeName: "MOM'S CHOICE",
   upiId: "yourname@okhdfcbank",
-  whatsappNumber: "919489938290"
+  whatsappNumber: "919876543210"
 };
 
 let products = [];
