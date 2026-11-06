@@ -9,16 +9,18 @@
     body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; background: #f0f0f0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
     .label-box { width: 210mm; min-height: 297mm; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; border: 2px solid #000; margin: 10mm auto; padding: 10mm; }
     
-    /* [1] HEADER */
+    /* HEADER */
     .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000; padding-bottom: 8mm; margin-bottom: 8mm; }
-    .header-left h1 { margin: 0; font-size: 28px; font-weight: 900; text-transform: uppercase; }
-    .header-left p { margin: 3px 0 0 0; font-size: 13px; font-weight: bold; color: #333; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-left img { height: 60px; width: auto; object-fit: contain; }
+    .header-left-text h1 { margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; }
+    .header-left-text p { margin: 3px 0 0 0; font-size: 12px; font-weight: bold; color: #333; }
     .header-middle { text-align: center; }
     .header-middle img { width: 45mm; height: 45mm; object-fit: contain; border: 1px solid #eee; padding: 2px; }
     .header-right { text-align: right; font-size: 14px; line-height: 1.5; }
     .header-right strong { font-size: 20px; font-weight: 900; }
     
-    /* [2] UPPER BODY */
+    /* BODY */
     .upper-body { display: flex; border-bottom: 3px solid #000; margin-bottom: 8mm; }
     .col-left, .col-right { flex: 1; font-size: 14px; line-height: 1.6; }
     .col-left { border-right: 2px dashed #000; padding-right: 8mm; }
@@ -27,7 +29,7 @@
     .col-name { font-size: 18px; font-weight: 900; margin-bottom: 3mm; }
     .col-phone { font-size: 16px; font-weight: 900; margin-top: 4mm; }
     
-    /* [3] MIDDLE BODY (Table) */
+    /* TABLE */
     .middle-body { flex: 1; display: flex; flex-direction: column; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 3mm; text-align: left; font-weight: 900; text-transform: uppercase; background: #f9f9f9; }
@@ -38,13 +40,11 @@
     .totals-table td { border: none; padding: 1mm 0; }
     .totals-table .grand-total { border-top: 2px solid #000; border-bottom: 4px double #000; font-size: 18px; font-weight: 900; padding-top: 3mm; margin-top: 2mm; }
     
-    /* [4] POLICIES & RETURN */
+    /* FOOTER */
     .footer-section { margin-top: auto; padding-top: 8mm; border-top: 2px dashed #000; }
     .policies { font-size: 12px; font-weight: bold; line-height: 1.4; margin-bottom: 5mm; }
-    .policies ul { margin: 0; padding-left: 5mm; }
     .return-address { font-size: 12px; line-height: 1.4; text-align: center; background: #f9f9f9; padding: 3mm; border: 1px solid #ccc; }
     
-    /* Controls */
     .controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100; }
     .controls button { padding: 12px 25px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 6px; }
     .btn-print { background: #16a34a; color: #fff; }
@@ -61,9 +61,11 @@
   <div class="label-box">
     <div class="header">
       <div class="header-left">
-        <h1>Mom's Choice</h1>
-        <p>Ethnic Wardrobe</p>
-        <p>Jewels & Accessories</p>
+        <img src="https://res.cloudinary.com/ft8zlz5x/image/upload/v1793235967/moms_pick/logo/MOMS%20CHOICE.png" alt="Logo">
+        <div class="header-left-text">
+          <h1>Mom's Choice</h1>
+          <p>Ethnic Wardrobe & Jewels</p>
+        </div>
       </div>
       <div class="header-middle">
         <img id="lblQr" src="" alt="QR">
@@ -85,7 +87,7 @@
       <div class="col-right">
         <div class="col-title">Sold To / To be Received:</div>
         <div class="col-name" id="lblCustName">Customer Name</div>
-        <div id="lblCustAddr">Flat 4B, Gandhi Street,<br>Anna Nagar, Chennai,<br>Tamil Nadu - 600040</div>
+        <div id="lblCustAddr">Address</div>
         <div class="col-phone">Ph: <span id="lblCustPhone">9876543210</span></div>
       </div>
     </div>
@@ -165,14 +167,12 @@
       const cPhone = params.get("cPhone") || "-";
       const cAddr = params.get("cAddr") || "-";
       
-      const orderId = params.get("orderId") || ("ORD-" + Math.floor(1000 + Math.random() * 9000));
+      const invNum = params.get("invNum") || "INV-0000";
 
-      // Calculate Totals
       const itemTotal = pPrice * qty;
       const grandTotal = itemTotal + shipping;
 
-      // Fill Basic UI
-      document.getElementById("lblInvNum").innerText = orderId;
+      document.getElementById("lblInvNum").innerText = invNum;
       document.getElementById("lblDate").innerText = new Date().toLocaleDateString();
       
       document.getElementById("lblCustName").innerText = cName;
@@ -189,19 +189,22 @@
       document.getElementById("lblShipping").innerText = shipping === 0 ? "Free" : "₹" + shipping;
       document.getElementById("lblTotal").innerText = "₹" + grandTotal;
 
-      // Generate Text-Based QR Data (JSON)
-      const qrData = {
-        invoice: orderId,
-        date: new Date().toLocaleDateString(),
-        customer: cName,
-        phone: cPhone,
-        address: cAddr,
-        items: [{ id: pId, title: pTitle, qty: qty, price: pPrice }],
-        total: grandTotal
-      };
+      // Generate QR Code Text (Formatted nicely for mobile scanners)
+      const qrText = `MOM'S CHOICE INVOICE\n` +
+                     `-------------------\n` +
+                     `Invoice: ${invNum}\n` +
+                     `Customer: ${cName}\n` +
+                     `Phone: ${cPhone}\n` +
+                     `Address: ${cAddr}\n` +
+                     `-------------------\n` +
+                     `Item: ${pTitle} (x${qty})\n` +
+                     `Amount: Rs.${itemTotal}\n` +
+                     `Shipping: Rs.${shipping}\n` +
+                     `-------------------\n` +
+                     `GRAND TOTAL: Rs.${grandTotal}\n` +
+                     `Thank you!`;
 
-      // Encode the JSON string for the QR image URL
-      const qrString = encodeURIComponent(JSON.stringify(qrData));
+      const qrString = encodeURIComponent(qrText);
       document.getElementById("lblQr").src = "https://quickchart.io/qr?text=" + qrString + "&size=300&margin=1";
     });
   </script>
