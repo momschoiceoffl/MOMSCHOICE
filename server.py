@@ -40,6 +40,10 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if self.path == "/health":
+            self._json(200, {"ok": True, "token_set": True})
+            return
+
         if self.path.startswith("/get-products"):
             try:
                 req = Request(GSHEET_URL)
@@ -49,6 +53,7 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return
+            
         return super().do_GET()
 
     def do_POST(self):

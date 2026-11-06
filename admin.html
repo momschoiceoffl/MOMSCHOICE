@@ -177,20 +177,28 @@
     </div>
 
     <!-- TAB 3: INVOICE -->
+    <!-- TAB 3: INVOICE -->
     <div id="tab-invoices" class="tab-content">
       <div class="card" style="background: #fef3c7; border-color: #fde68a;">
         <h2 style="color: #92400e;">🧾 Create Invoice</h2>
-        <p class="sub" style="color: #b45309;">Scan the QR code or type the Product ID to generate a bill.</p>
+        <p class="sub" style="color: #b45309;">Scan the QR code or type the Product ID, then fill in the customer details below.</p>
         
         <div class="row">
-          <div style="flex: 2;">
+          <div style="flex: 1;">
             <label style="color: #92400e;">Product ID or Name</label>
-            <input type="text" id="invSearchInput" placeholder="Scan QR here..." style="border-color: #d97706;" onkeypress="if(event.key==='Enter') promptInvoiceDetails()">
-          </div>
-          <div style="flex: 1; padding-top: 24px;">
-            <button class="btn" style="background: #d97706; color: #fff;" onclick="promptInvoiceDetails()">🔍 Find & Bill</button>
+            <input type="text" id="invSearchInput" placeholder="Scan QR here..." style="border-color: #d97706;">
           </div>
         </div>
+
+        <div class="row">
+          <div><label>Customer Name</label><input type="text" id="invCustName" placeholder="e.g. Priya Raman"></div>
+          <div><label>WhatsApp Number</label><input type="tel" id="invCustPhone" placeholder="e.g. 9876543210"></div>
+        </div>
+
+        <label>Full Delivery Address</label>
+        <textarea id="invCustAddress" rows="2" placeholder="Flat, Street, Area, District, State - Pincode"></textarea>
+
+        <button class="btn" style="background: #d97706; color: #fff; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate Bill & Print</button>
       </div>
     </div>
 
@@ -377,21 +385,45 @@
     }
 
     // ── INVOICE ──
+    // ── INVOICE ──
     async function promptInvoiceDetails() {
+      // If they click the "Bill" button from the catalog, this just pre-fills the search box and takes them to the Invoice tab.
       const query = document.getElementById("invSearchInput").value.trim().toLowerCase();
-      if (!query) return alert("Scan or type Product ID first.");
-      
+      if (query) {
+        switchTab('invoices', document.querySelectorAll('.nav-btn')[2]);
+      } else {
+        switchTab('invoices', document.querySelectorAll('.nav-btn')[2]);
+      }
+    }
+
+    async function generateInvoiceFromForm() {
+      const query = document.getElementById("invSearchInput").value.trim().toLowerCase();
+      const custName = document.getElementById("invCustName").value.trim();
+      const custPhone = document.getElementById("invCustPhone").value.trim();
+      const custAddress = document.getElementById("invCustAddress").value.trim();
+
+      if (!query) return alert("Please scan or enter a Product ID first.");
+      if (!custName || !custPhone || !custAddress) return alert("Please fill in all customer details.");
+
       const product = productsList.find(p => p.id.toLowerCase() === query || p.title.toLowerCase().includes(query));
       if (!product) return alert("❌ Product not found in Database.");
 
-      const custName = prompt(`Found: ${product.title}\n\nEnter Customer Name:`);
-      if (!custName) return;
-      const custPhone = prompt("Enter Customer Phone:");
-      const custAddress = prompt("Enter Customer Address:");
-
-      const url = `invoice.html?id=${encodeURIComponent(product.id)}&title=${encodeURIComponent(product.title)}&price=${product.price}&qty=1&cName=${encodeURIComponent(custName)}&cPhone=${encodeURIComponent(custPhone||"")}&cAddr=${encodeURIComponent(custAddress||"")}`;
+      // Construct the URL and open label.html
+      const url = `label.html?id=${encodeURIComponent(product.id)}` +
+                  `&title=${encodeURIComponent(product.title)}` +
+                  `&price=${product.price}` +
+                  `&qty=1` +
+                  `&cName=${encodeURIComponent(custName)}` +
+                  `&cPhone=${encodeURIComponent(custPhone)}` +
+                  `&cAddr=${encodeURIComponent(custAddress)}`;
+      
       window.open(url, '_blank');
+      
+      // Clear the form after generating
       document.getElementById("invSearchInput").value = "";
+      document.getElementById("invCustName").value = "";
+      document.getElementById("invCustPhone").value = "";
+      document.getElementById("invCustAddress").value = "";
     }
 
     // ── RENDER CATALOG ──
