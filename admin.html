@@ -506,39 +506,94 @@
       document.getElementById("invShipping").value = "0";
     }
 
-    // ── RENDER CATALOG ──
+    // ── RENDER CATALOG (Category > Status > Date > Products) ──
     function renderCatalog() {
       const container = document.getElementById("itemsContainer");
       if (productsList.length === 0) { container.innerHTML = "<p>No items in catalog.</p>"; return; }
       
       const grouped = {};
-      productsList.forEach(p => { if (!grouped[p.category]) grouped[p.category] = []; grouped[p.category].push(p); });
+      productsList.forEach(p => {
+        const cat = p.category || "Uncategorized";
+        const status = (p.status || "AVAILABLE").toUpperCase();
+        
+        // Extract date from ID (e.g., SS261029A1S2 -> 29-10-2026)
+        const match = p.id.match(/[A-Z]{2}(\d{6})/);
+        const dateStr = match ? match[1] : "000000";
+        const formattedDate = dateStr !== "000000" 
+          ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` 
+          : "Unknown Date";
+
+        if (!grouped[cat]) grouped[cat] = {};
+        if (!grouped[cat][status]) grouped[cat][status] = {};
+        if (!grouped[cat][status][formattedDate]) grouped[cat][status][formattedDate] = [];
+        
+        grouped[cat][status][formattedDate].push(p);
+      });
 
       let html = "";
       Object.keys(grouped).sort().forEach(cat => {
-        const safeId = cat.replace(/\s+/g, '_');
-        html += `<div class="category-group"><div class="date-header open" onclick="document.getElementById('cat-${safeId}').classList.toggle('open')"><span>${cat} (${grouped[cat].length})</span><span>▼</span></div>`;
-        html += `<div class="date-content open" id="cat-${safeId}">`;
+        const catSafeId = cat.replace(/\s+/g, '_');
         
-        html += grouped[cat].map(item => {
-          const idx = productsList.findIndex(p => p.id === item.id);
-          return `
-          <div class="item-card ${item.visible===false?'hidden-item':''}">
-            <img src="${item.image || ''}">
-            <div class="item-meta">
-              <strong>${item.title}</strong>
-              <div class="sub-text"><span>₹${item.price}</span><span>${item.id}</span></div>
-            </div>
-            <div class="item-actions">
-              <span style="font-size:0.7rem; font-weight:bold; color:${item.status === 'SOLD' ? '#dc2626' : '#16a34a'}; margin-right:8px;">${item.status || 'AVAILABLE'}</span>
-              <button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})">Bill</button>
-              <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})">Edit</button>
-              <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
-            </div>
+        html += `<div class="category-group">`;
+        // Level 1: Category
+        html += `<div class="date-header" onclick="document.getElementById('cat-${catSafeId}').classList.toggle('open'); this.classList.toggle('open')">
+          <span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span>
+        </div>`;
+        html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: #fff; border-radius: 0 0 8px 8px;">`;
+
+        Object.keys(grouped[cat]).sort().forEach(status => {
+          const statusSafeId = `${catSafeId}_${status}`;
+          const isSold = status === "SOLD";
+          const statusColor = isSold ? "#dc2626" : "#16a34a";
+
+          // Level 2: Status
+          html += `<div class="date-folder" style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px;">`;
+          html += `<div class="date-header" style="background: ${isSold ? '#fee2e2' : '#dcfce7'}; color: ${statusColor}; padding: 10px;" onclick="document.getElementById('status-${statusSafeId}').classList.toggle('open'); this.classList.toggle('open')">
+            <span>${isSold ? '🔴' : '🟢'} ${status} STOCK</span><span class="arrow">▼</span>
           </div>`;
-        }).join("");
-        html += `</div></div>`;
+          html += `<div class="date-content" id="status-${statusSafeId}" style="padding: 5px 10px;">`;
+
+          Object.keys(grouped[cat][status]).sort((a, b) => {
+            if (a === "Unknown Date") return 1;
+            if (b === "Unknown Date") return -1;
+            return new Date(b.split('-').reverse().join('-')) - new Date(a.split('-').reverse().join('-'));
+          }).forEach(date => {
+            const dateSafeId = `${statusSafeId}_${date.replace(/\//g, '-')}`;
+            
+            // Level 3: Date
+            html += `<div style="margin-bottom: 8px; border: 1px dashed #ccc; border-radius: 4px; background: #fafaf9;">`;
+            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #555; display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('date-${dateSafeId}').classList.toggle('open'); this.querySelector('.arrow').classList.toggle('open')">
+              <span>📅 ${date} (${grouped[cat][status][date].length} items)</span><span class="arrow" style="transition: transform 0.3s;">▼</span>
+            </div>`;
+            html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 10px; border-top: 1px dashed #ccc; background: #fff;">`;
+
+            // Level 4: Products
+            html += grouped[cat][status][date].map(item => {
+              const idx = productsList.findIndex(p => p.id === item.id);
+              return `
+              <div class="item-card">
+                <img src="${item.image || ''}">
+                <div class="item-meta">
+                  <strong>${item.title}</strong>
+                  <div class="sub-text"><span>₹${item.price}</span><span>${item.id}</span></div>
+                </div>
+                <div class="item-actions">
+                  ${!isSold ? `<button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})">Bill</button>` : ''}
+                  <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})">Edit</button>
+                  <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
+                </div>
+              </div>`;
+            }).join("");
+
+            html += `</div></div>`; // Close Date content & folder
+          });
+
+          html += `</div></div>`; // Close Status content & folder
+        });
+
+        html += `</div></div>`; // Close Category content & group
       });
+      
       container.innerHTML = html;
     }
   </script>
