@@ -195,12 +195,20 @@
           <div><label>WhatsApp Number</label><input type="tel" id="invCustPhone" placeholder="e.g. 9876543210"></div>
         </div>
 
-        <label>Full Delivery Address</label>
-        <textarea id="invCustAddress" rows="2" placeholder="Flat, Street, Area, District, State - Pincode"></textarea>
+        <div class="row">
+          <div style="flex: 2;">
+            <label>Full Delivery Address (Without Pincode)</label>
+            <textarea id="invCustAddress" rows="2" placeholder="Flat, Street, Area, District, State"></textarea>
+          </div>
+          <div style="flex: 1;">
+            <label>Pincode</label>
+            <input type="tel" id="invPincode" placeholder="6 digits" maxlength="6" oninput="calculateShipping()">
+          </div>
+        </div>
 
         <div class="row">
           <div><label>Quantity</label><input type="number" id="invQty" value="1" min="1"></div>
-          <div><label>Shipping Fee (₹)</label><input type="number" id="invShipping" value="60" min="0"></div>
+          <div><label>Shipping Fee (₹)</label><input type="number" id="invShipping" value="0" readonly style="background:#f0f0f0; font-weight:bold;"></div>
         </div>
 
         <button class="btn" style="background: #d97706; color: #fff; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate A4 Invoice</button>
@@ -401,16 +409,47 @@
       }
     }
 
+    // ── SHIPPING CALCULATOR ──
+    function calculateShipping() {
+      const pinStr = document.getElementById("invPincode").value.trim();
+      const shippingInput = document.getElementById("invShipping");
+      
+      if (pinStr.length !== 6 || isNaN(pinStr)) {
+        shippingInput.value = 0;
+        return;
+      }
+
+      const pin = parseInt(pinStr, 10);
+      
+      // Default zones (matching your store frontend)
+      const zones = [
+        { from: 600001, to: 643999, fee:  60 }, // Tamil Nadu
+        { from: 560001, to: 591999, fee:  80 }, // Karnataka
+        { from: 670001, to: 695999, fee:  80 }, // Kerala
+        { from: 500001, to: 539999, fee:  80 }, // Andhra / Telangana
+        { from: 400001, to: 445999, fee:  90 }, // Maharashtra / Goa
+        { from: 360001, to: 396999, fee:  90 }, // Gujarat
+        { from: 110001, to: 122099, fee: 120 }  // Delhi NCR
+      ];
+
+      const match = zones.find(z => pin >= z.from && pin <= z.to);
+      shippingInput.value = match ? match.fee : 150; // Default to 150 for Rest of India
+    }
+
     async function generateInvoiceFromForm() {
       const query = document.getElementById("invSearchInput").value.trim().toLowerCase();
       const custName = document.getElementById("invCustName").value.trim();
       const custPhone = document.getElementById("invCustPhone").value.trim();
       const custAddress = document.getElementById("invCustAddress").value.trim();
+      const pincode = document.getElementById("invPincode").value.trim();
       const qty = document.getElementById("invQty").value;
       const shipping = document.getElementById("invShipping").value;
 
       if (!query) return alert("Please scan or enter a Product ID first.");
       if (!custName || !custPhone || !custAddress) return alert("Please fill in all customer details.");
+      if (!pincode || pincode.length !== 6) return alert("Please enter a valid 6-digit Pincode.");
+
+      const fullAddress = `${custAddress} - ${pincode}`; // Combine address and pincode for the invoice
 
       const product = productsList.find(p => p.id.toLowerCase() === query || p.title.toLowerCase().includes(query));
       if (!product) return alert("❌ Product not found in Database.");
@@ -430,7 +469,7 @@
         orderId: document.getElementById("invOrderId").value.trim() || "Manual",
         cName: custName,
         cPhone: custPhone,
-        cAddr: custAddress,
+        cAddr: fullAddress,
         id: product.id,
         title: product.title,
         qty: qty,
@@ -454,7 +493,7 @@
                   `&invNum=${encodeURIComponent(invNumber)}` +
                   `&cName=${encodeURIComponent(custName)}` +
                   `&cPhone=${encodeURIComponent(custPhone)}` +
-                  `&cAddr=${encodeURIComponent(custAddress)}`;
+                  `&cAddr=${encodeURIComponent(fullAddress)}`;
       
       window.open(url, '_blank');
       
@@ -463,6 +502,8 @@
       document.getElementById("invCustName").value = "";
       document.getElementById("invCustPhone").value = "";
       document.getElementById("invCustAddress").value = "";
+      document.getElementById("invPincode").value = "";
+      document.getElementById("invShipping").value = "0";
     }
 
     // ── RENDER CATALOG ──
