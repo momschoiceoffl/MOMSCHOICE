@@ -3,180 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shipping Label | Mom's Choice</title>
+  <title>Invoice & Label | Mom's Choice</title>
   <style>
-    /* 
-      Thermal Printer Sizing: 100mm x 150mm (4x6 inch) 
-      This ensures it prints perfectly on Amazon/Meesho sticker rolls.
-    */
-    @page {
-      size: 100mm 150mm;
-      margin: 0;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #000;
-      background: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .label-box {
-      width: 100mm;
-      height: 150mm;
-      background: #fff;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      border: 2px solid #000; /* Outer border for the sticker */
-    }
-
-    /* ── [1] HEADER ── */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 3mm;
-      border-bottom: 2px solid #000;
-    }
-    .header-left { flex: 1; }
-    .header-left h1 { margin: 0; font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-    .header-left p { margin: 2px 0 0 0; font-size: 9px; font-weight: bold; }
+    @page { size: A4; margin: 0; }
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; background: #f0f0f0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+    .label-box { width: 210mm; min-height: 297mm; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; border: 2px solid #000; margin: 10mm auto; padding: 10mm; }
     
-    .header-middle { flex: 0 0 22mm; text-align: center; display: flex; justify-content: center; }
-    .header-middle img { width: 20mm; height: 20mm; object-fit: contain; }
+    /* [1] HEADER */
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000; padding-bottom: 8mm; margin-bottom: 8mm; }
+    .header-left h1 { margin: 0; font-size: 28px; font-weight: 900; text-transform: uppercase; }
+    .header-left p { margin: 3px 0 0 0; font-size: 13px; font-weight: bold; color: #333; }
+    .header-middle { text-align: center; }
+    .header-middle img { width: 45mm; height: 45mm; object-fit: contain; border: 1px solid #eee; padding: 2px; }
+    .header-right { text-align: right; font-size: 14px; line-height: 1.5; }
+    .header-right strong { font-size: 20px; font-weight: 900; }
     
-    .header-right { flex: 1; text-align: right; font-size: 9px; line-height: 1.3; }
-    .header-right strong { font-size: 11px; }
-
-    /* ── [2] UPPER BODY (2 Columns) ── */
-    .upper-body {
-      display: flex;
-      border-bottom: 2px solid #000;
-      height: 45mm; /* Fixed height */
-    }
-    .col-left, .col-right {
-      flex: 1;
-      padding: 3mm;
-      font-size: 9px;
-      line-height: 1.4;
-    }
-    .col-left { border-right: 1.5px dashed #000; }
+    /* [2] UPPER BODY */
+    .upper-body { display: flex; border-bottom: 3px solid #000; margin-bottom: 8mm; }
+    .col-left, .col-right { flex: 1; font-size: 14px; line-height: 1.6; }
+    .col-left { border-right: 2px dashed #000; padding-right: 8mm; }
+    .col-right { padding-left: 8mm; }
+    .col-title { font-size: 13px; font-weight: 900; text-transform: uppercase; margin-bottom: 4mm; background: #eee; padding: 2px 5px; display: inline-block; }
+    .col-name { font-size: 18px; font-weight: 900; margin-bottom: 3mm; }
+    .col-phone { font-size: 16px; font-weight: 900; margin-top: 4mm; }
     
-    .col-title {
-      font-size: 8px;
-      font-weight: 900;
-      text-transform: uppercase;
-      margin-bottom: 2mm;
-      text-decoration: underline;
-    }
-    .col-name { font-size: 11px; font-weight: 900; margin-bottom: 1mm; }
-    .col-phone { font-size: 10px; font-weight: 900; margin-top: 2mm; }
-
-    /* ── [3] MIDDLE BODY (Table) ── */
-    .middle-body {
-      flex: 1; /* Takes up remaining space */
-      padding: 3mm;
-      display: flex;
-      flex-direction: column;
-    }
+    /* [3] MIDDLE BODY (Table) */
+    .middle-body { flex: 1; display: flex; flex-direction: column; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 3mm; text-align: left; font-weight: 900; text-transform: uppercase; background: #f9f9f9; }
+    td { padding: 4mm 3mm; border-bottom: 1px dashed #999; vertical-align: top; }
     
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 9px;
-    }
-    th {
-      border-top: 1px solid #000;
-      border-bottom: 1px solid #000;
-      padding: 1.5mm 1mm;
-      text-align: left;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-    td {
-      padding: 2mm 1mm;
-      border-bottom: 1px dashed #ccc;
-      vertical-align: top;
-    }
+    .totals-section { margin-top: 8mm; display: flex; justify-content: flex-end; font-size: 14px; line-height: 1.6; }
+    .totals-table { width: 40%; }
+    .totals-table td { border: none; padding: 1mm 0; }
+    .totals-table .grand-total { border-top: 2px solid #000; border-bottom: 4px double #000; font-size: 18px; font-weight: 900; padding-top: 3mm; margin-top: 2mm; }
     
-    .totals-section {
-      margin-top: auto;
-      display: flex;
-      justify-content: flex-end;
-      font-size: 9px;
-      line-height: 1.5;
-    }
-    .totals-table { width: 50%; }
-    .totals-table td { border: none; padding: 0.5mm 0; }
-    .totals-table .grand-total { 
-      border-top: 1.5px solid #000; 
-      border-bottom: 3px double #000; 
-      font-size: 11px; 
-      font-weight: 900; 
-      padding-top: 1.5mm;
-      margin-top: 1mm;
-    }
-
-    /* ── [4] POLICIES ── */
-    .policies {
-      padding: 2mm 3mm;
-      border-top: 1px solid #000;
-      border-bottom: 2px solid #000;
-      font-size: 7.5px;
-      font-weight: bold;
-      line-height: 1.2;
-    }
-    .policies ul { margin: 0; padding-left: 3mm; }
-
-    /* ── [5] RETURN ADDRESS ── */
-    .return-address {
-      padding: 2mm 3mm;
-      font-size: 8px;
-      line-height: 1.3;
-      text-align: center;
-    }
-    .return-address strong { font-size: 9px; }
-
-    /* Print Controls */
-    .controls {
-      position: fixed;
-      bottom: 20px;
-      display: flex;
-      gap: 10px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .controls button {
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-    }
+    /* [4] POLICIES & RETURN */
+    .footer-section { margin-top: auto; padding-top: 8mm; border-top: 2px dashed #000; }
+    .policies { font-size: 12px; font-weight: bold; line-height: 1.4; margin-bottom: 5mm; }
+    .policies ul { margin: 0; padding-left: 5mm; }
+    .return-address { font-size: 12px; line-height: 1.4; text-align: center; background: #f9f9f9; padding: 3mm; border: 1px solid #ccc; }
+    
+    /* Controls */
+    .controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100; }
+    .controls button { padding: 12px 25px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 6px; }
     .btn-print { background: #16a34a; color: #fff; }
     .btn-close { background: #dc2626; color: #fff; }
-
+    
     @media print {
       body { background: #fff; display: block; }
       .controls { display: none; }
-      .label-box { border: 1.5px solid #000; }
+      .label-box { border: 2px solid #000; margin: 0; width: 100%; height: 100%; min-height: auto; padding: 10mm; }
     }
   </style>
 </head>
 <body>
-
   <div class="label-box">
-    
-    <!-- [1] HEADER -->
     <div class="header">
       <div class="header-left">
         <h1>Mom's Choice</h1>
@@ -184,7 +66,6 @@
         <p>Jewels & Accessories</p>
       </div>
       <div class="header-middle">
-        <!-- Generates a QR code using a free API based on the Order ID -->
         <img id="lblQr" src="" alt="QR">
       </div>
       <div class="header-right">
@@ -193,8 +74,7 @@
         <span id="lblDate">00/00/0000</span>
       </div>
     </div>
-
-    <!-- [2] UPPER BODY (Sold By / Sold To) -->
+    
     <div class="upper-body">
       <div class="col-left">
         <div class="col-title">Sold By / Send By:</div>
@@ -209,8 +89,7 @@
         <div class="col-phone">Ph: <span id="lblCustPhone">9876543210</span></div>
       </div>
     </div>
-
-    <!-- [3] MIDDLE BODY (Product Table) -->
+    
     <div class="middle-body">
       <table>
         <thead>
@@ -250,33 +129,29 @@
         </table>
       </div>
     </div>
-
-    <!-- [4] POLICIES -->
-    <div class="policies">
-      <ul>
-        <li>Once sold cannot be returned or exchanged.</li>
-        <li>We are not responsible for transportation damages.</li>
-        <li>Record unboxing video for damage claims.</li>
-      </ul>
+    
+    <div class="footer-section">
+      <div class="policies">
+        <ul>
+          <li>Once sold cannot be returned or exchanged.</li>
+          <li>We are not responsible for transportation damages.</li>
+          <li>Record unboxing video for damage claims.</li>
+        </ul>
+      </div>
+      <div class="return-address">
+        <strong>IF UNDELIVERED, RETURN TO:</strong><br>
+        Mom's Choice, 123 Main Street, Anna Nagar, Chennai - 600040.<br>
+        Ph: +91 98765 43210
+      </div>
     </div>
-
-    <!-- [5] RETURN ADDRESS -->
-    <div class="return-address">
-      <strong>IF UNDELIVERED, RETURN TO:</strong><br>
-      Mom's Choice, 123 Main Street, Anna Nagar, Chennai - 600040.<br>
-      Ph: +91 98765 43210
-    </div>
-
   </div>
-
-  <!-- BUTTONS -->
+  
   <div class="controls">
-    <button class="btn-print" onclick="window.print()">🖨️ Print Sticker</button>
+    <button class="btn-print" onclick="window.print()">🖨️ Print A4 Sheet</button>
     <button class="btn-close" onclick="window.close()">❌ Close</button>
   </div>
-
+  
   <script>
-    // Parse the data coming from the Admin Panel URL
     document.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
       
@@ -284,6 +159,7 @@
       const pTitle = params.get("title") || "Unknown Product";
       const pPrice = Number(params.get("price")) || 0;
       const qty = Number(params.get("qty")) || 1;
+      const shipping = Number(params.get("shipping")) || 0;
       
       const cName = params.get("cName") || "Walk-in Customer";
       const cPhone = params.get("cPhone") || "-";
@@ -291,32 +167,42 @@
       
       const orderId = params.get("orderId") || ("ORD-" + Math.floor(1000 + Math.random() * 9000));
 
-      // Fill Header
-      document.getElementById("lblInvNum").innerText = "INV-" + Math.floor(1000 + Math.random() * 9000);
+      // Calculate Totals
+      const itemTotal = pPrice * qty;
+      const grandTotal = itemTotal + shipping;
+
+      // Fill Basic UI
+      document.getElementById("lblInvNum").innerText = orderId;
       document.getElementById("lblDate").innerText = new Date().toLocaleDateString();
       
-      // Generate QR Code linking to the order ID
-      document.getElementById("lblQr").src = "https://quickchart.io/qr?text=" + encodeURIComponent(orderId) + "&size=150&margin=1";
-
-      // Fill Addresses
       document.getElementById("lblCustName").innerText = cName;
       document.getElementById("lblCustAddr").innerHTML = cAddr.replace(/,/g, "<br>");
       document.getElementById("lblCustPhone").innerText = cPhone;
 
-      // Fill Table
-      const itemTotal = pPrice * qty;
       document.getElementById("lblProdId").innerText = pId;
       document.getElementById("lblProdTitle").innerText = pTitle;
       document.getElementById("lblQty").innerText = qty;
       document.getElementById("lblRate").innerText = "₹" + pPrice;
       document.getElementById("lblAmount").innerText = "₹" + itemTotal;
 
-      // Fill Totals
-      const shipping = itemTotal > 2000 ? 0 : 60; // Example shipping rule
-      const grandTotal = itemTotal + shipping;
       document.getElementById("lblSubtotal").innerText = "₹" + itemTotal;
       document.getElementById("lblShipping").innerText = shipping === 0 ? "Free" : "₹" + shipping;
       document.getElementById("lblTotal").innerText = "₹" + grandTotal;
+
+      // Generate Text-Based QR Data (JSON)
+      const qrData = {
+        invoice: orderId,
+        date: new Date().toLocaleDateString(),
+        customer: cName,
+        phone: cPhone,
+        address: cAddr,
+        items: [{ id: pId, title: pTitle, qty: qty, price: pPrice }],
+        total: grandTotal
+      };
+
+      // Encode the JSON string for the QR image URL
+      const qrString = encodeURIComponent(JSON.stringify(qrData));
+      document.getElementById("lblQr").src = "https://quickchart.io/qr?text=" + qrString + "&size=300&margin=1";
     });
   </script>
 </body>

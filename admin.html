@@ -180,13 +180,17 @@
     <!-- TAB 3: INVOICE -->
     <div id="tab-invoices" class="tab-content">
       <div class="card" style="background: #fef3c7; border-color: #fde68a;">
-        <h2 style="color: #92400e;">🧾 Create Invoice</h2>
+        <h2 style="color: #92400e;">🧾 Create Invoice & Label</h2>
         <p class="sub" style="color: #b45309;">Scan the QR code or type the Product ID, then fill in the customer details below.</p>
         
         <div class="row">
           <div style="flex: 1;">
             <label style="color: #92400e;">Product ID or Name</label>
             <input type="text" id="invSearchInput" placeholder="Scan QR here..." style="border-color: #d97706;">
+          </div>
+          <div style="flex: 1;">
+            <label style="color: #92400e;">Order ID (Optional)</label>
+            <input type="text" id="invOrderId" placeholder="e.g. AJ-4839" style="border-color: #d97706;">
           </div>
         </div>
 
@@ -198,7 +202,12 @@
         <label>Full Delivery Address</label>
         <textarea id="invCustAddress" rows="2" placeholder="Flat, Street, Area, District, State - Pincode"></textarea>
 
-        <button class="btn" style="background: #d97706; color: #fff; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate Bill & Print</button>
+        <div class="row">
+          <div><label>Quantity</label><input type="number" id="invQty" value="1" min="1"></div>
+          <div><label>Shipping Fee (₹)</label><input type="number" id="invShipping" value="60" min="0"></div>
+        </div>
+
+        <button class="btn" style="background: #d97706; color: #fff; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate A4 Invoice</button>
       </div>
     </div>
 
