@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 3. Fetch Data
   try {
-    const res = await fetch(`products.json?_t=${Date.now()}`);
+    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
     products = await res.json();
     
     // Filter out hidden products
@@ -101,6 +101,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   restoreSavedCustomer();
   updateCartUI();
 });
+
+// ── AUTO-SYNC: Check for DB changes every 30 seconds ──
+setInterval(async () => {
+  try {
+    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
+    const newData = await res.json();
+    
+    if (JSON.stringify(newData) !== JSON.stringify(products)) {
+      products = newData.filter(p => p.visible !== false);
+      renderProducts(); // Re-render just the grid on category page
+      console.log("🔄 Category page synchronized.");
+    }
+  } catch (e) {}
+}, 30000);
 
 function renderSubcategories() {
   const bar = document.getElementById("subcategoryBar");
