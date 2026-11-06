@@ -8,13 +8,13 @@
     @page { size: A4; margin: 0; }
     body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; background: #f0f0f0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
     .label-box { 
-      width: 210mm; 
-      min-height: 297mm; 
+      width: 190mm; 
+      min-height: 277mm; 
       background: #fff; 
       box-sizing: border-box; 
       display: flex; 
       flex-direction: column; 
-      border: 3px solid #000; /* Outer Border */
+      border: 2px solid #000; /* Outer Border */
       margin: 10mm auto; 
       padding: 8mm; 
     }
@@ -66,13 +66,13 @@
     .btn-close { background: #dc2626; color: #fff; }
     
     @media print {
-      body { background: #fff; display: block; }
+      body { background: #fff; display: block; margin: 0; padding: 0; }
       .controls { display: none; }
       .label-box { 
-        border: 3px solid #000; /* Outer border on print */
-        margin: 0; 
-        width: 100%; 
-        min-height: 99vh; 
+        border: 2px solid #000; /* Outer border on print */
+        margin: 10mm; 
+        width: 190mm; 
+        min-height: 277mm; 
         padding: 8mm; 
         box-sizing: border-box;
       }
