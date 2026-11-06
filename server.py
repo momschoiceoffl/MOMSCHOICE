@@ -1,25 +1,13 @@
-
-"""
-Mom's Pick - Local Backend Server
-Handles all GitHub operations automatically. Admin panel never sees the token.
-"""
 import os
 import json
 import base64
-import subprocess
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError
 import cloudinary
 import cloudinary.uploader
 
 ENV_FILE = ".env"
-PRODUCTS = "products.json"
-PORT = 5000
 
-# ─────────────────────────────────────────────
-# Load .env
-# ─────────────────────────────────────────────
 def load_env():
     env = {}
     if os.path.exists(ENV_FILE):
@@ -32,10 +20,7 @@ def load_env():
     return env
 
 ENV = load_env()
-GH_USER = ENV.get("GITHUB_USER", "")
-GH_REPO = ENV.get("GITHUB_REPO", "")
-GH_TOKEN = ENV.get("GITHUB_TOKEN", "")
-GH_BRANCH = ENV.get("GITHUB_BRANCH", "main")
+GSHEET_URL = ENV.get("GSHEET_WEBAPP_URL", "")
 cloudinary.config(
     cloud_name=ENV.get("CLOUDINARY_CLOUD_NAME"),
     api_key=ENV.get("CLOUDINARY_API_KEY"),
@@ -43,46 +28,6 @@ cloudinary.config(
     secure=True
 )
 
-# ─────────────────────────────────────────────
-# GitHub API helpers
-# ─────────────────────────────────────────────
-def gh_get_sha():
-    url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/{PRODUCTS}?ref={GH_BRANCH}"
-    req = Request(url, headers={"Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json"})
-    try:
-        with urlopen(req) as r:
-            return json.loads(r.read())["sha"]
-    except HTTPError as e:
-        if e.code == 404: return None
-        raise
-
-def gh_get_sha_file(filename):
-    url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/{filename}?ref={GH_BRANCH}"
-    req = Request(url, headers={"Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json"})
-    try:
-        with urlopen(req) as r:
-            return json.loads(r.read())["sha"]
-    except HTTPError as e:
-        if e.code == 404: return None
-        raise
-
-def gh_push(content_str, commit_msg):
-    sha = gh_get_sha()
-    content_b64 = base64.b64encode(content_str.encode("utf-8")).decode("ascii")
-    body = {"message": commit_msg, "content": content_b64, "branch": GH_BRANCH}
-    if sha: body["sha"] = sha
-    url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/{PRODUCTS}"
-    req = Request(url, method="PUT", data=json.dumps(body).encode("utf-8"), headers={
-        "Authorization": f"Bearer {GH_TOKEN}",
-        "Accept": "application/vnd.github+json",
-        "Content-Type": "application/json"
-    })
-    with urlopen(req) as r:
-        return json.loads(r.read())
-
-# ─────────────────────────────────────────────
-# HTTP Request Handler
-# ─────────────────────────────────────────────
 class Handler(SimpleHTTPRequestHandler):
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -95,14 +40,14 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path == "/health":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self._cors()
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "ok": True, "user": GH_USER, "repo": GH_REPO, "branch": GH_BRANCH, "token_set": bool(GH_TOKEN)
-            }).encode())
+        if self.path.startswith("/get-products"):
+            try:
+                req = Request(GSHEET_URL)
+                with urlopen(req) as r:
+                    data = r.read()
+                self._json(200, json.loads(data))
+            except Exception as e:
+                self._json(500, {"error": str(e)})
             return
         return super().do_GET()
 
@@ -111,11 +56,7 @@ class Handler(SimpleHTTPRequestHandler):
             try:
                 content_type = self.headers.get("Content-Type", "")
                 content_length = int(self.headers.get("Content-Length", 0))
-                if "boundary=" not in content_type:
-                    self._json(400, {"ok": False, "error": "Missing boundary"})
-                    return
-                boundary = content_type.split("boundary=")[1].strip()
-                if boundary.startswith('"') and boundary.endswith('"'): boundary = boundary[1:-1]
+                boundary = content_type.split("boundary=")[1].strip().strip('"')
                 
                 from multipart import MultipartParser
                 import io
@@ -127,7 +68,6 @@ class Handler(SimpleHTTPRequestHandler):
                     if part.name == "file":
                         raw = part.value if isinstance(part.value, bytes) else part.value.encode('latin-1')
                         fname = (part.filename or "upload.jpg").replace('\x00', '').strip()
-                        if isinstance(fname, bytes): fname = fname.decode('latin-1', errors='ignore')
                         if not fname: fname = "upload.jpg"
                         if '.' not in fname: fname = fname + '.jpg'
                         uploaded.append((raw, fname))
@@ -135,83 +75,16 @@ class Handler(SimpleHTTPRequestHandler):
                 if not uploaded:
                     self._json(400, {"ok": False, "error": "No files received"})
                     return
-                if len(uploaded) > 5:
-                    self._json(400, {"ok": False, "error": "Max 5 images per product"})
-                    return
-                
-                category = ""
+
+                category = "Uncategorized"
                 for part in parser:
                     if part.name == "category":
-                        category = (part.value or "").strip() if not isinstance(part.value, bytes) else part.value.decode("latin-1").strip()
-                
-                category = "".join(c for c in category if c.isalnum() or c in "-_")
-                if not category: category = "Uncategorized"
+                        category = (part.value or "").strip()
 
-                cat_lower = category.lower()
-                if "saree" in cat_lower: prefix = "SS"
-                elif "necklace" in cat_lower: prefix = "NK"
-                elif "earring" in cat_lower: prefix = "ER"
-                elif "bangle" in cat_lower: prefix = "BG"
-                elif "ring" in cat_lower: prefix = "RG"
-                elif "ornament" in cat_lower: prefix = "OR"
-                elif "accessor" in cat_lower: prefix = "AC"
-                else: prefix = "MM"
-
-                import datetime, os
-                now = datetime.datetime.now()
-                yy = str(now.year)[-2:]
-                mm = f"{now.month:02d}"
-                dd = f"{now.day:02d}"
-                date_str = f"{yy}{mm}{dd}"
-                
-                # Read existing IDs to find the next sequence
-                existing_ids = []
-                if os.path.exists(PRODUCTS):
-                    try:
-                        with open(PRODUCTS, "r", encoding="utf-8") as f:
-                            data = json.load(f)
-                            for p in data:
-                                existing_ids.append(p.get("id", ""))
-                    except:
-                        pass
-                
-                cat_codes = {
-                    "Sarees": "S", "Necklaces": "N", "Earrings": "E", 
-                    "Bangles": "B", "Rings": "R", "Ornaments": "O", "Accessories": "A"
-                }
-                cat_letter = cat_codes.get(category, "X")
-                
-                # Count how many items of this category already exist for today
-                cat_count = 0
-                for existing_id in existing_ids:
-                    if f"{prefix}{date_str}" in existing_id and f"{cat_letter}" in existing_id:
-                        cat_count += 1
-                cat_num = cat_count + 1
-                cat_code = f"{cat_letter}{cat_num}"  # e.g., S1, S2
-                
-                # Find next primary serial (A1, A2... A9, B1...)
-                letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                primary_serial = "A1"
-                found = False
-                for letter in letters:
-                    for num in range(1, 10):
-                        test_serial = f"{letter}{num}"
-                        test_id = f"{prefix}{date_str}{test_serial}{cat_code}"
-                        if test_id not in existing_ids:
-                            primary_serial = test_serial
-                            found = True
-                            break
-                    if found:
-                        break
-                
-                # Final ID: e.g., SS261029A1S1
-                product_id = f"{prefix}{date_str}{primary_serial}{cat_code}"
-                folder_path = f"moms_pick/{category}"
-                
                 urls = []
                 for i, (raw, fname) in enumerate(uploaded):
                     result = cloudinary.uploader.upload(
-                        raw, folder=folder_path, public_id=f"{product_id}_{i}", overwrite=False, resource_type="image"
+                        raw, folder=f"moms_pick/{category}", resource_type="image"
                     )
                     urls.append(result["secure_url"])
                 
@@ -219,100 +92,19 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
             return
-                
-        if self.path == "/upload-logo":
-            try:
-                content_type = self.headers.get("Content-Type", "")
-                content_length = int(self.headers.get("Content-Length", 0))
-                if "boundary=" not in content_type:
-                    self._json(400, {"ok": False, "error": "Missing boundary"})
-                    return
-                boundary = content_type.split("boundary=")[1].strip()
-                if boundary.startswith('"') and boundary.endswith('"'): boundary = boundary[1:-1]
-
-                from multipart import MultipartParser
-                import io
-                body = self.rfile.read(content_length)
-                parser = MultipartParser(io.BytesIO(body), boundary, charset="latin-1")
-
-                uploaded = []
-                for part in parser:
-                    if part.name == "file":
-                        raw = part.value if isinstance(part.value, bytes) else part.value.encode('latin-1')
-                        fname = (part.filename or "logo.png").replace('\x00', '').strip()
-                        if isinstance(fname, bytes): fname = fname.decode('latin-1', errors='ignore')
-                        if not fname: fname = "logo.png"
-                        if '.' not in fname: fname = fname + '.png'
-                        uploaded.append((raw, fname))
-
-                if not uploaded:
-                    self._json(400, {"ok": False, "error": "No logo file received"})
-                    return
-                if len(uploaded) > 1:
-                    self._json(400, {"ok": False, "error": "Only 1 logo at a time"})
-                    return
-
-                raw, fname = uploaded[0]
-                base = fname.rsplit('.', 1)[0]
-                result = cloudinary.uploader.upload(
-                    raw, asset_folder="moms_pick/logo", use_asset_folder_as_public_id_prefix=True,
-                    public_id=base, overwrite=True, resource_type="image"
-                )
-                self._json(200, {"ok": True, "url": result["secure_url"], "public_id": result.get("public_id", "")})
-            except Exception as e:
-                self._json(500, {"ok": False, "error": str(e)})
-            return
-
-        if self.path == "/save-categories":
-            length = int(self.headers.get("Content-Length", 0))
-            raw = self.rfile.read(length).decode("utf-8")
-            try:
-                data = json.loads(raw)
-            except Exception:
-                self._json(400, {"ok": False, "error": "Invalid JSON"})
-                return
-
-            with open("categories.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-
-            try:
-                pretty = json.dumps(data, indent=2, ensure_ascii=False)
-                sha = gh_get_sha_file("categories.json")
-                content_b64 = base64.b64encode(pretty.encode("utf-8")).decode("ascii")
-                body = {"message": "Update categories", "content": content_b64, "branch": GH_BRANCH}
-                if sha: body["sha"] = sha
-
-                url = f"https://api.github.com/repos/{GH_USER}/{GH_REPO}/contents/categories.json"
-                req = Request(url, method="PUT", data=json.dumps(body).encode("utf-8"), headers={
-                    "Authorization": f"Bearer {GH_TOKEN}", "Accept": "application/vnd.github+json", "Content-Type": "application/json"
-                })
-                with urlopen(req) as r:
-                    result = json.loads(r.read())
-                self._json(200, {"ok": True, "commit": result.get("commit", {}).get("sha", "")[:7]})
-            except Exception as e:
-                self._json(500, {"ok": False, "error": str(e)})
-            return
 
         if self.path == "/save":
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length).decode("utf-8")
+            data = json.loads(raw)
+            
+            # Push to Google Sheets
             try:
-                data = json.loads(raw)
-            except Exception:
-                self._json(400, {"ok": False, "error": "Invalid JSON"})
-                return
-
-            with open(PRODUCTS, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-
-            try:
-                pretty = json.dumps(data, indent=2, ensure_ascii=False)
-                commit_msg = f"Admin update: {len(data)} products"
-                result = gh_push(pretty, commit_msg)
-                self._json(200, {"ok": True, "message": "Saved & pushed to GitHub", "commit": result.get("commit", {}).get("sha", "")[:7]})
-            except HTTPError as e:
-                err_body = e.read().decode()
-                self._json(500, {"ok": False, "error": f"GitHub: {err_body}"})
+                req = Request(GSHEET_URL, method="POST", data=json.dumps(data).encode("utf-8"),
+                              headers={"Content-Type": "application/json"})
+                with urlopen(req) as r:
+                    pass
+                self._json(200, {"ok": True})
             except Exception as e:
                 self._json(500, {"ok": False, "error": str(e)})
             return
@@ -326,27 +118,6 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(obj).encode())
 
-    def log_message(self, fmt, *args):
-        print(f"[server] {self.address_string()} - {fmt % args}")
-
-def main():
-    print("=" * 60)
-    print("✨ MOM'S PICK — BACKEND SERVER")
-    print("=" * 60)
-    if not GH_TOKEN:
-        print("⚠️  No GITHUB_TOKEN in .env — push will fail.")
-    else:
-        print(f"✅ GitHub: {GH_USER}/{GH_REPO} @ {GH_BRANCH}")
-    print(f"🌐 Open:   http://localhost:{PORT}/admin.html")
-    print(f"🛍️  Store:  http://localhost:{PORT}/index.html")
-    print(f"❤️  Health: http://localhost:{PORT}/health")
-    print("=" * 60)
-    print("Press Ctrl+C to stop.\n")
-    httpd = HTTPServer(("0.0.0.0", PORT), Handler)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\n👋 Stopped.")
-
 if __name__ == "__main__":
-    main()
+    print("Server running on http://localhost:5000")
+    HTTPServer(("0.0.0.0", 5000), Handler).serve_forever()
