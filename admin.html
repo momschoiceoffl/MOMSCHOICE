@@ -549,7 +549,7 @@
           // Level 2: Status
           html += `<div class="date-folder" style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px;">`;
           html += `<div class="date-header" style="background: ${isSold ? '#fee2e2' : '#dcfce7'}; color: ${statusColor}; padding: 10px;" onclick="document.getElementById('status-${statusSafeId}').classList.toggle('open'); this.classList.toggle('open')">
-            <span>${isSold ? '🔴' : '🟢'} ${status} STOCK</span><span class="arrow">▼</span>
+            <span>${isSold ? '🔴' : '🟢'} ${status} STOCK (${Object.values(grouped[cat][status]).flat().length})</span><span class="arrow">▼</span>
           </div>`;
           html += `<div class="date-content" id="status-${statusSafeId}" style="padding: 5px 10px;">`;
 
