@@ -200,7 +200,7 @@ function setupFooterLinks() {
 /* ═══════════════════════════════════════════════════════════════ */
 async function fetchProducts() {
   try {
-    const res = await fetch(`products.json?_t=${Date.now()}`);
+    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
     products = await res.json();
     
     // Fetch categories
@@ -227,6 +227,28 @@ async function fetchProducts() {
     console.error("Could not load products.json", e);
   }
 }
+
+// ── AUTO-SYNC: Check for DB changes every 30 seconds ──
+setInterval(async () => {
+  try {
+    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
+    const newData = await res.json();
+    
+    // Only update if data actually changed (saves bandwidth & prevents flickering)
+    if (JSON.stringify(newData) !== JSON.stringify(products)) {
+      products = newData.filter(p => p.visible !== false); // Keep hidden logic
+      products.forEach(p => { if (!Array.isArray(p.tags)) p.tags = []; });
+      
+      // Re-render everything
+      initCarousel();
+      renderCategoryCards();
+      if (typeof renderFiltered === 'function') renderFiltered();
+      console.log("🔄 Store synchronized with Google Sheets");
+    }
+  } catch (e) {
+    console.warn("Auto-sync paused (server offline).");
+  }
+}, 30000);
 
 function renderCategoryCards() {
   const grid = document.getElementById("categoryGrid");
