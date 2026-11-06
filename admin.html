@@ -391,9 +391,9 @@
       if (action === 'edit') editProduct(index);
       if (action === 'delete') deleteProduct(index);
       if (action === 'invoice') {
+        // Do NOT delete or hide the product. Just switch tabs and pre-fill the ID.
         switchTab('invoices', document.querySelectorAll('.nav-btn')[2]);
         document.getElementById("invSearchInput").value = productsList[index].id;
-        promptInvoiceDetails();
       }
     }
 
@@ -530,6 +530,7 @@
               <div class="sub-text"><span>₹${item.price}</span><span>${item.id}</span></div>
             </div>
             <div class="item-actions">
+              <span style="font-size:0.7rem; font-weight:bold; color:${item.status === 'SOLD' ? '#dc2626' : '#16a34a'}; margin-right:8px;">${item.status || 'AVAILABLE'}</span>
               <button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})">Bill</button>
               <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})">Edit</button>
               <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
