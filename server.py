@@ -44,6 +44,16 @@ class Handler(SimpleHTTPRequestHandler):
             self._json(200, {"ok": True, "token_set": True})
             return
 
+        if self.path == "/get-last-invoice":
+            try:
+                req = Request(GSHEET_URL + "?action=get_last_invoice")
+                with urlopen(req) as r:
+                    data = r.read()
+                self._json(200, json.loads(data))
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
+
         if self.path.startswith("/get-products"):
             try:
                 req = Request(GSHEET_URL)

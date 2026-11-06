@@ -454,13 +454,44 @@
       const product = productsList.find(p => p.id.toLowerCase() === query || p.title.toLowerCase().includes(query));
       if (!product) return alert("❌ Product not found in Database.");
 
-      // 1. Generate Auto Invoice Number (INV-YYMMDD-XXX)
+      // 1. Generate Sequential Invoice Number (CAT-YYMMDD-A0001)
       const d = new Date();
       const yy = d.getFullYear().toString().slice(-2);
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const dd = String(d.getDate()).padStart(2, '0');
-      const seq = Math.floor(100 + Math.random() * 900); // 3-digit random sequence
-      const invNumber = `INV-${yy}${mm}${dd}-${seq}`;
+      const dateStr = `${yy}${mm}${dd}`;
+      
+      const catPrefix = (product.category || "GEN").substring(0, 3).toUpperCase();
+
+      // Fetch the last invoice sequence from Google Sheets
+      let seqPart = "A0001"; // Default
+      try {
+        const logRes = await fetch("http://localhost:5000/get-last-invoice");
+        if (logRes.ok) {
+          const logData = await logRes.json();
+          const lastInv = logData.lastInv || "A0000"; 
+          
+          // Extract just the sequence part (the last 5 chars, e.g., A0000)
+          const lastSeq = lastInv.split('-').pop() || "A0000";
+          
+          const letter = lastSeq.charAt(0);
+          const numStr = lastSeq.substring(1);
+          let num = parseInt(numStr, 10) || 0;
+          
+          num++;
+          if (num > 9999) {
+            num = 1;
+            const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
+            seqPart = `${nextLetter}0001`;
+          } else {
+            seqPart = `${letter}${String(num).padStart(4, '0')}`;
+          }
+        }
+      } catch (e) {
+        console.error("Could not fetch last invoice number", e);
+      }
+
+      const invNumber = `${catPrefix}-${dateStr}-${seqPart}`;
 
       // 2. Save the Invoice to Google Sheets
       const invoiceData = {
