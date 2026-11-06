@@ -5,1198 +5,187 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mom's Pick - Seller Admin</title>
   <style>
-    :root {
-      --primary: #92400e;
-      --surface: #ffffff;
-      --bg: #f8fafc;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --muted: #64748b;
-      --accent: #d97706;
-      --success: #16a34a;
-      --danger: #dc2626;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; display: flex; justify-content: center; }
-    .admin-container { width: 100%; max-width: 640px; }
-
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-    h2 { font-size: 1.25rem; color: var(--primary); margin-bottom: 4px; }
-    p.sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; }
-
+    :root { --primary: #92400e; --surface: #fff; --bg: #f8fafc; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --accent: #d97706; --success: #16a34a; --danger: #dc2626; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+    body { background: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
+    .top-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-links { display: flex; gap: 5px; }
+    .nav-btn { background: none; border: none; padding: 20px; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; }
+    .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .main-container { padding: 24px; max-width: 1000px; margin: 0 auto; width: 100%; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    h2 { font-size: 1.2rem; color: var(--primary); margin-bottom: 16px; }
     label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; margin-bottom: 12px; }
-    .row { display: flex; gap: 10px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; }
+    .row { display: flex; gap: 16px; }
     .row > div { flex: 1; }
-
-    /* Image Preview */
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 8px;
-      min-height: 80px;
-      padding: 10px;
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      background: #fafaf9;
-      margin-bottom: 12px;
-      align-items: center;
-      justify-content: center;
-    }
-    .preview-grid > span {
-      grid-column: 1 / -1;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-    .preview-item {
-      position: relative;
-      aspect-ratio: 1/1;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: #fff;
-    }
-    .preview-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .preview-remove {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: rgba(220,38,38,0.9);
-      color: #fff;
-      border: none;
-      font-size: 12px;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [TAG CHECKBOXES] Multi-select tag picker                    */
-    /* ═══════════════════════════════════════════════════════════ */
-    .tag-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .tag-option {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 500;
-      background: #fff;
-      transition: background 0.15s, border-color 0.15s;
-      user-select: none;
-    }
-    .tag-option:hover { border-color: var(--accent); }
-    .tag-option input[type="checkbox"] {
-      width: auto;
-      margin: 0;
-      padding: 0;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-    .tag-option.checked {
-      background: #fef3c7;
-      border-color: var(--accent);
-    }
-    /* [END TAG CHECKBOXES] */
-
-    /* Buttons */
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); margin-top: 6px; }
-
-    /* Product List */
-    .item-card { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--border); padding: 12px 0; transition: opacity 0.3s; }
-    .item-card img { width: 55px; height: 55px; border-radius: 8px; object-fit: cover; }
-    .item-meta { flex: 1; }
-    .item-actions { display: flex; gap: 6px; }
-    .btn-sm { padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; }
-    .btn-edit { background: #e0f2fe; color: #0369a1; }
-    .btn-del { background: #fee2e2; color: var(--danger); }
-    .btn-hide { background: #fef08a; color: #854d0e; }
-    .btn-show { background: #dcfce7; color: #166534; }
-    
-    /* Grouping Styles (Date Folders) */
-    .category-group { margin-bottom: 24px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-    .category-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
-    
-    .date-folder { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; background: #fafaf9; }
-    .date-header { 
-      font-size: 0.9rem; 
-      font-weight: 700; 
-      color: var(--primary); 
-      background: #fef3c7; 
-      padding: 10px 14px; 
-      cursor: pointer; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center;
-      user-select: none;
-      border-left: 4px solid var(--accent);
-    }
-    .date-header:hover { background: #fde68a; }
-    .date-header .arrow { transition: transform 0.3s ease; font-size: 0.7rem; }
-    .date-header.open .arrow { transform: rotate(180deg); }
-    
-    .date-content { display: none; padding: 10px; border-top: 1px solid var(--border); background: #fff; }
-    .date-content.open { display: block; }
-
-    /* Hide the category list by default until clicked */
-    .category-content { display: none; padding-top: 8px; }
-    .category-content.open { display: block; }
-    
-    /* Compact Item Card (2 lines max) */
-    .item-card { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border); padding: 8px 0; transition: opacity 0.3s; }
-    .item-card:last-child { border-bottom: none; }
-    .item-card img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
-    .item-meta { flex: 1; min-width: 0; }
-    .item-meta strong { display: block; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-    .item-meta .sub-text { color: var(--muted); font-size: 0.7rem; display: flex; justify-content: space-between; margin-top: 2px; }
-    .item-actions { display: flex; gap: 4px; flex-shrink: 0; }
-    .btn-sm { padding: 4px 8px; border-radius: 4px; border: none; cursor: pointer; font-size: 0.65rem; font-weight: 600; }
-    
-    .item-card.hidden-item { opacity: 0.5; background: #f8fafc; }
-    .item-card.hidden-item img { filter: grayscale(100%); }
-
-    #configBanner { background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.85rem; color: #92400e; }
-
-    /* Small tag pills shown in the item list */
-    .item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .item-tag {
-      background: var(--accent);
-      color: #fff;
-      font-size: 0.6rem;
-      padding: 2px 7px;
-      border-radius: 10px;
-      text-transform: capitalize;
-      font-weight: 600;
-    }
+    .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; background: var(--primary); color: #fff; }
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, 90px); gap: 10px; padding: 15px; border: 2px dashed var(--border); border-radius: 10px; margin-bottom: 16px; }
+    .preview-item { aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .stat-card { background: var(--surface); padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary); }
+    .stat-card .value { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
   </style>
 </head>
 <body>
 
-  <div class="admin-container">
-
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- [HEADER] Brand + sync status badge                          -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <div>
-        <h2>Mom's Pick</h2>
-        <small style="color:var(--muted)">Admin Product & Inventory Studio</small>
-      </div>
-      <span id="syncStatusBadge" style="display:inline-flex; align-items:center; gap:6px; background:#dcfce7; color:#166534; font-size:0.75rem; font-weight:600; padding:6px 10px; border-radius:6px;">🟢 Auto-Sync Active</span>
+  <nav class="top-nav">
+    <div style="padding: 15px 0;"><h2 style="margin:0;">Mom's Pick Admin</h2></div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="switchTab('add-product', this)">➕ Add / Scan Product</button>
+      <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Create Bill</button>
     </div>
-    <!-- [END HEADER] -->
+  </nav>
 
-    <div id="statusNotice" style="display:none;" class="card"></div>
+  <div class="main-container">
+    
+    <!-- TAB 1: ADD PRODUCT -->
+    <div id="tab-add-product" class="tab-content active">
+      <div class="card">
+        <h2>Add New Stock</h2>
+        <div class="preview-grid" id="previewGrid"></div>
+        <input type="file" id="imageInput" accept="image/*" multiple onchange="handleImageSelection(event)">
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- [BRAND LOGO] Upload logo → Cloudinary folder "logo"         -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="card">
-      <h2>Brand Logo</h2>
-      <p class="sub">Upload your store logo — saved to Cloudinary folder <code>MMW/logo</code></p>
+        <div class="row">
+          <div><label>Product ID</label><input type="text" id="pId" placeholder="Scan QR or type ID"></div>
+          <div><label>Category</label><input type="text" id="pCat" placeholder="Sarees"></div>
+          <div><label>Subcategory</label><input type="text" id="pSubCat" placeholder="Silk"></div>
+        </div>
+        <div class="row">
+          <div><label>Purchase Rate (₹) - Private</label><input type="number" id="pCost" placeholder="e.g. 350"></div>
+          <div><label>Actual Selling Price (₹)</label><input type="number" id="pPrice" placeholder="e.g. 599"></div>
+          <div><label>Crossed MRP (₹)</label><input type="number" id="pMrp" placeholder="e.g. 999"></div>
+        </div>
+        <div class="row">
+          <div><label>Title (English)</label><input type="text" id="pTitle"></div>
+          <div><label>Title (Tamil)</label><input type="text" id="pTitleTa"></div>
+        </div>
+        <label>Description (English)</label>
+        <textarea id="pDesc" rows="2"></textarea>
+        <label>Description (Tamil)</label>
+        <textarea id="pDescTa" rows="2"></textarea>
 
-      <div class="preview-grid" id="logoPreview" style="min-height:100px; grid-template-columns: 1fr;">
-        <span id="logoPlaceholder">No Logo Uploaded</span>
+        <button class="btn" onclick="saveProduct()">Save to Google Sheet</button>
       </div>
-
-      <input type="file" id="logoInput" accept="image/*" onchange="uploadLogo(event)">
-
-      <label>Current Logo URL</label>
-      <input type="text" id="logoUrlDisplay" readonly placeholder="Upload a logo to get the URL">
-
-      <button class="btn btn-success" onclick="copyLogoUrl()">📋 Copy Logo URL</button>
-      <button class="btn btn-outline" onclick="openLogoInNewTab()">🔗 Open in New Tab</button>
     </div>
-    <!-- [END BRAND LOGO] -->
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- [PRODUCT FORM] Add / edit product                            -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="card">
-      <h2 id="formTitle">Add New Product</h2>
-      <p class="sub">Upload item photo and set price details</p>
-
-      <input type="hidden" id="editProductId" value="">
-
-      <div class="preview-grid" id="previewGrid">
-        <span id="previewPlaceholder">No Images Selected (max 5)</span>
-      </div>
-      <input type="file" id="imageInput" accept="image/*" multiple onchange="handleImageSelection(event)">
-
-      <div class="row">
-        <div>
-          <label>Item Name (English)</label>
-          <input type="text" id="pTitle" placeholder="e.g. Antique Matte Peacock Choker Set">
-        </div>
-        <div>
-          <label>Item Name (Tamil)</label>
-          <input type="text" id="pTitleTa" placeholder="எ.கா. பீகாக் நெக்லஸ்">
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>Category</label>
-          <select id="pCat">
-            <option value="Necklaces">Necklaces</option>
-            <option value="Earrings">Earrings</option>
-            <option value="Bangles">Bangles</option>
-            <option value="Rings">Rings</option>
-            <option value="Sarees">Sarees & Ethnic</option>
-            <option value="Ornaments">Hair Ornaments</option>
-            <option value="Accessories">Accessories</option>
-          </select>
-        </div>
-        <div>
-          <label>Subcategory</label>
-          <input type="text" id="pSubCat" placeholder="e.g. Choker, Jhumka">
-        </div>
-        <div>
-          <label>Free-text Badge</label>
-          <input type="text" id="pTag" placeholder="e.g. Limited Edition">
-        </div>
-      </div>
-
-      <!-- ═════════════════════════════════════════════════════════ -->
-      <!-- [TAG CHECKBOXES] Multi-select tags for storefront filters -->
-      <!-- ------------------------------------------------------- -->
-      <!-- These drive the filter chips on index.html:               -->
-      <!--   bestseller  → ⭐ Best Sellers                           -->
-      <!--   most_loved  → 💖 Most Loved                             -->
-      <!--   trending    → 🔥 Trending                               -->
-      <!--   new         → ✨ New                                    -->
-      <!--   sale        → 🏷️ Sale                                   -->
-      <!-- ═════════════════════════════════════════════════════════ -->
-      <label>Storefront Tags (pick any)</label>
-      <div class="tag-grid" id="tagGrid">
-        <label class="tag-option" data-tag="bestseller">
-          <input type="checkbox" value="bestseller"> ⭐ Bestseller
-        </label>
-        <label class="tag-option" data-tag="most_loved">
-          <input type="checkbox" value="most_loved"> 💖 Most Loved
-        </label>
-        <label class="tag-option" data-tag="trending">
-          <input type="checkbox" value="trending"> 🔥 Trending
-        </label>
-        <label class="tag-option" data-tag="new">
-          <input type="checkbox" value="new"> ✨ New
-        </label>
-        <label class="tag-option" data-tag="sale">
-          <input type="checkbox" value="sale"> 🏷️ Sale
-        </label>
-      </div>
-      <!-- [END TAG CHECKBOXES] -->
-
-      <div class="row">
-        <div>
-          <label>Selling Price (₹)</label>
-          <input type="number" id="pPrice" placeholder="1899">
-        </div>
-        <div>
-          <label>Original MRP (₹)</label>
-          <input type="number" id="pMrp" placeholder="3499">
-        </div>
-      </div>
-
-      <label>Short Description (English)</label>
-      <textarea id="pDesc" rows="2" placeholder="e.g. Handcrafted brass necklace with matching jhumkas..."></textarea>
-      
-      <label>Short Description (Tamil)</label>
-      <textarea id="pDescTa" rows="2" placeholder="எ.கா. கைவினை பித்தளை நெக்லஸ்..."></textarea>
-
-      <button class="btn btn-primary" id="saveBtn" onclick="saveProduct()">Publish & Update Store</button>
-      <button class="btn btn-outline" id="cancelEditBtn" style="display:none;" onclick="resetForm()">Cancel Edit</button>
-    </div>
-    <!-- [END PRODUCT FORM] -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- [INVOICE GENERATOR] Search by ID or Name                    -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="card" style="background: #fef3c7; border-color: #fde68a;">
-      <h2 style="color: #92400e;">🧾 Create Invoice</h2>
-      <p class="sub" style="color: #b45309;">Search for a product, enter customer details, and generate the bill.</p>
-      
-      <div class="row">
-        <div style="flex: 2;">
-          <label style="color: #92400e;">Product ID or Name</label>
-          <input type="text" id="invSearchInput" placeholder="e.g. SS261029A1S8" style="border-color: #d97706;">
-        </div>
-        <div style="flex: 1; display: flex; align-items: flex-end; padding-bottom: 12px;">
-          <button class="btn" style="background: #d97706; color: #fff; margin: 0; height: 42px;" onclick="promptInvoiceDetails()">🔍 Find & Bill</button>
+    <!-- TAB 2: INVOICE -->
+    <div id="tab-invoices" class="tab-content">
+      <div class="card" style="background: #fef3c7; border-color: #fde68a;">
+        <h2>🧾 Scan & Bill</h2>
+        <p style="color: #b45309; margin-bottom: 16px;">Scan the QR code on the saree packet to auto-fill the bill.</p>
+        
+        <div class="row">
+          <div style="flex: 2;">
+            <label>Scan QR / Enter Product ID</label>
+            <input type="text" id="invSearchInput" placeholder="Scan here..." onkeypress="if(event.key==='Enter') promptInvoiceDetails()">
+          </div>
+          <div style="flex: 1; padding-top: 24px;">
+            <button class="btn" style="background: #d97706;" onclick="promptInvoiceDetails()">Find & Bill</button>
+          </div>
         </div>
       </div>
     </div>
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- [CATALOG LIST] Current live catalog                          -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="card">
-      <h2>Store Catalog</h2>
-      <p class="sub">Live products currently visible to customers</p>
-
-      <div id="itemsContainer">Loading products...</div>
-    </div>
-    <!-- [END CATALOG LIST] -->
-
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- [CATEGORY MANAGER] Add Categories & Subcategories            -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="card">
-      <h2>Category Manager</h2>
-      <p class="sub">Add new categories or subcategories for your store</p>
-
-      <div class="row">
-        <div>
-          <label>New Category (English)</label>
-          <input type="text" id="newCatName" placeholder="e.g. Anklets">
-        </div>
-        <div>
-          <label>New Category (Tamil)</label>
-          <input type="text" id="newCatNameTa" placeholder="எ.கா. கொலுசு">
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label>New Subcategory (English)</label>
-          <input type="text" id="newSubCatName" placeholder="e.g. Payal">
-        </div>
-        <div>
-          <label>New Subcategory (Tamil)</label>
-          <input type="text" id="newSubCatNameTa" placeholder="எ.கா. பாயல்">
-        </div>
-      </div>
-      <button class="btn btn-success" onclick="addCategory()">+ Add to Store</button>
-      
-      <div style="margin-top: 16px;">
-        <label>Current Categories & Subcategories</label>
-        <div id="categoryListDisplay" style="font-size: 0.85rem; color: var(--muted); line-height: 1.6;">
-          Loading...
-        </div>
-      </div>
-    </div>
-    <!-- [END CATEGORY MANAGER] -->
 
   </div>
 
   <script>
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [STATE] Admin panel state                                   */
-    /* ═══════════════════════════════════════════════════════════ */
-    let productsList = [];
-    let currentImageFiles = [];   // array of File objects (max 5)
-    let existingImageUrls = [];   // URLs kept when editing (no new upload)
-    let storeCategories = {};     // { "Necklaces": ["Choker", "Long"] }
-    /* [END STATE] */
+    let currentImageFiles = [];
 
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [INIT] Boot admin                                            */
-    /* ═══════════════════════════════════════════════════════════ */
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchCatalog();
-      checkBackendHealth();
-      setupTagCheckboxes();
-      fetchCategories();
-      loadSavedLogo();
-    });
-    /* [END INIT] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [TAG CHECKBOXES] Visual checked state + change handling      */
-    /* ═══════════════════════════════════════════════════════════ */
-    function setupTagCheckboxes() {
-      document.querySelectorAll(".tag-option input[type='checkbox']").forEach(cb => {
-        cb.addEventListener("change", () => {
-          cb.closest(".tag-option").classList.toggle("checked", cb.checked);
-        });
-      });
+    function switchTab(tabId, btnEl) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      btnEl.classList.add('active');
     }
-
-    function getSelectedTags() {
-      return Array.from(document.querySelectorAll(".tag-option input:checked"))
-                  .map(cb => cb.value);
-    }
-
-    function setSelectedTags(tags) {
-      document.querySelectorAll(".tag-option input[type='checkbox']").forEach(cb => {
-        cb.checked = tags.includes(cb.value);
-        cb.closest(".tag-option").classList.toggle("checked", cb.checked);
-      });
-    }
-    /* [END TAG CHECKBOXES] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [HEALTH] Backend ping                                        */
-    /* ═══════════════════════════════════════════════════════════ */
-    async function checkBackendHealth() {
-      const badge = document.getElementById("syncStatusBadge");
-      if (!badge) return;
-      try {
-        const res = await fetch("http://localhost:5000/health", { cache: "no-store" });
-        const data = await res.json();
-        if (data.ok && data.token_set) {
-          badge.style.background = "#dcfce7";
-          badge.style.color = "#166534";
-          badge.innerText = "🟢 Auto-Sync Active";
-        } else {
-          badge.style.background = "#fef3c7";
-          badge.style.color = "#92400e";
-          badge.innerText = "🟡 Backend up, no token";
-        }
-      } catch {
-        badge.style.background = "#fee2e2";
-        badge.style.color = "#991b1b";
-        badge.innerText = "🔴 Backend offline";
-      }
-    }
-    /* [END HEALTH] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [CATEGORIES] Manage Categories & Subcategories               */
-    /* ═══════════════════════════════════════════════════════════ */
-    async function fetchCategories() {
-      try {
-        const res = await fetch(`categories.json?_t=${Date.now()}`);
-        if (res.ok) {
-          storeCategories = await res.json();
-        } else {
-          // Fallback if categories.json doesn't exist yet
-          storeCategories = {
-            "Necklaces": ["Choker", "Long", "Pendant", "Set"],
-            "Earrings": ["Jhumka", "Studs", "Drops", "Hoops"],
-            "Bangles": ["Kada", "Set", "Bracelet"],
-            "Rings": ["Adjustable", "Statement"],
-            "Sarees": ["Silk", "Cotton", "Designer"],
-            "Ornaments": ["Maang Tikka", "Hair Pin"],
-            "Accessories": ["Bags", "Clutches", "Belts"]
-          };
-        }
-        renderCategories();
-        updateCategoryDropdown();
-      } catch (e) {
-        console.error("Could not load categories.json", e);
-      }
-    }
-
-    function renderCategories() {
-      const display = document.getElementById("categoryListDisplay");
-      if (!display) return;
-      
-      const html = Object.keys(storeCategories).filter(k => k !== "_translations").map(cat => {
-        const subs = storeCategories[cat].join(", ");
-        const ta = storeCategories["_translations"] && storeCategories["_translations"][cat] ? ` (${storeCategories["_translations"][cat]})` : "";
-        return `<strong>${cat}${ta}</strong>: ${subs || "No subcategories"}`;
-      }).join("<br>");
-      
-      display.innerHTML = html || "No categories yet.";
-    }
-
-    function updateCategoryDropdown() {
-      const select = document.getElementById("pCat");
-      if (!select) return;
-      
-      const currentVal = select.value;
-      select.innerHTML = Object.keys(storeCategories).map(cat => 
-        `<option value="${cat}">${cat}</option>`
-      ).join("");
-      
-      if (currentVal && storeCategories[currentVal]) select.value = currentVal;
-    }
-
-    async function addCategory() {
-      const catInput = document.getElementById("newCatName").value.trim();
-      const catInputTa = document.getElementById("newCatNameTa").value.trim();
-      const subInput = document.getElementById("newSubCatName").value.trim();
-      const subInputTa = document.getElementById("newSubCatNameTa").value.trim();
-
-      if (!catInput && !subInput) return alert("Enter a category or subcategory name.");
-
-      // Save Tamil mappings in a special dictionary inside categories.json
-      if (catInput && catInputTa) {
-        if (!storeCategories["_translations"]) storeCategories["_translations"] = {};
-        storeCategories["_translations"][catInput] = catInputTa;
-      }
-
-      if (subInput && subInputTa) {
-        if (!storeCategories["_translations"]) storeCategories["_translations"] = {};
-        storeCategories["_translations"][subInput] = subInputTa;
-      }
-
-      if (catInput) {
-        if (!storeCategories[catInput]) storeCategories[catInput] = [];
-      }
-
-      if (subInput) {
-        const targetCat = catInput || document.getElementById("pCat").value;
-        if (!storeCategories[targetCat]) storeCategories[targetCat] = [];
-        if (!storeCategories[targetCat].includes(subInput)) {
-          storeCategories[targetCat].push(subInput);
-        }
-      }
-
-      document.getElementById("newCatName").value = "";
-      document.getElementById("newCatNameTa").value = "";
-      document.getElementById("newSubCatName").value = "";
-      document.getElementById("newSubCatNameTa").value = "";
-
-      renderCategories();
-      updateCategoryDropdown();
-      
-      await saveCategoriesToGitHub();
-    }
-
-    async function saveCategoriesToGitHub() {
-      const btn = document.querySelector('button[onclick="addCategory()"]');
-      const original = btn.innerText;
-      btn.innerText = "⏳ Saving...";
-      btn.disabled = true;
-
-      try {
-        const res = await fetch("http://localhost:5000/save-categories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(storeCategories)
-        });
-        const data = await res.json();
-        
-        if (data.ok) {
-          btn.innerText = "✅ Saved!";
-          setTimeout(() => { btn.innerText = original; btn.disabled = false; }, 1500);
-        } else {
-          alert("❌ Failed to save: " + data.error);
-          btn.innerText = original;
-          btn.disabled = false;
-        }
-      } catch (e) {
-        alert("❌ Backend not running.");
-        btn.innerText = original;
-        btn.disabled = false;
-      }
-    }
-    /* [END CATEGORIES] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [FETCH] Load products.json                                   */
-    /* ═══════════════════════════════════════════════════════════ */
-    async function fetchCatalog() {
-      try {
-        const res = await fetch(`products.json?_t=${Date.now()}`);
-        if (!res.ok) throw new Error("products.json not found");
-        productsList = await res.json();
-
-        // Backwards compat: convert old single "tag" to "tags" array
-        productsList.forEach(p => {
-          if (!Array.isArray(p.tags)) {
-            p.tags = p.tag ? [String(p.tag).toLowerCase().replace(/\s+/g, "_")] : [];
-          }
-        });
-
-        renderCatalog();
-      } catch (e) {
-        document.getElementById("itemsContainer").innerHTML =
-          "<p style='color:var(--muted);'>Could not load products.json — run the backend sync script.</p>";
-      }
-    }
-    /* [END FETCH] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [IMAGE] Preview only (upload happens on save)                */
-    /* ═══════════════════════════════════════════════════════════ */
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [LOGO] Upload logo → Cloudinary folder "logo"                */
-    /* ═══════════════════════════════════════════════════════════ */
-    const LOGO_STORAGE_KEY = "mm_logo_url";
-
-    function uploadLogo(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      const preview = document.getElementById("logoPreview");
-      preview.innerHTML = '<span>⏳ Uploading…</span>';
-
-      const form = new FormData();
-      form.append("file", file);
-
-      fetch("http://localhost:5000/upload-logo", { method: "POST", body: form })
-        .then(r => r.json())
-        .then(data => {
-          if (!data.ok) throw new Error(data.error || "Upload failed");
-          renderLogoPreview(data.url);
-          try { localStorage.setItem(LOGO_STORAGE_KEY, data.url); } catch(e) {}
-          event.target.value = "";
-          alert("✅ Logo uploaded!\n\nCopy the URL below and paste it into index.html where it says YOUR_LOGO_URL_HERE.");
-        })
-        .catch(err => {
-          preview.innerHTML = '<span id="logoPlaceholder">No Logo Uploaded</span>';
-          alert("❌ Upload failed: " + err.message + "\n\nIs the backend running? Run 2.start.bat.");
-          event.target.value = "";
-        });
-    }
-
-    function renderLogoPreview(url) {
-      const preview = document.getElementById("logoPreview");
-      const urlBox = document.getElementById("logoUrlDisplay");
-      if (!url) {
-        preview.innerHTML = '<span id="logoPlaceholder">No Logo Uploaded</span>';
-        if (urlBox) urlBox.value = "";
-        return;
-      }
-      preview.innerHTML = `<div class="preview-item" style="aspect-ratio: auto; max-height:180px; background:#fafaf9; display:flex; align-items:center; justify-content:center;">
-        <img src="${url}" alt="Logo" style="max-width:100%; max-height:180px; object-fit:contain; width:auto; height:auto;">
-      </div>`;
-      if (urlBox) urlBox.value = url;
-    }
-
-    function loadSavedLogo() {
-      try {
-        const url = localStorage.getItem(LOGO_STORAGE_KEY);
-        if (url) renderLogoPreview(url);
-      } catch(e) {}
-    }
-
-    function copyLogoUrl() {
-      const box = document.getElementById("logoUrlDisplay");
-      if (!box || !box.value) return alert("Upload a logo first.");
-      box.select();
-      box.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(box.value)
-        .then(() => alert("✅ URL copied:\n\n" + box.value))
-        .catch(() => { document.execCommand("copy"); alert("✅ URL copied."); });
-    }
-
-    function openLogoInNewTab() {
-      const box = document.getElementById("logoUrlDisplay");
-      if (!box || !box.value) return alert("Upload a logo first.");
-      window.open(box.value, "_blank");
-    }
-    /* [END LOGO] */
 
     function handleImageSelection(event) {
       const files = Array.from(event.target.files || []);
-      if (!files.length) return;
-
-      const remaining = 5 - currentImageFiles.length;
-      if (remaining <= 0) {
-        alert("Max 5 images per product.");
-        event.target.value = "";
-        return;
-      }
-
-      files.slice(0, remaining).forEach(f => currentImageFiles.push(f));
-      if (files.length > remaining) {
-        alert("Only first " + remaining + " added (max 5 total).");
-      }
-
-      event.target.value = "";
-      renderPreviewGrid();
-    }
-
-    function renderPreviewGrid() {
-      const grid = document.getElementById("previewGrid");
-      const ph = document.getElementById("previewPlaceholder");
-
-      const hasAny = currentImageFiles.length > 0 || existingImageUrls.length > 0;
-      if (!hasAny) {
-        grid.innerHTML = '<span id="previewPlaceholder">No Images Selected (max 5)</span>';
-        return;
-      }
-
-      const existingHTML = existingImageUrls.map((url, i) => `
-        <div class="preview-item">
-          <img src="${url}" alt="">
-          ${i === 0 ? '<span style="position:absolute; bottom:2px; left:2px; background:var(--success); color:#fff; font-size:0.55rem; padding:2px 4px; border-radius:4px; font-weight:bold;">COVER</span>' : ''}
-          <button type="button" class="preview-remove" onclick="removeExistingImage(${i})">×</button>
-          
-          <div style="position:absolute; bottom:2px; right:2px; display:flex; gap:2px;">
-            ${i > 0 ? `<button type="button" onclick="moveExistingImage(${i}, -1)" style="background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:4px; font-size:10px; padding:2px 4px; cursor:pointer;">←</button>` : ''}
-            ${i < existingImageUrls.length - 1 ? `<button type="button" onclick="moveExistingImage(${i}, 1)" style="background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:4px; font-size:10px; padding:2px 4px; cursor:pointer;">→</button>` : ''}
-            ${i > 0 ? `<button type="button" onclick="makeCover('existing', ${i})" style="background:var(--primary); color:#fff; border:none; border-radius:4px; font-size:10px; padding:2px 4px; cursor:pointer;">Cover</button>` : ''}
-          </div>
-        </div>
+      files.forEach(f => currentImageFiles.push(f));
+      document.getElementById("previewGrid").innerHTML = currentImageFiles.map((file, i) => `
+        <div class="preview-item"><img src="${URL.createObjectURL(file)}"></div>
       `).join("");
-
-      const newHTML = currentImageFiles.map((file, i) => `
-        <div class="preview-item">
-          <img src="${URL.createObjectURL(file)}" alt="">
-          ${existingImageUrls.length === 0 && i === 0 ? '<span style="position:absolute; bottom:2px; left:2px; background:var(--success); color:#fff; font-size:0.55rem; padding:2px 4px; border-radius:4px; font-weight:bold;">COVER</span>' : ''}
-          <button type="button" class="preview-remove" onclick="removeNewImage(${i})">×</button>
-          
-          <div style="position:absolute; bottom:2px; right:2px; display:flex; gap:2px;">
-            ${i > 0 ? `<button type="button" onclick="moveNewImage(${i}, -1)" style="background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:4px; font-size:10px; padding:2px 4px; cursor:pointer;">←</button>` : ''}
-            ${i < currentImageFiles.length - 1 ? `<button type="button" onclick="moveNewImage(${i}, 1)" style="background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:4px; font-size:10px; padding:2px 4px; cursor:pointer;">→</button>` : ''}
-            ${(existingImageUrls.length > 0 || i > 0) ? `<button type="button" onclick="makeCover('new', ${i})" style="background:var(--primary); color:#fff; border:none; border-radius:4px; font-size:10px; padding:2px 4px; cursor:pointer;">Cover</button>` : ''}
-          </div>
-        </div>
-      `).join("");
-
-      grid.innerHTML = existingHTML + newHTML;
     }
 
-    function removeExistingImage(idx) {
-      existingImageUrls.splice(idx, 1);
-      renderPreviewGrid();
-    }
-
-    function removeNewImage(idx) {
-      currentImageFiles.splice(idx, 1);
-      renderPreviewGrid();
-    }
-
-    // NEW: Move Existing Image Left/Right
-    function moveExistingImage(idx, dir) {
-      const newIdx = idx + dir;
-      if (newIdx < 0 || newIdx >= existingImageUrls.length) return;
-      const temp = existingImageUrls[idx];
-      existingImageUrls[idx] = existingImageUrls[newIdx];
-      existingImageUrls[newIdx] = temp;
-      renderPreviewGrid();
-    }
-
-    // NEW: Move New Image Left/Right
-    function moveNewImage(idx, dir) {
-      const newIdx = idx + dir;
-      if (newIdx < 0 || newIdx >= currentImageFiles.length) return;
-      const temp = currentImageFiles[idx];
-      currentImageFiles[idx] = currentImageFiles[newIdx];
-      currentImageFiles[newIdx] = temp;
-      renderPreviewGrid();
-    }
-
-    // NEW: Make Image the Cover (Move to index 0)
-    function makeCover(type, idx) {
-      if (type === 'existing') {
-        const img = existingImageUrls.splice(idx, 1)[0];
-        existingImageUrls.unshift(img);
-      } else {
-        const img = currentImageFiles.splice(idx, 1)[0];
-        currentImageFiles.unshift(img);
-      }
-      renderPreviewGrid();
-    }
-    /* [END IMAGE] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [RENDER] Catalog list                                        */
-    /* ═══════════════════════════════════════════════════════════ */
-    function renderCatalog() {
-      const container = document.getElementById("itemsContainer");
-
-      if (productsList.length === 0) {
-        container.innerHTML = "<p style='color:var(--muted); padding:10px 0;'>No items in catalog.</p>";
-        return;
-      }
-
-      // 1. Group by Category
-      const grouped = {};
-      productsList.forEach(item => {
-        if (!grouped[item.category]) grouped[item.category] = [];
-        grouped[item.category].push(item);
-      });
-
-      let html = "";
-
-      // 2. Sort Categories Alphabetically
-      const sortedCategories = Object.keys(grouped).sort();
-
-      sortedCategories.forEach(cat => {
-        const items = grouped[cat];
-        const catSafeId = cat.replace(/\s+/g, '_');
-        
-        // Preserve category open/close state
-        const isCatOpen = document.getElementById(`cat-${catSafeId}`)?.classList.contains('open');
-        const catOpenClass = isCatOpen ? 'open' : '';
-        const catContentClass = isCatOpen ? 'open' : '';
-
-        html += `<div class="category-group">`;
-        html += `<div class="date-header ${catOpenClass}" onclick="toggleCatFolder('${catSafeId}')" style="background: #fef3c7; border-left-color: var(--primary); margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border);">
-          <span style="font-size: 1rem;">${cat} (${items.length})</span>
-          <span class="arrow">▼</span>
-        </div>`;
-        
-        html += `<div class="category-content ${catContentClass}" id="cat-${catSafeId}" style="padding-left: 10px;">`;
-
-        // 3. Group by Date within the category
-        const dateGrouped = {};
-        items.forEach(item => {
-          const match = item.id.match(/[A-Z]{2}(\d{6})/);
-          const dateStr = match ? match[1] : "000000";
-          
-          // Format date as DD-MM-YYYY
-          const formattedDate = dateStr !== "000000" 
-            ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` 
-            : "Unknown Date";
-          
-          if (!dateGrouped[formattedDate]) dateGrouped[formattedDate] = [];
-          dateGrouped[formattedDate].push(item);
-        });
-
-        // Sort dates descending (Newest first)
-        const sortedDates = Object.keys(dateGrouped).sort((a, b) => {
-          if (a === "Unknown Date") return 1;
-          if (b === "Unknown Date") return -1;
-          return new Date(b.split('-').reverse().join('-')) - new Date(a.split('-').reverse().join('-'));
-        });
-
-        sortedDates.forEach(date => {
-          const dateSafeId = date.replace(/\//g, '-');
-          
-          // Preserve open/close state
-          const isDateOpen = document.getElementById(`date-${dateSafeId}`)?.classList.contains('open');
-          const openClass = isDateOpen ? 'open' : '';
-          const contentClass = isDateOpen ? 'open' : '';
-
-          html += `<div class="date-folder">`;
-          html += `<div class="date-header ${openClass}" onclick="toggleDateFolder('${dateSafeId}')">
-            <span>${date} (${dateGrouped[date].length})</span>
-            <span class="arrow">▼</span>
-          </div>`;
-          
-          html += `<div class="date-content ${contentClass}" id="date-${dateSafeId}">`;
-          
-          html += dateGrouped[date].map(item => {
-            const originalIndex = productsList.findIndex(p => p.id === item.id);
-            const isHidden = item.visible === false;
-            const hiddenClass = isHidden ? "hidden-item" : "";
-            const hideBtnText = isHidden ? "Show" : "Hide";
-            const hideBtnClass = isHidden ? "btn-show" : "btn-hide";
-
-            const thumb = (item.images && item.images[0]) || item.image || "";
-
-            return `
-            <div class="item-card ${hiddenClass}">
-              <img src="${thumb}" alt="">
-              <div class="item-meta">
-                <strong>${item.title} ${isHidden ? '<span style="color:red;">(Hidden)</span>' : ''}</strong>
-                <div class="sub-text">
-                  <span>₹${item.price}</span>
-                  <span>${item.id}</span>
-                </div>
-              </div>
-              <div class="item-actions">
-                <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${originalIndex})">Edit</button>
-                <button class="btn-sm ${hideBtnClass}" onclick="confirmAction('${isHidden ? 'show' : 'hide'}', ${originalIndex})">${hideBtnText}</button>
-                <button class="btn-sm btn-del" onclick="confirmAction('delete', ${originalIndex})">Delete</button>
-              </div>
-            </div>
-          `;
-          }).join("");
-          
-          html += `</div></div>`; // Close date-content and date-folder
-        });
-        
-        html += `</div>`; // Close category-content
-        html += `</div>`; // Close category-group
-      });
-
-      container.innerHTML = html;
-    }
-
-    function toggleCatFolder(id) {
-      const content = document.getElementById(`cat-${id}`);
-      const header = content.previousElementSibling;
-      if (content) content.classList.toggle('open');
-      if (header) header.classList.toggle('open');
-    }
-
-    function toggleDateFolder(id) {
-      const content = document.getElementById(`date-${id}`);
-      const header = content.previousElementSibling;
-      if (content) content.classList.toggle('open');
-      if (header) header.classList.toggle('open');
-    }
-
-    function confirmAction(action, index) {
-      const item = productsList[index];
-      if (!item) return;
-
-      if (action === 'edit') {
-        if (confirm(`Edit "${item.title}"?`)) editProduct(index);
-      } else if (action === 'delete') {
-        if (confirm(`Are you sure you want to PERMANENTLY DELETE "${item.title}"?`)) deleteProduct(index);
-      } else if (action === 'hide') {
-        if (confirm(`Hide "${item.title}" from the store?`)) toggleVisibility(index);
-      } else if (action === 'show') {
-        if (confirm(`Show "${item.title}" on the store?`)) toggleVisibility(index);
-      }
-    }
-
-    async function toggleVisibility(index) {
-      const item = productsList[index];
-      item.visible = item.visible === false ? true : false;
-      renderCatalog();
-      await pushChangesToGitHub((item.visible === false ? "Hidden" : "Showed") + " product: " + item.title);
-    }
-    /* [END RENDER] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [SAVE] Upload image (if new) + save product                  */
-    /* ═══════════════════════════════════════════════════════════ */
     async function saveProduct() {
+      const id = document.getElementById("pId").value.trim();
       const title = document.getElementById("pTitle").value.trim();
-      const titleTa = document.getElementById("pTitleTa").value.trim();
       const price = Number(document.getElementById("pPrice").value);
-      const mrp   = Number(document.getElementById("pMrp").value) || price;
-      const category = document.getElementById("pCat").value;
-      const subcategory = document.getElementById("pSubCat").value.trim();
-      const freeTag  = document.getElementById("pTag").value.trim();
-      const desc  = document.getElementById("pDesc").value.trim();
-      const descTa = document.getElementById("pDescTa").value.trim();
-      const editId = document.getElementById("editProductId").value;
-      const saveBtn = document.getElementById("saveBtn");
-      const original = saveBtn.innerText;
+      
+      if (!id || !title || !price) return alert("Please fill ID, Title, and Selling Price.");
 
-      if (!title || !price) {
-        alert("Please enter product name and selling price.");
-        return;
-      }
-
-      const selectedTags = getSelectedTags();
-
-      // 1. Upload new images (if any were picked)
-      let uploadedUrls = [];
+      const btn = document.querySelector("#tab-add-product .btn");
+      btn.innerText = "Uploading Images...";
+      
+      let imageUrl = "";
       if (currentImageFiles.length > 0) {
-        saveBtn.innerText = "⏳ Uploading " + currentImageFiles.length + " image(s)...";
-        saveBtn.disabled = true;
-        try {
-          const form = new FormData();
-          currentImageFiles.forEach(f => form.append("file", f));
-          form.append("category", category);
-          form.append("product_id", editId || ("AJ-" + Date.now().toString().slice(-4)));
-          const upRes = await fetch("http://localhost:5000/upload", {
-            method: "POST",
-            body: form
-          });
-          const upData = await upRes.json();
-          if (!upData.ok) throw new Error(upData.error);
-          uploadedUrls = upData.urls || [upData.url];
-          
-          // Extract the generated ID from the Cloudinary URL filename
-          if (uploadedUrls.length > 0) {
-            const urlParts = uploadedUrls[0].split('/');
-            const filename = urlParts[urlParts.length - 1];
-            const newGenId = filename.split('_')[0];
-            document.getElementById("editProductId").value = newGenId;
-          }
-        } catch (e) {
-          alert("❌ Image upload failed: " + e.message);
-          saveBtn.innerText = original;
-          saveBtn.disabled = false;
-          return;
-        }
+        const form = new FormData();
+        currentImageFiles.forEach(f => form.append("file", f));
+        form.append("category", document.getElementById("pCat").value || "Uncategorized");
+        
+        const upRes = await fetch("http://localhost:5000/upload", { method: "POST", body: form });
+        const upData = await upRes.json();
+        if (upData.ok) imageUrl = upData.url;
       }
 
-      // Combine: newly uploaded + kept existing (edit mode)
-      const finalImages = [...uploadedUrls, ...existingImageUrls];
-
-      if (finalImages.length === 0) {
-        alert("Please select at least one image.");
-        saveBtn.innerText = original;
-        saveBtn.disabled = false;
-        return;
-      }
-
-      // 2. Build product object
-      // Extract the ID directly from the uploaded image URL (matches image filename perfectly)
-      let finalId = document.getElementById("editProductId").value;
-      if (!finalId && finalImages.length > 0) {
-        const urlParts = finalImages[0].split('/');
-        const filename = urlParts[urlParts.length - 1];
-        finalId = filename.split('_')[0]; 
-      }
-
-      const productObj = {
-        id: finalId || ("SS-" + Date.now().toString().slice(-4)), 
-        title,
-        title_ta: titleTa,
-        price,
-        originalPrice: mrp,
-        category,
-        subcategory,
-        tag: freeTag,
-        tags: selectedTags,
-        description: desc,
-        description_ta: descTa,
-        image: finalImages[0],
-        images: finalImages
+      const product = {
+        id: id,
+        category: document.getElementById("pCat").value,
+        subcategory: document.getElementById("pSubCat").value,
+        purchaseRate: Number(document.getElementById("pCost").value) || 0,
+        price: price,
+        originalPrice: Number(document.getElementById("pMrp").value) || price,
+        title: title,
+        title_ta: document.getElementById("pTitleTa").value,
+        description: document.getElementById("pDesc").value,
+        description_ta: document.getElementById("pDescTa").value,
+        image: imageUrl
       };
 
-      if (editId) {
-        const idx = productsList.findIndex(p => p.id === editId);
-        if (idx !== -1) productsList[idx] = productObj;
-      } else {
-        productsList.unshift(productObj);
-      }
+      btn.innerText = "Saving to Google Sheet...";
+      await fetch("http://localhost:5000/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(product)
+      });
 
-      renderCatalog();
-      resetForm();
-      await pushChangesToGitHub("Update product: " + title);
+      btn.innerText = "✅ Saved!";
+      setTimeout(() => { btn.innerText = "Save to Google Sheet"; resetForm(); }, 1500);
     }
-    /* [END SAVE] */
 
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [EDIT] Load product into form                                */
-    /* ═══════════════════════════════════════════════════════════ */
-    function editProduct(index) {
-      const p = productsList[index];
-      currentImageFiles = [];
-      existingImageUrls = (p.images && p.images.length) ? [...p.images]
-                        : (p.image ? [p.image] : []);
-
-      document.getElementById("formTitle").innerText = "✏️ Edit Product";
-      document.getElementById("editProductId").value = p.id;
-      document.getElementById("pTitle").value = p.title;
-      document.getElementById("pTitleTa").value = p.title_ta || "";
-      document.getElementById("pPrice").value = p.price;
-      document.getElementById("pMrp").value   = p.originalPrice;
-      document.getElementById("pCat").value   = p.category;
-      document.getElementById("pSubCat").value = p.subcategory || "";
-      document.getElementById("pTag").value   = p.tag || "";
-      document.getElementById("pDesc").value  = p.description || "";
-      document.getElementById("pDescTa").value  = p.description_ta || "";
-
-      setSelectedTags(p.tags || []);
-      renderPreviewGrid();
-
-      document.getElementById("saveBtn").innerText = "Update & Sync";
-      document.getElementById("cancelEditBtn").style.display = "block";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-    /* [END EDIT] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [RESET] Clear form                                           */
-    /* ═══════════════════════════════════════════════════════════ */
     function resetForm() {
-      document.getElementById("formTitle").innerText = "✨ Add New Product";
-      document.getElementById("editProductId").value = "";
-      document.getElementById("pTitle").value = "";
-      document.getElementById("pTitleTa").value = "";
-      document.getElementById("pPrice").value = "";
-      document.getElementById("pMrp").value   = "";
-      document.getElementById("pTag").value   = "";
-      document.getElementById("pSubCat").value = "";
-      document.getElementById("pDesc").value  = "";
-      document.getElementById("pDescTa").value  = "";
-      document.getElementById("imageInput").value = "";
-      document.getElementById("saveBtn").innerText = "Publish & Update Store";
-      document.getElementById("cancelEditBtn").style.display = "none";
+      document.querySelectorAll("#tab-add-product input, #tab-add-product textarea").forEach(el => el.value = "");
+      document.getElementById("previewGrid").innerHTML = "";
       currentImageFiles = [];
-      existingImageUrls = [];
-      setSelectedTags([]);
-      renderPreviewGrid();
     }
-    /* [END RESET] */
 
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [DELETE] Remove product                                      */
-    /* ═══════════════════════════════════════════════════════════ */
-    async function deleteProduct(index) {
-      const title = productsList[index].title;
-      if (confirm(`Are you sure you want to delete "${title}"?`)) {
-        productsList.splice(index, 1);
-        renderCatalog();
-        await pushChangesToGitHub("Deleted product: " + title);
-      }
-    }
-    /* [END DELETE] */
-
-    /* ═══════════════════════════════════════════════════════════ */
-    /* [PUSH] Send catalog to backend → GitHub                      */
-    /* ═══════════════════════════════════════════════════════════ */
-    async function pushChangesToGitHub(commitMessage) {
-      const saveBtn = document.getElementById("saveBtn");
-      const original = saveBtn.innerText;
-      saveBtn.innerText = "⏳ Pushing to GitHub...";
-      saveBtn.disabled = true;
-
-      try {
-        const res = await fetch("http://localhost:5000/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(productsList)
-        });
-        const data = await res.json();
-
-        if (data.ok) {
-          saveBtn.innerText = "✅ Live!";
-          setTimeout(() => {
-            saveBtn.innerText = original;
-            saveBtn.disabled = false;
-          }, 1500);
-        } else {
-          alert("❌ Sync failed: " + (data.error || "Unknown error"));
-          saveBtn.innerText = original;
-          saveBtn.disabled = false;
-        }
-      } catch (e) {
-        alert("❌ Backend not running.\n\nStart it with: start.bat\n\nError: " + e.message);
-        saveBtn.innerText = original;
-        saveBtn.disabled = false;
-      }
-    }
-    /* [END PUSH] */
-        // ═══════════════════════════════════════════════════════════
-    // [INVOICE GENERATOR] Find product and open invoice.html
-    // ═══════════════════════════════════════════════════════════
-    function promptInvoiceDetails() {
+    async function promptInvoiceDetails() {
       const query = document.getElementById("invSearchInput").value.trim().toLowerCase();
-      if (!query) return alert("Please type a Product ID or Name first.");
+      if (!query) return alert("Please scan or enter a Product ID");
 
-      // Search the productsList array (which is already loaded in admin.html)
-      const product = productsList.find(p => 
-        p.id.toLowerCase() === query || 
-        p.title.toLowerCase().includes(query)
-      );
+      // Fetch live data from Google Sheets via Python
+      const res = await fetch("http://localhost:5000/get-products");
+      const products = await res.json();
+      
+      const product = products.find(p => p.id.toLowerCase() === query);
+      if (!product) return alert("❌ Product not found in database!");
 
-      if (!product) {
-        return alert("❌ Product not found. Please check the ID or Name.");
-      }
+      const custName = prompt(`Found: ${product.title}\n\nEnter Customer Name:`);
+      if (!custName) return;
+      const custPhone = prompt("Enter Customer Phone:");
+      const custAddress = prompt("Enter Customer Address:");
 
-      // Prompt for customer details
-      const custName = prompt(`Product Found: ${product.title}\n\nEnter Customer Name:`, "Walk-in Customer");
-      if (custName === null) return;
-
-      const custPhone = prompt("Enter Customer Phone:", "");
-      if (custPhone === null) return;
-
-      const custAddress = prompt("Enter Customer Address:", "");
-      if (custAddress === null) return;
-
-      const qty = parseInt(prompt("Enter Quantity:", "1")) || 1;
-
-      // Build the URL with all the data
+      // Send to invoice.html
       const url = `invoice.html?id=${encodeURIComponent(product.id)}` +
                   `&title=${encodeURIComponent(product.title)}` +
                   `&price=${product.price}` +
-                  `&qty=${qty}` +
+                  `&qty=1` +
                   `&cName=${encodeURIComponent(custName)}` +
-                  `&cPhone=${encodeURIComponent(custPhone)}` +
-                  `&cAddr=${encodeURIComponent(custAddress)}`;
-
-      // Open the invoice page in a new tab
+                  `&cPhone=${encodeURIComponent(custPhone || "")}` +
+                  `&cAddr=${encodeURIComponent(custAddress || "")}`;
       window.open(url, '_blank');
-      
-      // Clear the search box
-      document.getElementById("invSearchInput").value = "";
     }
   </script>
 </body>
