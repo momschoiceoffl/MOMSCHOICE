@@ -7,7 +7,17 @@
   <style>
     @page { size: A4; margin: 0; }
     body { margin: 0; padding: 0; font-family: Arial, sans-serif; color: #000; background: #f0f0f0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
-    .label-box { width: 210mm; min-height: 297mm; background: #fff; box-sizing: border-box; display: flex; flex-direction: column; border: 2px solid #000; margin: 10mm auto; padding: 10mm; }
+    .label-box { 
+      width: 210mm; 
+      min-height: 297mm; 
+      background: #fff; 
+      box-sizing: border-box; 
+      display: flex; 
+      flex-direction: column; 
+      border: 3px solid #000; /* Outer Border */
+      margin: 10mm auto; 
+      padding: 8mm; 
+    }
     
     /* HEADER */
     .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000; padding-bottom: 8mm; margin-bottom: 8mm; }
@@ -58,7 +68,14 @@
     @media print {
       body { background: #fff; display: block; }
       .controls { display: none; }
-      .label-box { border: 2px solid #000; margin: 0; width: 100%; height: 100%; min-height: auto; padding: 10mm; }
+      .label-box { 
+        border: 3px solid #000; /* Outer border on print */
+        margin: 0; 
+        width: 100%; 
+        min-height: 99vh; 
+        padding: 8mm; 
+        box-sizing: border-box;
+      }
     }
   </style>
 </head>
@@ -101,8 +118,9 @@
       <table>
         <thead>
           <tr>
+            <th style="width: 8%; text-align: center;">Sl No</th>
             <th style="width: 15%;">Product ID</th>
-            <th style="width: 45%;">Description</th>
+            <th style="width: 37%;">Description</th>
             <th style="width: 10%; text-align: center;">Qty</th>
             <th style="width: 15%; text-align: right;">Rate</th>
             <th style="width: 15%; text-align: right;">Amount</th>
@@ -110,6 +128,7 @@
         </thead>
         <tbody>
           <tr>
+            <td style="text-align: center; font-weight: bold;">1</td>
             <td id="lblProdId" style="font-weight: bold; font-size: 12px;">ID</td>
             <td id="lblProdTitle">Product Name</td>
             <td id="lblQty" style="text-align: center;">1</td>
