@@ -173,10 +173,25 @@
       const grandTotal = itemTotal + shipping;
 
       document.getElementById("lblInvNum").innerText = invNum;
-      document.getElementById("lblDate").innerText = new Date().toLocaleDateString();
+      
+      // Format Date as DD/MM/YYYY
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      document.getElementById("lblDate").innerText = `${dd}/${mm}/${yyyy}`;
       
       document.getElementById("lblCustName").innerText = cName;
-      document.getElementById("lblCustAddr").innerHTML = cAddr.replace(/,/g, "<br>");
+      
+      // Preserve Address Structure strictly line-by-line
+      const formattedAddr = cAddr
+        .replace(/,/g, "\n") // Convert commas to newlines
+        .split("\n")
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .join("<br>");
+      
+      document.getElementById("lblCustAddr").innerHTML = formattedAddr;
       document.getElementById("lblCustPhone").innerText = cPhone;
 
       document.getElementById("lblProdId").innerText = pId;
