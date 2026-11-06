@@ -69,16 +69,18 @@
     .btn-close { background: #dc2626; color: #fff; }
     
     @media print {
-      @page { size: A4; margin: 5mm; }
+      /* Remove A4 restriction and let the box hug the content */
+      @page { size: auto; margin: 5mm; }
       body { background: #fff; margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
       .controls { display: none; }
+      
       .label-box { 
         border: 2px solid #000; 
         width: 100%; 
-        min-height: 0; 
-        height: 100%; /* Force it to fill the page */
+        height: auto; /* Hugs the content */
+        min-height: 0;
         padding: 5mm; 
-        margin: 0;
+        margin: 0 auto;
         box-sizing: border-box;
         page-break-after: avoid;
         page-break-inside: avoid;
