@@ -310,10 +310,14 @@
         </div>
 
         <!-- Tiles -->
-        <div class="stats-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 20px;">
+        <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
           <div class="stat-card" style="border-left-color: #dc2626;">
-            <h3>Total Items Sold</h3>
+            <h3>Items Sold</h3>
             <div class="value" id="statSaleQty" style="color: #dc2626;">0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #d97706;">
+            <h3>Total Revenue</h3>
+            <div class="value" id="statSaleValue" style="color: #d97706;">₹0</div>
           </div>
           <div class="stat-card" style="border-left-color: #3b82f6;">
             <h3>Gross Profit</h3>
@@ -468,22 +472,23 @@
       if (!Array.isArray(inv)) return null;
       const num = (v) => Number(String(v == null ? 0 : v).replace(/[^0-9.\-]/g, '')) || 0;
       
-      // Your Invoice Log has 11 columns:
-      // 0: Date, 1: InvNo, 2: OrderID(Auto), 3: CustName, 4: Phone, 5: Address, 
-      // 6: ProdID, 7: Title, 8: Qty, 9: Price, 10: GrandTotal
+      // 12 columns now (added Courier):
+      // 0: Date, 1: InvNo, 2: OrderID, 3: CustName, 4: Phone, 5: Address, 
+      // 6: ProdID, 7: Title, 8: Qty, 9: Price, 10: Courier, 11: GrandTotal
       
       return {
         rawDate:   inv[0] || '',
         dateStr:   String(inv[0] || '').split(',')[0].trim(),
         invNum:    String(inv[1] || '').trim(),
-        custName:  String(inv[3] || '').trim(),  // Shifted to 3
-        custPhone: String(inv[4] || '').trim(),  // Shifted to 4
-        custAddr:  String(inv[5] || '').trim(),  // Shifted to 5
-        productId: String(inv[6] || '').trim(),  // Shifted to 6
-        title:     String(inv[7] || '').trim(),  // Shifted to 7
-        qty:       num(inv[8]) || 1,             // Shifted to 8
-        price:     num(inv[9]),                  // Shifted to 9
-        grandTotal:num(inv[10])                  // Shifted to 10
+        custName:  String(inv[3] || '').trim(),
+        custPhone: String(inv[4] || '').trim(),
+        custAddr:  String(inv[5] || '').trim(),
+        productId: String(inv[6] || '').trim(),
+        title:     String(inv[7] || '').trim(),
+        qty:       num(inv[8]) || 1,
+        price:     num(inv[9]),
+        courier:   num(inv[10]),   // 11th column: Courier
+        grandTotal:num(inv[11])    // 12th column: Grand Total
       };
     }
 
@@ -732,17 +737,21 @@
         return true;
       });
 
-      let totalQty = 0, grossProfit = 0, netProfit = 0;
+      let totalQty = 0, totalRevenue = 0, grossProfit = 0, netProfit = 0;
       filtered.forEach(inv => {
         totalQty += inv.qty;
+        totalRevenue += inv.grandTotal;
         const prod = productsList.find(p => p.id === inv.productId);
         const cost = prod ? Number(prod.purchaseRate) : 0;
-        // Gross = Total Revenue - Cost
+        
+        // Gross Profit = Revenue (incl courier) - Purchase Cost
         grossProfit += (inv.grandTotal - cost);
-        // Net = Total Revenue - Cost - Shipping
-        netProfit += (inv.grandTotal - cost - 60); // 60 is the assumed courier charge
+        
+        // Net Profit = Revenue - Purchase Cost - Courier
+        netProfit += (inv.grandTotal - cost - inv.courier);
       });
       document.getElementById("statSaleQty").innerText = totalQty;
+      document.getElementById("statSaleValue").innerText = "₹" + totalRevenue.toLocaleString("en-IN");
       document.getElementById("statGrossProfit").innerText = "₹" + grossProfit.toLocaleString("en-IN");
       document.getElementById("statNetProfit").innerText = "₹" + netProfit.toLocaleString("en-IN");
 
@@ -803,7 +812,7 @@
             <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${inv.title || "-"}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">${inv.custName || "-"}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.price}</td>
-            <td style="padding:10px; border-bottom:1px solid #eee;">₹60</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.courier}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">${inv.qty}</td>
             <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
           </tr>`;
