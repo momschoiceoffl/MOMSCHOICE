@@ -479,30 +479,32 @@
     }
 
     function getNormalizedInvoices() {
-      // If Google Sheets fails, fallback to reading directly from products.json
-      if (!Array.isArray(invoiceLog) || invoiceLog.length === 0) {
-        const soldProducts = productsList.filter(p => (p.status || '').toUpperCase() === 'SOLD');
-        return soldProducts.map(p => {
-          const d = new Date();
-          const ds = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-          const invStr = "INV-" + p.id.substring(0, 6) + "-" + Math.floor(Math.random()*1000);
-          const grand = Number(p.price) + 60; // Add default shipping for display
-          return {
-            rawDate: ds,
-            dateStr: ds,
-            invNum: invStr,
-            custName: "Sold via Store",
-            custPhone: "-",
-            custAddr: "-",
-            productId: p.id,
-            title: p.title,
-            qty: 1,
-            price: Number(p.price) || 0,
-            grandTotal: grand
-          };
-        });
+      // 1. If Google Sheets returned invoices, use them immediately.
+      if (Array.isArray(invoiceLog) && invoiceLog.length > 0) {
+        return invoiceLog.map(normalizeInvoice).filter(Boolean);
       }
-      return invoiceLog.map(normalizeInvoice).filter(Boolean);
+      
+      // 2. Fallback: Read from products.json ONLY if Google Sheets fails.
+      const soldProducts = productsList.filter(p => (p.status || '').toUpperCase() === 'SOLD');
+      return soldProducts.map(p => {
+        const d = new Date();
+        const ds = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+        const invStr = "INV-" + p.id.substring(0, 6) + "-" + Math.floor(Math.random()*1000);
+        const grand = Number(p.price) + 60;
+        return {
+          rawDate: ds,
+          dateStr: ds,
+          invNum: invStr,
+          custName: "Sold via Store",
+          custPhone: "-",
+          custAddr: "-",
+          productId: p.id,
+          title: p.title,
+          qty: 1,
+          price: Number(p.price) || 0,
+          grandTotal: grand
+        };
+      });
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -864,11 +866,28 @@
 
     async function fetchCatalog() {
       try {
+        // Fetch Products
         const res = await fetch("http://localhost:5000/get-products");
         productsList = await res.json();
 
-        const invRes = await fetch("http://localhost:5000/get-invoices");
-        invoiceLog = invRes.ok ? await invRes.json() : [];
+        // Fetch Invoices and FORCE it to parse as JSON
+        try {
+          const invRes = await fetch("http://localhost:5000/get-invoices");
+          const textData = await invRes.text();
+          
+          // Check if the response is actually JSON (starts with '[' or '{')
+          if (textData.trim().startsWith('[') || textData.trim().startsWith('{')) {
+            const parsed = JSON.parse(textData);
+            // Ensure it's an array
+            invoiceLog = Array.isArray(parsed) ? parsed : [];
+          } else {
+            console.warn("Invoice endpoint did not return JSON:", textData.substring(0, 50));
+            invoiceLog = [];
+          }
+        } catch (e) {
+          console.error("Invoice fetch failed:", e);
+          invoiceLog = [];
+        }
 
         renderDashboard();
         renderCatalog();
