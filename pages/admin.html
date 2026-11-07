@@ -110,6 +110,7 @@
       <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
       <button class="nav-btn" onclick="switchTab('catalog', this)">📦 Store Catalog</button>
+      <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
     </div>
   </nav>
 
@@ -157,20 +158,6 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>Brand Logo</h2>
-        <p class="sub">Upload your store logo — saved to Cloudinary</p>
-        <div class="preview-grid" id="logoPreview" style="min-height:100px; grid-template-columns: 1fr;">
-          <span id="logoPlaceholder">No Logo Uploaded</span>
-        </div>
-        <input type="file" id="logoInput" accept="image/*" onchange="uploadLogo(event)">
-        <label>Current Logo URL</label>
-        <input type="text" id="logoUrlDisplay" readonly placeholder="Upload a logo to get the URL">
-        <div class="row">
-          <button class="btn btn-success" onclick="copyLogoUrl()">📋 Copy Logo URL</button>
-          <button class="btn btn-outline" onclick="openLogoInNewTab()">🔗 Open in New Tab</button>
-        </div>
-      </div>
     </div>
 
     <!-- TAB 2: ADD PRODUCT -->
@@ -266,7 +253,25 @@
       </div>
     </div>
 
-    <!-- TAB 6: CATALOG -->
+    <!-- TAB 6: SETTINGS -->
+    <div id="tab-settings" class="tab-content">
+      <div class="card">
+        <h2>Brand Logo</h2>
+        <p class="sub">Upload your store logo — saved to Cloudinary</p>
+        <div class="preview-grid" id="logoPreview" style="min-height:100px; grid-template-columns: 1fr;">
+          <span id="logoPlaceholder">No Logo Uploaded</span>
+        </div>
+        <input type="file" id="logoInput" accept="image/*" onchange="uploadLogo(event)">
+        <label>Current Logo URL</label>
+        <input type="text" id="logoUrlDisplay" readonly placeholder="Upload a logo to get the URL">
+        <div class="row">
+          <button class="btn btn-success" onclick="copyLogoUrl()">📋 Copy Logo URL</button>
+          <button class="btn btn-outline" onclick="openLogoInNewTab()">🔗 Open in New Tab</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: CATALOG -->
     <div id="tab-catalog" class="tab-content">
       <div class="card">
         <h2>Store Catalog</h2>
