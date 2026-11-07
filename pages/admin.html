@@ -463,18 +463,23 @@
     function normalizeInvoice(inv) {
       if (!Array.isArray(inv)) return null;
       const num = (v) => Number(String(v == null ? 0 : v).replace(/[^0-9.\-]/g, '')) || 0;
+      
+      // Your Invoice Log has 11 columns:
+      // 0: Date, 1: InvNo, 2: OrderID(Auto), 3: CustName, 4: Phone, 5: Address, 
+      // 6: ProdID, 7: Title, 8: Qty, 9: Price, 10: GrandTotal
+      
       return {
         rawDate:   inv[0] || '',
         dateStr:   String(inv[0] || '').split(',')[0].trim(),
         invNum:    String(inv[1] || '').trim(),
-        custName:  String(inv[2] || '').trim(),
-        custPhone: String(inv[3] || '').trim(),
-        custAddr:  String(inv[4] || '').trim(),
-        productId: String(inv[5] || '').trim(),
-        title:     String(inv[6] || '').trim(),
-        qty:       num(inv[7]) || 1,
-        price:     num(inv[8]),
-        grandTotal:num(inv[9])
+        custName:  String(inv[3] || '').trim(),  // Shifted to 3
+        custPhone: String(inv[4] || '').trim(),  // Shifted to 4
+        custAddr:  String(inv[5] || '').trim(),  // Shifted to 5
+        productId: String(inv[6] || '').trim(),  // Shifted to 6
+        title:     String(inv[7] || '').trim(),  // Shifted to 7
+        qty:       num(inv[8]) || 1,             // Shifted to 8
+        price:     num(inv[9]),                  // Shifted to 9
+        grandTotal:num(inv[10])                  // Shifted to 10
       };
     }
 
