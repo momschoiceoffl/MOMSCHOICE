@@ -649,13 +649,12 @@
             <tbody>`;
 
       filtered.forEach(p => {
-        const statusStr = (p.status || 'AVAILABLE').toUpperCase() === 'SOLD' ? `<span style="background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-size:0.7rem;font-weight:bold;margin-left:6px;">SOLD</span>` : '';
         html += `<tr>
           <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${p._date}</td>
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${p.id}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${p.category || "-"}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${p.subcategory || "-"}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${p.title}${statusStr}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${p.title}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">₹${p._rate}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">1</td>
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${p._rate}</td>
@@ -687,8 +686,9 @@
 
       const allNorm = getNormalizedInvoices();
       const enriched = allNorm.map(inv => {
+        // Safe substring category in case product was deleted
         const prod = productsList.find(p => p.id === inv.productId);
-        return { ...inv, _cat: prod ? prod.category : "-" };
+        return { ...inv, _cat: prod ? prod.category : "Sarees" };
       });
 
       let filtered = enriched.filter(inv => {
@@ -794,11 +794,13 @@
     function parseDate(dateStr) {
       if (!dateStr) return new Date();
       const s = String(dateStr).trim();
-      const parts = s.split(',')[0].split('/');
+      // Handle DD/MM/YYYY, HH:MM:SS (from Google Sheets)
+      const parts = s.split(',')[0].trim().split('/');
       if (parts.length === 3) {
         const d = Number(parts[0]), m = Number(parts[1]), y = Number(parts[2]);
         if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return new Date(y, m - 1, d);
       }
+      // Handle YYYY-MM-DD
       const ymd = s.split('-');
       if (ymd.length === 3) {
         return new Date(Number(ymd[0]), Number(ymd[1]) - 1, Number(ymd[2]));
