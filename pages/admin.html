@@ -6,6 +6,32 @@
   <title>Mom's Pick - Seller Admin</title>
   <style>
     :root { --primary: #92400e; --surface: #fff; --bg: #f8fafc; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --accent: #d97706; --success: #16a34a; --danger: #dc2626; }
+    
+    /* Excel Filter Dropdown */
+    .excel-filter-wrap { position: relative; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+    .excel-filter-wrap:hover { color: var(--primary); }
+    .excel-popup {
+      display: none; position: absolute; top: 100%; left: 0; z-index: 1000;
+      background: #fff; border: 1px solid #ccc; border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; padding: 8px;
+      font-weight: normal; font-size: 0.8rem; color: #333;
+    }
+    .excel-popup.show { display: block; }
+    .excel-popup input {
+      width: 100%; padding: 6px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; outline: none;
+    }
+    .excel-popup ul {
+      list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto;
+    }
+    .excel-popup li {
+      padding: 6px 8px; cursor: pointer; border-radius: 2px;
+    }
+    .excel-popup li:hover { background: #f1f5f9; }
+    .excel-popup li.selected { background: #e2e8f0; font-weight: bold; }
+    .excel-popup .clear-btn {
+      margin-top: 8px; width: 100%; padding: 6px; background: #f1f5f9; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold;
+    }
+    .excel-popup .clear-btn:hover { background: #e2e8f0; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
 
@@ -343,6 +369,33 @@
     let currentImageFiles = [];
     let existingImageUrls = [];
     let myChart = null;
+    
+    // Filter State
+    let purFilters = {};
+    let saleFilters = {};
+
+    function clearFilters(type) {
+      if (type === 'pur') purFilters = {};
+      if (type === 'sale') saleFilters = {};
+    }
+
+    function toggleExcelFilter(type, col, event) {
+      event.stopPropagation();
+      const popupId = `popup-${type}-${col}`;
+      document.querySelectorAll('.excel-popup').forEach(p => {
+        if (p.id !== popupId) p.classList.remove('show');
+      });
+      const popup = document.getElementById(popupId);
+      if (popup) popup.classList.toggle('show');
+    }
+
+    function applyExcelFilter(type, col, val) {
+      if (type === 'pur') purFilters[col] = val;
+      if (type === 'sale') saleFilters[col] = val;
+      document.querySelectorAll('.excel-popup').forEach(p => p.classList.remove('show'));
+      if (type === 'pur') renderPurchases();
+      if (type === 'sale') renderSales();
+    }
 
     function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -552,21 +605,23 @@
         const dateStr = match ? match[1] : "";
         const formattedDate = dateStr ? `20${dateStr.substring(0,2)}-${dateStr.substring(2,4)}-${dateStr.substring(4,6)}` : "";
         
-        // Time filter
         if (timeFilter !== 'all') {
           const d = parseDate(formattedDate);
           if (!filterByTime(d, timeFilter)) return false;
         }
+        
+        // Apply Excel Filters
+        if (purFilters.date && !formattedDate.includes(purFilters.date)) return false;
+        if (purFilters.id && !p.id.includes(purFilters.id)) return false;
+        if (purFilters.cat && p.category !== purFilters.cat) return false;
+        if (purFilters.name && !p.title.includes(purFilters.name)) return false;
+        
         return true;
       });
 
-      // Calculate Tiles
-      let totalVal = 0;
-      let totalQty = 0;
-      filtered.forEach(p => {
-        totalVal += Number(p.purchaseRate) || 0;
-        totalQty += 1;
-      });
+      // Tiles
+      let totalVal = 0; let totalQty = 0;
+      filtered.forEach(p => { totalVal += Number(p.purchaseRate) || 0; totalQty += 1; });
       document.getElementById("statPurValue").innerText = "₹" + totalVal.toLocaleString("en-IN");
       document.getElementById("statPurQty").innerText = totalQty;
 
@@ -580,18 +635,40 @@
         else if (purSortCol === 'cat') { valA = a.category || ""; valB = b.category || ""; }
         else if (purSortCol === 'name') { valA = a.title; valB = b.title; }
         else if (purSortCol === 'rate') { valA = Number(a.purchaseRate) || 0; valB = Number(b.purchaseRate) || 0; }
-        
         if (valA < valB) return purSortAsc ? -1 : 1;
         if (valA > valB) return purSortAsc ? 1 : -1;
         return 0;
       });
 
-      let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
+      // Unique values for Excel Filters
+      const uniqueCats = [...new Set(productsList.map(p => p.category))].filter(Boolean);
+      
+      let html = `<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+        <button onclick="clearFilters('pur'); renderPurchases();" style="padding:5px 10px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer; font-size:0.8rem;">Clear All Filters</button>
+      </div>`;
+      
+      html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
         <thead>
           <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">Date ${purSortCol==='date'?(purSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('pur', 'date', event)">Date ${purSortCol==='date'?(purSortAsc?'▲':'▼'):''} ▼</div>
+              <div class="excel-popup" id="popup-pur-date">
+                <input type="text" placeholder="Search Date..." oninput="document.getElementById('list-pur-date').querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                <ul id="list-pur-date">
+                  ${[...new Set(productsList.map(p => { const m = p.id.match(/[A-Z]{2}(\\d{6})/); return m ? '20'+m[1].substring(0,2)+'-'+m[1].substring(2,4)+'-'+m[1].substring(4,6) : ''; }))].filter(Boolean).map(v => `<li onclick="applyExcelFilter('pur', 'date', '${v}')">${v}</li>`).join('')}
+                </ul>
+              </div>
+            </th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('id')">Unique ID ${purSortCol==='id'?(purSortAsc?'▲':'▼'):'⇅'}</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">Category ${purSortCol==='cat'?(purSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('pur', 'cat', event)">Category ${purSortCol==='cat'?(purSortAsc?'▲':'▼'):''} ▼</div>
+              <div class="excel-popup" id="popup-pur-cat">
+                <input type="text" placeholder="Search..." oninput="document.getElementById('list-pur-cat').querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                <ul id="list-pur-cat">
+                  ${uniqueCats.map(v => `<li onclick="applyExcelFilter('pur', 'cat', '${v}')">${v}</li>`).join('')}
+                </ul>
+              </div>
+            </th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Sub Cat</th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('name')">Product Name ${purSortCol==='name'?(purSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('rate')">Purchase Rate ${purSortCol==='rate'?(purSortAsc?'▲':'▼'):'⇅'}</th>
@@ -606,8 +683,6 @@
         const dateStr = match ? match[1] : "";
         const formattedDate = dateStr ? `20${dateStr.substring(0,2)}-${dateStr.substring(2,4)}-${dateStr.substring(4,6)}` : "Unknown";
         const rate = Number(p.purchaseRate) || 0;
-        
-        // Shrink text sizes slightly to keep date on one line
         html += `<tr>
           <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${formattedDate}</td>
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${p.id}</td>
@@ -625,8 +700,6 @@
     function renderSales() {
       const container = document.getElementById("salesList");
       const timeFilter = document.getElementById("salesTimeFilter").value;
-
-      // Safety check: If invoiceLog is not an array, force it to empty to prevent hanging
       if (!Array.isArray(invoiceLog)) invoiceLog = [];
 
       let filtered = invoiceLog.filter(inv => {
@@ -635,6 +708,12 @@
           const d = parseDate(dateStr);
           if (!filterByTime(d, timeFilter)) return false;
         }
+        
+        // Apply Excel Filters
+        if (saleFilters.date && !dateStr.includes(saleFilters.date)) return false;
+        if (saleFilters.id && !(inv[1]||"").includes(saleFilters.id)) return false;
+        if (saleFilters.name && !(inv[3]||"").includes(saleFilters.name) && !(inv[7]||"").includes(saleFilters.name)) return false;
+        
         return true;
       });
 
@@ -665,10 +744,22 @@
         return 0;
       });
 
-      let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
+      let html = `<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+        <button onclick="clearFilters('sale'); renderSales();" style="padding:5px 10px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer; font-size:0.8rem;">Clear All Filters</button>
+      </div>`;
+
+      html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
         <thead>
           <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">Date ${saleSortCol==='date'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('sale', 'date', event)">Date ${saleSortCol==='date'?(saleSortAsc?'▲':'▼'):''} ▼</div>
+              <div class="excel-popup" id="popup-sale-date">
+                <input type="text" placeholder="Search Date..." oninput="document.getElementById('list-sale-date').querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                <ul id="list-sale-date">
+                  ${[...new Set(invoiceLog.map(inv => (inv[0]||"").split(',')[0]))].filter(Boolean).map(v => `<li onclick="applyExcelFilter('sale', 'date', '${v}')">${v}</li>`).join('')}
+                </ul>
+              </div>
+            </th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('id')">Invoice ID ${saleSortCol==='id'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name ${saleSortCol==='prod'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
