@@ -66,17 +66,36 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path.startswith("/get-invoices"):
             try:
-                # Force Python to fetch the raw data directly from Google
-                req = Request(GSHEET_URL + "?action=get_invoices")
+                import csv
+                import io
+                
+                # 1. Extract the Sheet ID from your GSHEET_URL
+                # Format: https://script.google.com/macros/s/AKfy.../exec
+                # We need the Google Sheet ID. Get it from your .env or hardcode it here.
+                SHEET_ID = "1A2b3C4d5E6fG7hI8jK9lM0nO1pQ2rS3tU4vW5xY6z" # <--- PASTE YOUR SHEET ID HERE
+                
+                # 2. Fetch the raw CSV from Google Sheets
+                csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Invoice%20Log"
+                req = Request(csv_url)
                 with urlopen(req) as r:
-                    data = r.read()
-                # Return exactly what Google sent (JSON array)
+                    csv_data = r.read().decode('utf-8')
+                
+                # 3. Parse CSV into a list of rows
+                reader = csv.reader(io.StringIO(csv_data))
+                rows = list(reader)
+                
+                # 4. Remove the header row
+                if len(rows) > 0:
+                    rows = rows[1:]
+                
+                # 5. Send back as JSON
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
-                self.wfile.write(data)
+                self.wfile.write(json.dumps(rows).encode())
             except Exception as e:
+                print("INVOICE CSV FETCH ERROR:", e)
                 self._json(500, {"error": str(e)})
             return
             
