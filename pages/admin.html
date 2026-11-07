@@ -751,12 +751,13 @@
         totalRevenue += inv.grandTotal;
         const prod = productsList.find(p => p.id === inv.productId);
         const cost = prod ? (Number(prod.purchaseRate) || 0) : 0;
+        const courier = inv.courier || 0;
         
         // Gross Profit = Grand Total - Purchase Cost
         grossProfit += (inv.grandTotal - cost);
         
         // Net Profit = Grand Total - Purchase Cost - Courier
-        netProfit += (inv.grandTotal - cost - inv.courier);
+        netProfit += (inv.grandTotal - cost - courier);
       });
       
       // Safety guard against NaN
@@ -825,7 +826,7 @@
             <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${inv.title || "-"}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">${inv.custName || "-"}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.price}</td>
-            <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.courier}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.courier || 0}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">${inv.qty}</td>
             <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
           </tr>`;
@@ -1254,7 +1255,7 @@
 
       const invNumber = `${catPrefix}-${dateStr}-${seqPart}`;
 
-      // 2. Save the Invoice to Google Sheets
+      // 2. Save the Invoice to Google Sheets (12 columns with Courier)
       const invoiceData = {
         action: "save_invoice",
         invNumber: invNumber,
@@ -1266,6 +1267,7 @@
         title: product.title,
         qty: qty,
         price: product.price,
+        courier: Number(shipping),
         grandTotal: (Number(product.price) * Number(qty)) + Number(shipping)
       };
 
