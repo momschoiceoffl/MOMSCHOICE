@@ -72,7 +72,7 @@ class Handler(SimpleHTTPRequestHandler):
                 # 1. Extract the Sheet ID from your GSHEET_URL
                 # Format: https://script.google.com/macros/s/AKfy.../exec
                 # We need the Google Sheet ID. Get it from your .env or hardcode it here.
-                SHEET_ID = "1A2b3C4d5E6fG7hI8jK9lM0nO1pQ2rS3tU4vW5xY6z" # <--- PASTE YOUR SHEET ID HERE
+                SHEET_ID = "AKfycbyleYQlJtnZbyMVpmLoxy4tBZLBIP3sSOb-TsGceQjxjllqM6rpp7pc3Fo4SmWBHTkI" # <--- PASTE YOUR SHEET ID HERE
                 
                 # 2. Fetch the raw CSV from Google Sheets
                 csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Invoice%20Log"
