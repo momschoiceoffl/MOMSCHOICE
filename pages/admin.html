@@ -279,13 +279,13 @@
         
         <!-- Tiles -->
         <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
-          <div class="stat-card" style="border-left-color: #3b82f6;">
-            <h3>Total Purchase Value</h3>
-            <div class="value" id="statPurValue" style="color: #3b82f6;">₹0</div>
-          </div>
           <div class="stat-card" style="border-left-color: #d97706;">
             <h3>Total Items Purchased</h3>
             <div class="value" id="statPurQty" style="color: #d97706;">0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #3b82f6;">
+            <h3>Total Purchase Value</h3>
+            <div class="value" id="statPurValue" style="color: #3b82f6;">₹0</div>
           </div>
         </div>
 
@@ -310,14 +310,18 @@
         </div>
 
         <!-- Tiles -->
-        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
-          <div class="stat-card" style="border-left-color: #16a34a;">
-            <h3>Total Sales Revenue</h3>
-            <div class="value" id="statSaleValue" style="color: #16a34a;">₹0</div>
-          </div>
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 20px;">
           <div class="stat-card" style="border-left-color: #dc2626;">
             <h3>Total Items Sold</h3>
             <div class="value" id="statSaleQty" style="color: #dc2626;">0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #3b82f6;">
+            <h3>Gross Profit</h3>
+            <div class="value" id="statGrossProfit" style="color: #3b82f6;">₹0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #16a34a;">
+            <h3>Net Profit</h3>
+            <div class="value" id="statNetProfit" style="color: #16a34a;">₹0</div>
           </div>
         </div>
 
@@ -728,10 +732,19 @@
         return true;
       });
 
-      let totalVal = 0, totalQty = 0;
-      filtered.forEach(inv => { totalVal += inv.grandTotal; totalQty += inv.qty; });
-      document.getElementById("statSaleValue").innerText = "₹" + totalVal.toLocaleString("en-IN");
+      let totalQty = 0, grossProfit = 0, netProfit = 0;
+      filtered.forEach(inv => {
+        totalQty += inv.qty;
+        const prod = productsList.find(p => p.id === inv.productId);
+        const cost = prod ? Number(prod.purchaseRate) : 0;
+        // Gross = Total Revenue - Cost
+        grossProfit += (inv.grandTotal - cost);
+        // Net = Total Revenue - Cost - Shipping
+        netProfit += (inv.grandTotal - cost - 60); // 60 is the assumed courier charge
+      });
       document.getElementById("statSaleQty").innerText = totalQty;
+      document.getElementById("statGrossProfit").innerText = "₹" + grossProfit.toLocaleString("en-IN");
+      document.getElementById("statNetProfit").innerText = "₹" + netProfit.toLocaleString("en-IN");
 
       filtered.sort((a, b) => {
         let va, vb;
@@ -772,6 +785,7 @@
                 <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name</th>
                 <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('cust')">Customer</th>
                 <th style="padding:10px; border-bottom:2px solid #ccc;">Sale Rate</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Courier</th>
                 <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
                 <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('total')">Total Amount</th>
               </tr>
@@ -789,6 +803,7 @@
             <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${inv.title || "-"}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">${inv.custName || "-"}</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.price}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">₹60</td>
             <td style="padding:10px; border-bottom:1px solid #eee;">${inv.qty}</td>
             <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
           </tr>`;
@@ -972,7 +987,7 @@
           <span>▼</span>
         </div>`;
         
-        html += `<div class="date-content" id="stock-${catSafeId}" style="padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
+        html += `<div class="date-content" id="stock-${catSafeId}" style="padding: 10px; display: none; grid-template-columns: 1fr 1fr; gap: 15px;">`;
 
         ['AVAILABLE', 'SOLD'].forEach(status => {
           const isSold = status === "SOLD";
@@ -1289,7 +1304,7 @@
         
         html += `<div class="category-group">`;
         html += `<div class="date-header" onclick="document.getElementById('cat-${catSafeId}').classList.toggle('open'); this.classList.toggle('open')"><span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span></div>`;
-        html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: #fff; border-radius: 0 0 8px 8px;">`;
+        html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: #fff; border-radius: 0 0 8px 8px; display: none;">`;
 
         // Level 2: Side-by-Side Split (Available vs Sold)
         html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
