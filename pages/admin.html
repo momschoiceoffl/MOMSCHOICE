@@ -380,6 +380,7 @@
     }
 
     function toggleExcelFilter(type, col, event) {
+      event.preventDefault();
       event.stopPropagation();
       const popupId = `popup-${type}-${col}`;
       document.querySelectorAll('.excel-popup').forEach(p => {
@@ -389,12 +390,51 @@
       if (popup) popup.classList.toggle('show');
     }
 
-    function applyExcelFilter(type, col, val) {
+    function applyExcelFilter(type, col, val, event) {
+      if (event) { event.preventDefault(); event.stopPropagation(); }
       if (type === 'pur') purFilters[col] = val;
       if (type === 'sale') saleFilters[col] = val;
       document.querySelectorAll('.excel-popup').forEach(p => p.classList.remove('show'));
       if (type === 'pur') renderPurchases();
       if (type === 'sale') renderSales();
+    }
+
+    // Close any open excel popup when clicking anywhere else
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.excel-filter-wrap') && !e.target.closest('.excel-popup')) {
+        document.querySelectorAll('.excel-popup').forEach(p => p.classList.remove('show'));
+      }
+    });
+
+    /* ═══════════════════════════════════════════════════════════════
+       INVOICE NORMALIZER — SINGLE SOURCE OF TRUTH
+       Google Sheet "Invoice Log" column order:
+         [0] Date          [1] Invoice No    [2] Customer Name
+         [3] Phone         [4] Address       [5] Product ID
+         [6] Title         [7] Qty           [8] Price
+         [9] Grand Total
+       ═══════════════════════════════════════════════════════════════ */
+    function normalizeInvoice(inv) {
+      if (!Array.isArray(inv)) return null;
+      const num = (v) => Number(String(v == null ? 0 : v).replace(/[^0-9.\-]/g, '')) || 0;
+      return {
+        rawDate:    inv[0] || '',
+        dateStr:    String(inv[0] || '').split(',')[0].trim(),
+        invNum:     String(inv[1] || '').trim(),
+        custName:   String(inv[2] || '').trim(),
+        custPhone:  String(inv[3] || '').trim(),
+        custAddr:   String(inv[4] || '').trim(),
+        productId:  String(inv[5] || '').trim(),
+        title:      String(inv[6] || '').trim(),
+        qty:        num(inv[7]) || 1,
+        price:      num(inv[8]),
+        grandTotal: num(inv[9])
+      };
+    }
+
+    function getNormalizedInvoices() {
+      if (!Array.isArray(invoiceLog)) return [];
+      return invoiceLog.map(normalizeInvoice).filter(Boolean);
     }
 
     function switchTab(tabId, btnEl) {
@@ -481,47 +521,35 @@
 
     function renderDashboard() {
       const filter = document.getElementById("dashTimeFilter").value;
-      
-      // 1. CALCULATE STATS
-      let totalPurchasedQty = 0;
-      let totalPurchasedVal = 0;
-      let totalSoldQty = 0;
-      let totalSoldVal = 0;
+
+      // --- Available stock: current snapshot (ignores date filter) ---
       let availQty = 0;
       let availVal = 0;
-
-      // Available stock is current snapshot (ignores date filter)
       productsList.forEach(p => {
-        if (p.status !== 'SOLD') {
-          availQty++;
+        if ((p.status || 'AVAILABLE').toUpperCase() !== 'SOLD') {
+          availQty += 1;
           availVal += (Number(p.purchaseRate) || 0);
         }
       });
 
-      // Sold & Purchased requires invoice filtering
-      const filteredInvoices = invoiceLog.filter(inv => filterByTime(inv[0], filter));
-      
+      // --- Sales from Invoice Log (shared with Sales tab) ---
+      const allInvoices = getNormalizedInvoices();
+      const filteredInvoices = allInvoices.filter(inv => filterByTime(inv.rawDate || inv.dateStr, filter));
+
+      let totalSoldQty = 0;
+      let totalSoldVal = 0;
+      let totalCOGS = 0;
+
       filteredInvoices.forEach(inv => {
-        // Invoice array structure: [Date, InvNo, OrderID, Name, Phone, Addr, ProdID, Title, Qty, Price, Total]
-        const qty = Number(inv[8]) || 1;
-        const priceStr = String(inv[9] || 0).replace(/[^0-9.]/g, ''); // Remove ₹
-        const totalStr = String(inv[10] || 0).replace(/[^0-9.]/g, ''); // Remove ₹
-        
-        const price = Number(priceStr);
-        const grandTotal = Number(totalStr);
-        
-        totalSoldQty += qty;
-        totalSoldVal += grandTotal; // This will now correctly add the grand total
-        
-        const prod = productsList.find(p => p.id === inv[6]);
-        if (prod) totalPurchasedVal += (Number(prod.purchaseRate) || 0) * qty;
+        totalSoldQty += inv.qty;
+        totalSoldVal += inv.grandTotal;
+        const prod = productsList.find(p => p.id === inv.productId);
+        if (prod) totalCOGS += (Number(prod.purchaseRate) || 0) * inv.qty;
       });
 
-      // Total purchased includes available stock + sold stock (within time frame)
-      // For simplicity, we sum available + sold in this timeframe
-      totalPurchasedQty = availQty + totalSoldQty;
-      // Rough estimate of total purchase value
-      productsList.forEach(p => { totalPurchasedVal += (Number(p.purchaseRate) || 0); });
+      // Purchased stock in the window = available snapshot + sold qty in window
+      const totalPurchasedQty = availQty + totalSoldQty;
+      const totalPurchasedVal = availVal + totalCOGS;
 
       document.getElementById("statSoldQty").innerText = totalSoldQty + " Qty";
       document.getElementById("statSoldVal").innerText = totalSoldVal.toLocaleString("en-IN");
@@ -530,20 +558,20 @@
       document.getElementById("statAvailQty").innerText = availQty + " Qty";
       document.getElementById("statAvailVal").innerText = availVal.toLocaleString("en-IN");
 
-      // 2. DRAW CHART
+      // 2. DRAW CHART (uses normalized {qty, dateStr})
       drawChart(filteredInvoices, filter);
     }
 
     function drawChart(invoices, filter) {
       const ctx = document.getElementById('stockChart').getContext('2d');
-      
-      // Group by Date
+
+      // Group by Date — invoices here are ALREADY normalized objects
       const grouped = {};
       invoices.forEach(inv => {
-        const d = parseDate(inv[0]);
-        const dateStr = `${d.getDate()}-${d.getMonth()+1}`;
-        if (!grouped[dateStr]) grouped[dateStr] = 0;
-        grouped[dateStr] += Number(inv[8]) || 1; // Qty
+        const d = parseDate(inv.rawDate || inv.dateStr);
+        const key = `${d.getDate()}-${d.getMonth()+1}`;
+        if (!grouped[key]) grouped[key] = 0;
+        grouped[key] += inv.qty || 1;
       });
 
       const labels = Object.keys(grouped).sort((a,b) => {
@@ -604,18 +632,18 @@
         const match = p.id.match(/[A-Z]{2}(\d{6})/);
         const dateStr = match ? match[1] : "";
         const formattedDate = dateStr ? `20${dateStr.substring(0,2)}-${dateStr.substring(2,4)}-${dateStr.substring(4,6)}` : "";
-        
+
         if (timeFilter !== 'all') {
           const d = parseDate(formattedDate);
           if (!filterByTime(d, timeFilter)) return false;
         }
-        
+
         // Apply Excel Filters
         if (purFilters.date && !formattedDate.includes(purFilters.date)) return false;
         if (purFilters.id && !p.id.includes(purFilters.id)) return false;
         if (purFilters.cat && p.category !== purFilters.cat) return false;
         if (purFilters.name && !p.title.includes(purFilters.name)) return false;
-        
+
         return true;
       });
 
@@ -642,31 +670,35 @@
 
       // Unique values for Excel Filters
       const uniqueCats = [...new Set(productsList.map(p => p.category))].filter(Boolean);
-      
+      const uniquePurDates = [...new Set(productsList.map(p => {
+        const m = p.id.match(/[A-Z]{2}(\d{6})/);
+        return m ? `20${m[1].substring(0,2)}-${m[1].substring(2,4)}-${m[1].substring(4,6)}` : '';
+      }))].filter(Boolean);
+
       let html = `<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
         <button onclick="clearFilters('pur'); renderPurchases();" style="padding:5px 10px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer; font-size:0.8rem;">Clear All Filters</button>
       </div>`;
-      
+
       html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
         <thead>
           <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">
-              <div class="excel-filter-wrap" onclick="toggleExcelFilter('pur', 'date', event)">Date ${purSortCol==='date'?(purSortAsc?'▲':'▼'):''} ▼</div>
-              <div class="excel-popup" id="popup-pur-date">
-                <input type="text" placeholder="Search Date..." oninput="document.getElementById('list-pur-date').querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
-                <ul id="list-pur-date">
-                  ${[...new Set(productsList.map(p => { const m = p.id.match(/[A-Z]{2}(\\d{6})/); return m ? '20'+m[1].substring(0,2)+'-'+m[1].substring(2,4)+'-'+m[1].substring(4,6) : ''; }))].filter(Boolean).map(v => `<li onclick="applyExcelFilter('pur', 'date', '${v}')">${v}</li>`).join('')}
-                </ul>
+            <th style="padding:10px; border-bottom:2px solid #ccc;">
+              <span style="cursor:pointer;" onclick="sortPurchase('date')">Date ${purSortCol==='date'?(purSortAsc?'▲':'▼'):'⇅'}</span>
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('pur', 'date', event)" style="float:right;">▼
+                <div class="excel-popup" id="popup-pur-date">
+                  <input type="text" placeholder="Search Date..." oninput="this.parentElement.querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                  <ul>${uniquePurDates.map(v => `<li onclick="applyExcelFilter('pur', 'date', '${v}', event)">${v}</li>`).join('')}</ul>
+                </div>
               </div>
             </th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('id')">Unique ID ${purSortCol==='id'?(purSortAsc?'▲':'▼'):'⇅'}</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">
-              <div class="excel-filter-wrap" onclick="toggleExcelFilter('pur', 'cat', event)">Category ${purSortCol==='cat'?(purSortAsc?'▲':'▼'):''} ▼</div>
-              <div class="excel-popup" id="popup-pur-cat">
-                <input type="text" placeholder="Search..." oninput="document.getElementById('list-pur-cat').querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
-                <ul id="list-pur-cat">
-                  ${uniqueCats.map(v => `<li onclick="applyExcelFilter('pur', 'cat', '${v}')">${v}</li>`).join('')}
-                </ul>
+            <th style="padding:10px; border-bottom:2px solid #ccc;">
+              <span style="cursor:pointer;" onclick="sortPurchase('cat')">Category ${purSortCol==='cat'?(purSortAsc?'▲':'▼'):'⇅'}</span>
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('pur', 'cat', event)" style="float:right;">▼
+                <div class="excel-popup" id="popup-pur-cat">
+                  <input type="text" placeholder="Search..." oninput="this.parentElement.querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                  <ul>${uniqueCats.map(v => `<li onclick="applyExcelFilter('pur', 'cat', '${v}', event)">${v}</li>`).join('')}</ul>
+                </div>
               </div>
             </th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Sub Cat</th>
@@ -700,49 +732,44 @@
     function renderSales() {
       const container = document.getElementById("salesList");
       const timeFilter = document.getElementById("salesTimeFilter").value;
-      if (!Array.isArray(invoiceLog)) invoiceLog = [];
 
-      let filtered = invoiceLog.filter(inv => {
-        const dateStr = (inv[0] || "").split(',')[0];
+      // Normalize first — this is the shared, correct column mapping
+      let filtered = getNormalizedInvoices().filter(inv => {
         if (timeFilter !== 'all') {
-          const d = parseDate(dateStr);
+          const d = parseDate(inv.rawDate || inv.dateStr);
           if (!filterByTime(d, timeFilter)) return false;
         }
-        
-        // Apply Excel Filters
-        if (saleFilters.date && !dateStr.includes(saleFilters.date)) return false;
-        if (saleFilters.id && !(inv[1]||"").includes(saleFilters.id)) return false;
-        if (saleFilters.name && !(inv[3]||"").includes(saleFilters.name) && !(inv[7]||"").includes(saleFilters.name)) return false;
-        
+        if (saleFilters.date && !inv.dateStr.includes(saleFilters.date)) return false;
+        if (saleFilters.id && !inv.invNum.includes(saleFilters.id)) return false;
+        if (saleFilters.prod && !inv.productId.includes(saleFilters.prod)) return false;
+        if (saleFilters.name && !inv.title.includes(saleFilters.name) && !inv.custName.includes(saleFilters.name)) return false;
         return true;
       });
 
-      // Calculate Tiles
+      // Tiles (now correct: grandTotal from [9], qty from [7])
       let totalVal = 0;
       let totalQty = 0;
-      filtered.forEach(inv => {
-        totalVal += Number(String(inv[10] || 0).replace(/[^0-9.]/g, '')) || 0;
-        totalQty += Number(inv[8]) || 1;
-      });
+      filtered.forEach(inv => { totalVal += inv.grandTotal; totalQty += inv.qty; });
       document.getElementById("statSaleValue").innerText = "₹" + totalVal.toLocaleString("en-IN");
       document.getElementById("statSaleQty").innerText = totalQty;
 
       // Sorting
       filtered.sort((a, b) => {
         let valA, valB;
-        if (saleSortCol === 'date') { valA = parseDate(a[0]); valB = parseDate(b[0]); }
-        else if (saleSortCol === 'id') { valA = a[1] || ""; valB = b[1] || ""; }
-        else if (saleSortCol === 'prod') { valA = a[7] || ""; valB = b[7] || ""; }
-        else if (saleSortCol === 'cust') { valA = a[3] || ""; valB = b[3] || ""; }
-        else if (saleSortCol === 'total') { 
-          valA = Number(String(a[10] || 0).replace(/[^0-9.]/g, '')); 
-          valB = Number(String(b[10] || 0).replace(/[^0-9.]/g, '')); 
-        }
-        
+        if (saleSortCol === 'date') { valA = parseDate(a.rawDate || a.dateStr); valB = parseDate(b.rawDate || b.dateStr); }
+        else if (saleSortCol === 'id') { valA = a.invNum; valB = b.invNum; }
+        else if (saleSortCol === 'prod') { valA = a.title; valB = b.title; }
+        else if (saleSortCol === 'cust') { valA = a.custName; valB = b.custName; }
+        else if (saleSortCol === 'total') { valA = a.grandTotal; valB = b.grandTotal; }
         if (valA < valB) return saleSortAsc ? -1 : 1;
         if (valA > valB) return saleSortAsc ? 1 : -1;
         return 0;
       });
+
+      // Unique values for filter dropdowns (from normalized data)
+      const allNorm = getNormalizedInvoices();
+      const uniqueDates = [...new Set(allNorm.map(i => i.dateStr))].filter(Boolean);
+      const uniqueInvs  = [...new Set(allNorm.map(i => i.invNum))].filter(Boolean);
 
       let html = `<div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
         <button onclick="clearFilters('sale'); renderSales();" style="padding:5px 10px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer; font-size:0.8rem;">Clear All Filters</button>
@@ -751,16 +778,24 @@
       html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
         <thead>
           <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">
-              <div class="excel-filter-wrap" onclick="toggleExcelFilter('sale', 'date', event)">Date ${saleSortCol==='date'?(saleSortAsc?'▲':'▼'):''} ▼</div>
-              <div class="excel-popup" id="popup-sale-date">
-                <input type="text" placeholder="Search Date..." oninput="document.getElementById('list-sale-date').querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
-                <ul id="list-sale-date">
-                  ${[...new Set(invoiceLog.map(inv => (inv[0]||"").split(',')[0]))].filter(Boolean).map(v => `<li onclick="applyExcelFilter('sale', 'date', '${v}')">${v}</li>`).join('')}
-                </ul>
+            <th style="padding:10px; border-bottom:2px solid #ccc;">
+              <span style="cursor:pointer;" onclick="sortSale('date')">Date ${saleSortCol==='date'?(saleSortAsc?'▲':'▼'):'⇅'}</span>
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('sale', 'date', event)" style="float:right;">▼
+                <div class="excel-popup" id="popup-sale-date">
+                  <input type="text" placeholder="Search Date..." oninput="this.parentElement.querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                  <ul>${uniqueDates.map(v => `<li onclick="applyExcelFilter('sale', 'date', '${v}', event)">${v}</li>`).join('')}</ul>
+                </div>
               </div>
             </th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('id')">Invoice ID ${saleSortCol==='id'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc;">
+              <span style="cursor:pointer;" onclick="sortSale('id')">Invoice ID ${saleSortCol==='id'?(saleSortAsc?'▲':'▼'):'⇅'}</span>
+              <div class="excel-filter-wrap" onclick="toggleExcelFilter('sale', 'id', event)" style="float:right;">▼
+                <div class="excel-popup" id="popup-sale-id">
+                  <input type="text" placeholder="Search Invoice..." oninput="this.parentElement.querySelectorAll('li').forEach(li => li.style.display = li.innerText.toLowerCase().includes(this.value.toLowerCase()) ? '' : 'none')">
+                  <ul>${uniqueInvs.map(v => `<li onclick="applyExcelFilter('sale', 'id', '${v}', event)">${v}</li>`).join('')}</ul>
+                </div>
+              </div>
+            </th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name ${saleSortCol==='prod'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('cust')">Customer ${saleSortCol==='cust'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
@@ -770,32 +805,19 @@
           </tr>
         </thead>
         <tbody>`;
-      
-      filtered.forEach(inv => {
-        const dateStr = (inv[0] || "").split(',')[0];
-        const invId = inv[1] || "-";
-        const prodId = inv[6] || "";
-        const prodTitle = inv[7] || "-";
-        const custName = inv[3] || "-";
-        const qty = Number(inv[8]) || 1;
-        const rateStr = String(inv[9] || 0).replace(/[^0-9.]/g, '');
-        const totalStr = String(inv[10] || 0).replace(/[^0-9.]/g, '');
-        
-        const rate = Number(rateStr) || 0;
-        const total = Number(totalStr) || 0;
-        
-        const prod = productsList.find(p => p.id === prodId);
-        const cat = prod ? prod.category : "-";
 
+      filtered.forEach(inv => {
+        const prod = productsList.find(p => p.id === inv.productId);
+        const cat = prod ? prod.category : "-";
         html += `<tr>
-          <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${dateStr}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${invId}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${inv.dateStr}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${inv.invNum || "-"}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${cat}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${prodTitle}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${custName}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">₹${rate}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${qty}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${total}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${inv.title || "-"}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee;">${inv.custName || "-"}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.price}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee;">${inv.qty}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
         </tr>`;
       });
       container.innerHTML = html + `</tbody></table>`;
