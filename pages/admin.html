@@ -767,6 +767,89 @@
 
 
 
+    function switchTab(tabId, btnEl) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      const tab = document.getElementById('tab-' + tabId);
+      if (tab) tab.classList.add('active');
+      if (btnEl) btnEl.classList.add('active');
+
+      if (tabId === 'dashboard') renderDashboard();
+      if (tabId === 'purchases') renderPurchases();
+      if (tabId === 'sales')     renderSales();
+      if (tabId === 'stock')     renderStockAvailability();
+      if (tabId === 'catalog')   renderCatalog();
+    }
+
+    function parseDate(dateStr) {
+      if (!dateStr) return new Date();
+      const s = String(dateStr).trim();
+      const parts = s.split(',')[0].split('/');
+      if (parts.length === 3) {
+        const d = Number(parts[0]), m = Number(parts[1]), y = Number(parts[2]);
+        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return new Date(y, m - 1, d);
+      }
+      const ymd = s.split('-');
+      if (ymd.length === 3) {
+        return new Date(Number(ymd[0]), Number(ymd[1]) - 1, Number(ymd[2]));
+      }
+      const fallback = new Date(s);
+      return isNaN(fallback.getTime()) ? new Date() : fallback;
+    }
+
+    function filterByTime(dateVal, filter) {
+      if (filter === 'all') return true;
+      const now = new Date();
+      const d = (dateVal instanceof Date) ? dateVal : parseDate(dateVal);
+      if (isNaN(d.getTime())) return false;
+      if (filter === 'week') {
+        const diff = now - d;
+        return diff >= 0 && diff <= 7 * 24 * 60 * 60 * 1000;
+      }
+      if (filter === 'month') {
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }
+      if (filter === 'year') {
+        return d.getFullYear() === now.getFullYear();
+      }
+      return true;
+    }
+
+    async function checkBackendHealth() {
+      const badge = document.getElementById("syncStatusBadge");
+      if (!badge) return;
+      try {
+        const res = await fetch("http://localhost:5000/health", { cache: "no-store" });
+        const data = await res.json();
+        if (data.ok) { badge.className = "bg-green"; badge.innerText = "🟢 Auto-Sync Active"; }
+        else { badge.className = "bg-yellow"; badge.innerText = "🟡 Backend up, no token"; }
+      } catch {
+        badge.className = "bg-red"; badge.innerText = "🔴 Backend offline";
+      }
+    }
+
+    async function fetchCatalog() {
+      try {
+        const res = await fetch("http://localhost:5000/get-products");
+        productsList = await res.json();
+
+        const invRes = await fetch("http://localhost:5000/get-invoices");
+        invoiceLog = invRes.ok ? await invRes.json() : [];
+
+        renderDashboard();
+        renderCatalog();
+      } catch (e) {
+        const el = document.getElementById("itemsContainer");
+        if (el) el.innerHTML = "<p style='color:red;'>Could not load data. Is the backend running?</p>";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchCatalog();
+      checkBackendHealth();
+      loadSavedLogo();
+    });
+
     function renderStockAvailability() {
       const container = document.getElementById("stockContainer");
       
