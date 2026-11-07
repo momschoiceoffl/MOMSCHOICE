@@ -5,6 +5,6 @@ echo.
 echo   Admin:  http://localhost:5000/admin.html
 echo   Store:  http://localhost:5000/index.html
 echo.
-start "" http://localhost:5000/admin.html
+start "" http://localhost:5000/pages/admin.html
 py server.py || python server.py
 pause

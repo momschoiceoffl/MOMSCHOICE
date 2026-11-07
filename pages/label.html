@@ -241,22 +241,16 @@
       document.getElementById("lblShipping").innerText = shipping === 0 ? "Free" : "₹" + shipping;
       document.getElementById("lblTotal").innerText = "₹" + grandTotal;
 
-      // Generate QR Code Text (Formatted nicely for mobile scanners)
-      const qrText = `MOM'S CHOICE INVOICE\n` +
-                     `-------------------\n` +
-                     `Invoice: ${invNum}\n` +
-                     `Customer: ${cName}\n` +
-                     `Phone: ${cPhone}\n` +
-                     `Address: ${cAddr}\n` +
-                     `-------------------\n` +
-                     `Item: ${pTitle} (x${qty})\n` +
-                     `Amount: Rs.${itemTotal}\n` +
-                     `Shipping: Rs.${shipping}\n` +
-                     `-------------------\n` +
-                     `GRAND TOTAL: Rs.${grandTotal}\n` +
-                     `Thank you!`;
+      // Generate Link to Digital Receipt Page
+      const baseUrl = window.location.origin + window.location.pathname.replace("pages/label.html", "");
+      const receiptUrl = `${baseUrl}pages/receipt.html?invNum=${encodeURIComponent(invNum)}` +
+                         `&cName=${encodeURIComponent(cName)}` +
+                         `&title=${encodeURIComponent(pTitle)}` +
+                         `&qty=${qty}` +
+                         `&price=${pPrice}` +
+                         `&shipping=${shipping}`;
 
-      const qrString = encodeURIComponent(qrText);
+      const qrString = encodeURIComponent(receiptUrl);
       document.getElementById("lblQr").src = "https://quickchart.io/qr?text=" + qrString + "&size=300&margin=1";
     });
   </script>

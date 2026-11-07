@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Receipt | Mom's Choice</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .receipt-card { background: #fff; width: 100%; max-width: 400px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+    .receipt-header { background: #6B0F2E; color: #fff; padding: 24px; text-align: center; }
+    .receipt-header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+    .receipt-header p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.8; }
+    .receipt-body { padding: 24px; }
+    .status-badge { background: #dcfce7; color: #166534; font-weight: 800; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; letter-spacing: 1px; }
+    .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+    .detail-row span:first-child { color: #64748b; }
+    .detail-row span:last-child { font-weight: 600; color: #0f172a; text-align: right; }
+    .divider { border-top: 1px dashed #cbd5e1; margin: 20px 0; }
+    .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: 900; color: #6B0F2E; margin-top: 10px; }
+    .footer { text-align: center; font-size: 12px; color: #94a3b8; padding: 20px; border-top: 1px solid #f1f5f9; }
+  </style>
+</head>
+<body>
+
+  <div class="receipt-card">
+    <div class="receipt-header">
+      <h1>MOM'S CHOICE</h1>
+      <p>Digital Receipt</p>
+    </div>
+    
+    <div class="receipt-body">
+      <div class="status-badge">✓ PAYMENT VERIFIED</div>
+      
+      <div class="detail-row">
+        <span>Invoice No:</span>
+        <span id="rInvNum">INV-0000</span>
+      </div>
+      <div class="detail-row">
+        <span>Date:</span>
+        <span id="rDate">00/00/0000</span>
+      </div>
+      <div class="detail-row">
+        <span>Customer:</span>
+        <span id="rCustName">Customer Name</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="detail-row">
+        <span>Item:</span>
+        <span id="rItem" style="max-width: 60%;">Product Name</span>
+      </div>
+      <div class="detail-row">
+        <span>Qty:</span>
+        <span id="rQty">1</span>
+      </div>
+      <div class="detail-row">
+        <span>Amount:</span>
+        <span id="rAmount">₹0</span>
+      </div>
+      <div class="detail-row">
+        <span>Shipping:</span>
+        <span id="rShipping">₹0</span>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="total-row">
+        <span>TOTAL PAID:</span>
+        <span id="rTotal">₹0</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      Thank you for shopping with Mom's Choice!<br>
+      For any queries, contact us on WhatsApp.
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      const invNum = params.get("invNum") || "INV-0000";
+      const cName = params.get("cName") || "Customer";
+      const pTitle = params.get("title") || "Product";
+      const qty = params.get("qty") || "1";
+      const pPrice = Number(params.get("price")) || 0;
+      const shipping = Number(params.get("shipping")) || 0;
+      const grandTotal = pPrice + shipping;
+
+      document.getElementById("rInvNum").innerText = invNum;
+      document.getElementById("rDate").innerText = new Date().toLocaleDateString();
+      document.getElementById("rCustName").innerText = cName;
+      document.getElementById("rItem").innerText = pTitle;
+      document.getElementById("rQty").innerText = qty;
+      document.getElementById("rAmount").innerText = "₹" + pPrice;
+      document.getElementById("rShipping").innerText = shipping === 0 ? "Free" : "₹" + shipping;
+      document.getElementById("rTotal").innerText = "₹" + grandTotal;
+    });
+  </script>
+</body>
+</html>
