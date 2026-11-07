@@ -385,98 +385,45 @@
       if (type === 'sale') saleFilters = {};
     }
 
-    function togglePurFilterPanel(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      toggleFilterDrawer('pur');
+    function toggleFilter(type) {
+      const panel = document.getElementById(type + 'InlineFilter');
+      if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     }
 
-    function toggleSaleFilterPanel(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      toggleFilterDrawer('sale');
-    }
-
-    function toggleFilterDrawer(type) {
-      const id = type + 'FilterDrawer';
-      const drawer = document.getElementById(id);
-      const backdrop = document.getElementById(type + 'FilterBackdrop');
-      if (!drawer) return;
-      const isOpen = drawer.classList.contains('open');
-      // Close all drawers first
-      document.querySelectorAll('.filter-drawer').forEach(d => d.classList.remove('open'));
-      document.querySelectorAll('.filter-drawer-backdrop').forEach(b => b.classList.remove('open'));
-      if (!isOpen) {
-        drawer.classList.add('open');
-        if (backdrop) backdrop.classList.add('open');
-      }
-    }
-
-    function closeFilterDrawer(type) {
-      const drawer = document.getElementById(type + 'FilterDrawer');
-      const backdrop = document.getElementById(type + 'FilterBackdrop');
-      if (drawer) drawer.classList.remove('open');
-      if (backdrop) backdrop.classList.remove('open');
-    }
-
-    function renderFilterDrawer(type, sections) {
+    function renderInlineFilter(type, sections) {
       const store = type === 'pur' ? purFilters : saleFilters;
       const activeCount = Object.keys(store).length;
-      const activeChips = Object.entries(store).map(([k, v]) => {
-        const label = (sections.find(s => s.col === k) || {}).label || k;
-        return `<span style="display:inline-flex; align-items:center; gap:6px; background:#fef3c7; color:#92400e; font-size:0.72rem; font-weight:700; padding:4px 8px; border-radius:12px; margin:3px 3px 3px 0;">
-          ${label}: ${v}
-          <span onclick="pickFilter('${type}', '${k}', '${String(v).replace(/'/g,"\\'")}', event)" style="cursor:pointer; font-weight:900;">×</span>
-        </span>`;
-      }).join('');
-
+      
       let body = '';
       sections.forEach(sec => {
+        if (sec.values.length === 0) return;
         const active = store[sec.col];
-        body += `<div style="margin-bottom:14px;">
-          <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; color:#92400e; margin-bottom:6px;">${sec.label}${active ? ` <span style="color:#dc2626;">— ${active}</span>` : ''}</div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            ${sec.values.length === 0
-              ? `<span style="font-size:0.78rem; color:#94a3b8;">No values</span>`
-              : sec.values.map(v => {
+        body += `<div style="margin-bottom:16px;">
+          <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; color:#92400e; margin-bottom:6px;">${sec.label}</div>
+          <div style="display:flex; flex-direction:column; gap:2px; max-height:180px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:6px;">
+            ${sec.values.map(v => {
                   const safe = String(v).replace(/'/g, "\\'").replace(/"/g, '&quot;');
                   const sel = active === v;
-                  return `<button onclick="pickFilter('${type}', '${sec.col}', '${safe}', event)" style="padding:5px 10px; font-size:0.78rem; border-radius:16px; cursor:pointer; border:1px solid ${sel ? '#d97706' : '#cbd5e1'}; background:${sel ? '#d97706' : '#fff'}; color:${sel ? '#fff' : '#334155'}; font-weight:${sel ? '700' : '500'};">${v}</button>`;
+                  return `<div onclick="pickFilter('${type}', '${sec.col}', '${safe}', event)" style="padding:6px 10px; font-size:0.78rem; cursor:pointer; background:${sel ? '#fef3c7' : '#fff'}; color:${sel ? '#92400e' : '#334155'}; font-weight:${sel ? '700' : '500'};" onmouseover="if(!this.style.fontWeight.includes('700')) this.style.background='#f8fafc'" onmouseout="if(!this.style.fontWeight.includes('700')) this.style.background='#fff'">
+                    ${v} ${sel ? '<span style="float:right;color:#dc2626;">×</span>' : ''}
+                  </div>`;
                 }).join('')}
           </div>
         </div>`;
       });
 
       return `
-        <div id="${type}FilterBackdrop" class="filter-drawer-backdrop" onclick="closeFilterDrawer('${type}')" style="position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:998; display:none;"></div>
-        <div id="${type}FilterDrawer" class="filter-drawer" style="position:fixed; top:0; right:0; height:100vh; width:340px; max-width:90vw; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,0.15); z-index:999; transform:translateX(100%); transition:transform 0.25s ease; display:flex; flex-direction:column;">
-          <div style="padding:16px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#fef3c7;">
-            <div>
-              <div style="font-size:1rem; font-weight:800; color:#92400e;">Filter ${type === 'pur' ? 'Purchases' : 'Sales'}</div>
-              <div style="font-size:0.72rem; color:#b45309;">${activeCount} active</div>
-            </div>
-            <button onclick="closeFilterDrawer('${type}')" style="border:none; background:none; font-size:1.4rem; cursor:pointer; color:#92400e;">×</button>
+        <button onclick="toggleFilter('${type}')" style="width:100%; margin-bottom:10px; padding:8px; background:#fff; border:1px solid #d97706; color:#d97706; font-weight:700; border-radius:6px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px;">
+          ▼ ${type === 'pur' ? 'Filter Purchases' : 'Filter Sales'} ${activeCount ? `(${activeCount})` : ''}
+        </button>
+        <div id="${type}InlineFilter" style="display:${activeCount ? 'block' : 'none'}; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <strong style="font-size:0.9rem; color:#92400e;">Filters</strong>
+            ${activeCount ? `<button onclick="clearFilters('${type}'); render${type === 'pur' ? 'Purchases' : 'Sales'}();" style="background:none; border:none; color:#dc2626; font-size:0.75rem; font-weight:700; cursor:pointer;">Clear All</button>` : ''}
           </div>
-          <div style="padding:14px; overflow-y:auto; flex:1;">
-            ${activeCount ? `<div style="margin-bottom:14px; padding:8px; background:#fef9ee; border:1px solid #fde68a; border-radius:8px;">
-              <div style="font-size:0.7rem; font-weight:800; color:#92400e; margin-bottom:4px;">ACTIVE</div>
-              ${activeChips}
-            </div>` : ''}
-            ${body}
-          </div>
-          <div style="padding:12px; border-top:1px solid #e2e8f0; display:flex; gap:8px;">
-            <button onclick="clearFilters('${type}'); render${type === 'pur' ? 'Purchases' : 'Sales'}();" style="flex:1; padding:10px; border:1px solid #dc2626; background:#fff; color:#dc2626; font-weight:700; border-radius:8px; cursor:pointer; font-size:0.85rem;">Clear All</button>
-            <button onclick="closeFilterDrawer('${type}')" style="flex:1; padding:10px; background:#16a34a; color:#fff; border:none; font-weight:700; border-radius:8px; cursor:pointer; font-size:0.85rem;">Done</button>
-          </div>
+          ${body || '<div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:10px;">No filters available</div>'}
         </div>
-        <style>
-          .filter-drawer.open { transform: translateX(0) !important; }
-          .filter-drawer-backdrop.open { display: block !important; }
-        </style>`;
-    }
-
-    function renderFloatingFilterBtn(type, activeCount) {
-      return `<button onclick="toggleFilterDrawer('${type}')" style="position:fixed; right:20px; bottom:20px; z-index:997; padding:12px 18px; background:${activeCount ? '#d97706' : '#fff'}; color:${activeCount ? '#fff' : '#d97706'}; border:2px solid #d97706; border-radius:50px; font-weight:800; font-size:0.9rem; cursor:pointer; box-shadow:0 6px 20px rgba(217,119,6,0.35); display:flex; align-items:center; gap:8px;">
-        <span style="font-size:1.1rem;">▼</span> Filter${activeCount ? ` (${activeCount})` : ''}
-      </button>`;
+      `;
     }
 
     function pickFilter(type, col, val, e) {
@@ -641,13 +588,10 @@
       });
 
       let filtered = enriched.filter(p => {
-        if (timeFilter !== 'all') {
-          if (!filterByTime(parseDate(p._date), timeFilter)) return false;
-        }
+        if (timeFilter !== 'all' && !filterByTime(parseDate(p._date), timeFilter)) return false;
         if (purFilters.cat && p.category !== purFilters.cat) return false;
         if (purFilters.sub && p.subcategory !== purFilters.sub) return false;
         if (purFilters.date && p._date !== purFilters.date) return false;
-        if (purFilters.name && p.title !== purFilters.name) return false;
         return true;
       });
 
@@ -670,39 +614,36 @@
 
       const uniq = arr => [...new Set(arr.filter(Boolean))].sort();
 
-      // DRILL-DOWN: each step's values narrow based on previous picks
       const baseForCat  = enriched;
       const baseForSub  = purFilters.cat ? enriched.filter(p => p.category === purFilters.cat) : enriched;
       const baseForDate = baseForSub.filter(p => !purFilters.sub || p.subcategory === purFilters.sub);
-      const baseForName = baseForDate.filter(p => !purFilters.date || p._date === purFilters.date);
 
       const sections = [
         { col: 'cat',  label: 'Category',     values: uniq(baseForCat.map(p => p.category)) },
         { col: 'sub',  label: 'Sub Category', values: uniq(baseForSub.map(p => p.subcategory)) },
-        { col: 'date', label: 'Date',         values: uniq(baseForDate.map(p => p._date)) },
-        { col: 'name', label: 'Product Name', values: uniq(baseForName.map(p => p.title)) }
+        { col: 'date', label: 'Date',         values: uniq(baseForDate.map(p => p._date)) }
       ];
       const activeCount = Object.keys(purFilters).length;
 
-      let html = `
-        <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
-          Showing <strong>${filtered.length}</strong> of ${productsList.length} items${activeCount ? ` • <span style="color:#d97706;">${activeCount} filter${activeCount>1?'s':''} active</span>` : ''}
-        </div>`;
-
-      html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
-        <thead>
-          <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">Date</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('id')">Unique ID</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">Category</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Sub Cat</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('name')">Product Name</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('rate')">Purchase Rate</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Total Amount</th>
-          </tr>
-        </thead>
-        <tbody>`;
+      let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
+        <div style="flex:1; overflow:hidden;">
+          <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
+            Showing <strong>${filtered.length}</strong> of ${productsList.length} items${activeCount ? ` • <span style="color:#d97706;">${activeCount} active</span>` : ''}
+          </div>
+          <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
+            <thead>
+              <tr style="background:#f1f5f9; text-align:left;">
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">Date</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('id')">Unique ID</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">Category</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Sub Cat</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('name')">Product Name</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('rate')">Purchase Rate</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>`;
 
       filtered.forEach(p => {
         html += `<tr>
@@ -716,7 +657,12 @@
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${p._rate}</td>
         </tr>`;
       });
-      container.innerHTML = html + `</tbody></table>` + renderFloatingFilterBtn('pur', activeCount) + renderFilterDrawer('pur', sections);
+      html += `</tbody></table></div>
+        <div style="width:260px; flex-shrink:0;">
+          ${renderInlineFilter('pur', sections)}
+        </div>
+      </div>`;
+      container.innerHTML = html;
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -742,14 +688,10 @@
       });
 
       let filtered = enriched.filter(inv => {
-        if (timeFilter !== 'all') {
-          if (!filterByTime(parseDate(inv.rawDate || inv.dateStr), timeFilter)) return false;
-        }
+        if (timeFilter !== 'all' && !filterByTime(parseDate(inv.rawDate || inv.dateStr), timeFilter)) return false;
         if (saleFilters.cat && inv._cat !== saleFilters.cat) return false;
         if (saleFilters.prod && inv.title !== saleFilters.prod) return false;
         if (saleFilters.date && inv.dateStr !== saleFilters.date) return false;
-        if (saleFilters.inv && inv.invNum !== saleFilters.inv) return false;
-        if (saleFilters.cust && inv.custName !== saleFilters.cust) return false;
         return true;
       });
 
@@ -772,41 +714,36 @@
 
       const uniq = arr => [...new Set(arr.filter(Boolean))].sort();
 
-      // DRILL-DOWN: each step narrows based on previous picks
       const baseForCat  = enriched;
       const baseForProd = saleFilters.cat ? enriched.filter(i => i._cat === saleFilters.cat) : enriched;
       const baseForDate = baseForProd.filter(i => !saleFilters.prod || i.title === saleFilters.prod);
-      const baseForInv  = baseForDate.filter(i => !saleFilters.date || i.dateStr === saleFilters.date);
-      const baseForCust = baseForInv.filter(i => !saleFilters.inv || i.invNum === saleFilters.inv);
 
       const sections = [
         { col: 'cat',  label: 'Category',   values: uniq(baseForCat.map(i => i._cat)) },
         { col: 'prod', label: 'Product',    values: uniq(baseForProd.map(i => i.title)) },
-        { col: 'date', label: 'Date',       values: uniq(baseForDate.map(i => i.dateStr)) },
-        { col: 'inv',  label: 'Invoice No', values: uniq(baseForInv.map(i => i.invNum)) },
-        { col: 'cust', label: 'Customer',   values: uniq(baseForCust.map(i => i.custName)) }
+        { col: 'date', label: 'Date',       values: uniq(baseForDate.map(i => i.dateStr)) }
       ];
       const activeCount = Object.keys(saleFilters).length;
 
-      let html = `
-        <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
-          Showing <strong>${filtered.length}</strong> of ${enriched.length} invoices${activeCount ? ` • <span style="color:#d97706;">${activeCount} filter${activeCount>1?'s':''} active</span>` : ''}
-        </div>`;
-
-      html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
-        <thead>
-          <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">Date</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('id')">Invoice ID</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('cust')">Customer</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Sale Rate</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('total')">Total Amount</th>
-          </tr>
-        </thead>
-        <tbody>`;
+      let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
+        <div style="flex:1; overflow:hidden;">
+          <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
+            Showing <strong>${filtered.length}</strong> of ${enriched.length} invoices${activeCount ? ` • <span style="color:#d97706;">${activeCount} active</span>` : ''}
+          </div>
+          <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
+            <thead>
+              <tr style="background:#f1f5f9; text-align:left;">
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">Date</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('id')">Invoice ID</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('cust')">Customer</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Sale Rate</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
+                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('total')">Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>`;
 
       filtered.forEach(inv => {
         html += `<tr>
@@ -820,7 +757,12 @@
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
         </tr>`;
       });
-      container.innerHTML = html + `</tbody></table>` + renderFloatingFilterBtn('sale', activeCount) + renderFilterDrawer('sale', sections);
+      html += `</tbody></table></div>
+        <div style="width:260px; flex-shrink:0;">
+          ${renderInlineFilter('sale', sections)}
+        </div>
+      </div>`;
+      container.innerHTML = html;
     }
 
 
