@@ -470,12 +470,20 @@
        ═══════════════════════════════════════════════════════════════ */
     function normalizeInvoice(inv) {
       if (!Array.isArray(inv)) return null;
-      const num = (v) => Number(String(v == null ? 0 : v).replace(/[^0-9.\-]/g, '')) || 0;
+      const num = (v) => {
+        if (v === undefined || v === null || v === '') return 0;
+        const n = Number(String(v).replace(/[^0-9.\-]/g, ''));
+        return isNaN(n) ? 0 : n;
+      };
       
-      // 12 columns now (added Courier):
-      // 0: Date, 1: InvNo, 2: OrderID, 3: CustName, 4: Phone, 5: Address, 
-      // 6: ProdID, 7: Title, 8: Qty, 9: Price, 10: Courier, 11: GrandTotal
+      // 12 columns: 0:Date, 1:InvNo, 2:OrderID, 3:Name, 4:Phone, 5:Addr, 6:ProdID, 7:Title, 8:Qty, 9:Price, 10:Courier, 11:GrandTotal
+      const price = num(inv[9]);
+      const courier = num(inv[10]);
+      let grandTotal = num(inv[11]);
       
+      // Fallback if Grand Total is missing
+      if (grandTotal === 0) grandTotal = price + courier;
+
       return {
         rawDate:   inv[0] || '',
         dateStr:   String(inv[0] || '').split(',')[0].trim(),
@@ -486,9 +494,9 @@
         productId: String(inv[6] || '').trim(),
         title:     String(inv[7] || '').trim(),
         qty:       num(inv[8]) || 1,
-        price:     num(inv[9]),
-        courier:   num(inv[10]),   // 11th column: Courier
-        grandTotal:num(inv[11])    // 12th column: Grand Total
+        price:     price,
+        courier:   courier,
+        grandTotal: grandTotal
       };
     }
 
@@ -742,14 +750,19 @@
         totalQty += inv.qty;
         totalRevenue += inv.grandTotal;
         const prod = productsList.find(p => p.id === inv.productId);
-        const cost = prod ? Number(prod.purchaseRate) : 0;
+        const cost = prod ? (Number(prod.purchaseRate) || 0) : 0;
         
-        // Gross Profit = Revenue (incl courier) - Purchase Cost
+        // Gross Profit = Grand Total - Purchase Cost
         grossProfit += (inv.grandTotal - cost);
         
-        // Net Profit = Revenue - Purchase Cost - Courier
+        // Net Profit = Grand Total - Purchase Cost - Courier
         netProfit += (inv.grandTotal - cost - inv.courier);
       });
+      
+      // Safety guard against NaN
+      if (isNaN(grossProfit)) grossProfit = 0;
+      if (isNaN(netProfit)) netProfit = 0;
+
       document.getElementById("statSaleQty").innerText = totalQty;
       document.getElementById("statSaleValue").innerText = "₹" + totalRevenue.toLocaleString("en-IN");
       document.getElementById("statGrossProfit").innerText = "₹" + grossProfit.toLocaleString("en-IN");
