@@ -1002,10 +1002,12 @@
         const res = await fetch("http://localhost:5000/get-products");
         productsList = await res.json();
 
-        // 2. Fetch Invoices from Python (which fetches from Google Sheets)
+        // 2. Fetch Invoices from Python (with cache busting)
         try {
-          const invRes = await fetch("http://localhost:5000/get-invoices");
+          const invRes = await fetch("http://localhost:5000/get-invoices?t=" + Date.now(), { cache: "no-store" });
           const textData = await invRes.text();
+          
+          console.log("RAW INVOICE DATA FROM PYTHON:", textData.substring(0, 300));
           
           if (textData.trim().startsWith('[') || textData.trim().startsWith('{')) {
             let parsed = JSON.parse(textData);
@@ -1014,6 +1016,7 @@
             }
             invoiceLog = Array.isArray(parsed) ? parsed : [];
             console.log("SUCCESS: Retrieved", invoiceLog.length, "invoices from Python.");
+            console.log("FIRST INVOICE:", invoiceLog[0]);
           } else {
             console.error("Python returned invalid JSON.");
             invoiceLog = [];
