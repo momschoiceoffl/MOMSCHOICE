@@ -391,13 +391,15 @@
       filteredInvoices.forEach(inv => {
         // Invoice array structure: [Date, InvNo, OrderID, Name, Phone, Addr, ProdID, Title, Qty, Price, Total]
         const qty = Number(inv[8]) || 1;
-        const price = Number(inv[9]) || 0;
-        const grandTotal = Number(inv[10]) || 0;
+        const priceStr = String(inv[9] || 0).replace(/[^0-9.]/g, ''); // Remove ₹
+        const totalStr = String(inv[10] || 0).replace(/[^0-9.]/g, ''); // Remove ₹
+        
+        const price = Number(priceStr);
+        const grandTotal = Number(totalStr);
         
         totalSoldQty += qty;
-        totalSoldVal += grandTotal;
-
-        // Estimate purchase value for sold items
+        totalSoldVal += grandTotal; // This will now correctly add the grand total
+        
         const prod = productsList.find(p => p.id === inv[6]);
         if (prod) totalPurchasedVal += (Number(prod.purchaseRate) || 0) * qty;
       });
