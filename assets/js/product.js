@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) { document.getElementById("pdTitle").innerText = "Product not found"; return; }
   try {
-    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
+    const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
   } catch (e) { document.getElementById("pdTitle").innerText = "Could not load products"; return; }
 
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── AUTO-SYNC: Check for DB changes every 30 seconds ──
   setInterval(async () => {
     try {
-      const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
+      const res = await fetch(`products.json?_t=${Date.now()}`);
       const newData = await res.json();
       
       if (JSON.stringify(newData) !== JSON.stringify(products)) {

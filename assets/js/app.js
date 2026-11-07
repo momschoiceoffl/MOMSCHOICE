@@ -200,7 +200,7 @@ function setupFooterLinks() {
 /* ═══════════════════════════════════════════════════════════════ */
 async function fetchProducts() {
   try {
-    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
+    const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
     
     // Fetch categories
@@ -231,7 +231,7 @@ async function fetchProducts() {
 // ── AUTO-SYNC: Check for DB changes every 30 seconds ──
 setInterval(async () => {
   try {
-    const res = await fetch(`http://localhost:5000/get-products?_t=${Date.now()}`);
+    const res = await fetch(`products.json?_t=${Date.now()}`);
     const newData = await res.json();
     
     // Only update if data actually changed (saves bandwidth & prevents flickering)
