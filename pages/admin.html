@@ -592,28 +592,67 @@
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
 
-      const grouped = {};
+      const timeFilter = document.getElementById("dashTimeFilter").value;
+      const now = new Date();
+      
+      let labels = [];
+      let data = [];
+      let maxRevenue = 0;
+
+      // 1. Generate X-Axis Labels based on Time Filter
+      if (timeFilter === 'week') {
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now);
+          d.setDate(d.getDate() - i);
+          labels.push(`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}`);
+        }
+      } else if (timeFilter === 'month') {
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+        for (let i = 1; i <= daysInMonth; i++) {
+          labels.push(`${String(i).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}`);
+        }
+      } else if (timeFilter === 'year') {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        labels = months;
+      } else {
+        // All Time -> just show months
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        labels = months;
+      }
+
+      // 2. Map Invoices to X-Axis Slots
+      data = new Array(labels.length).fill(0);
+
       invoices.forEach(inv => {
         const d = parseDate(inv.rawDate || inv.dateStr);
-        const key = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}`;
-        grouped[key] = (grouped[key] || 0) + inv.grandTotal; // Sum the Grand Total (Revenue)
+        const revenue = inv.grandTotal || 0;
+        if (revenue > 0) maxRevenue += revenue;
+
+        if (timeFilter === 'week' || timeFilter === 'month') {
+          const dayStr = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}`;
+          const idx = labels.indexOf(dayStr);
+          if (idx !== -1) data[idx] += revenue;
+        } else {
+          // Year / All time
+          const idx = d.getMonth();
+          if (idx >= 0 && idx < 12) data[idx] += revenue;
+        }
       });
 
-      const labels = Object.keys(grouped).sort((a, b) => {
-        const [d1, m1] = a.split('-').map(Number);
-        const [d2, m2] = b.split('-').map(Number);
-        return new Date(2026, m1 - 1, d1) - new Date(2026, m2 - 1, d2);
-      });
-      const data = labels.map(l => grouped[l]);
+      // 3. Calculate Y-Axis Step Size Dynamically
+      let stepSize = 100;
+      if (maxRevenue > 10000) stepSize = 1000;
+      if (maxRevenue > 100000) stepSize = 10000;
+      if (maxRevenue > 1000000) stepSize = 100000;
 
       if (myChart) myChart.destroy();
       myChart = new Chart(ctx, {
-        type: 'bar', // Changed to bar chart for better revenue visibility
+        type: 'bar',
         data: {
-          labels: labels.length ? labels : ['No Data'],
+          labels: labels,
           datasets: [{
             label: 'Revenue (₹)',
-            data: data.length ? data : [0],
+            data: data,
             backgroundColor: 'rgba(107, 15, 46, 0.7)',
             borderColor: '#6B0F2E',
             borderWidth: 1,
@@ -637,9 +676,16 @@
             y: { 
               beginAtZero: true,
               ticks: { 
+                stepSize: stepSize,
                 callback: function(value) { return '₹' + value; }
               } 
-            } 
+            },
+            x: {
+              ticks: {
+                autoSkip: true,
+                maxTicksLimit: 15 // Prevents X-axis from being too crowded
+              }
+            }
           }
         }
       });
