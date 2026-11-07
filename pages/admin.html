@@ -540,6 +540,7 @@
           title: p.title,
           qty: 1,
           price: Number(p.price) || 0,
+          courier: 60, // Force fallback courier to 60 so cards show numbers
           grandTotal: grand
         };
       });
@@ -952,6 +953,24 @@
     // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT URL HERE (from your .env file)
     const GOOGLE_SHEET_URL = "PASTE_YOUR_URL_HERE";
 
+    // Force the Admin Panel to fetch directly from Google Sheets on load
+    async function forceFetchInvoices() {
+      try {
+        const res = await fetch(GOOGLE_SHEET_URL + "?action=get_invoices");
+        const textData = await res.text();
+        if (textData.trim().startsWith('[')) {
+          let parsed = JSON.parse(textData);
+          if (Array.isArray(parsed) && parsed.length === 1 && Array.isArray(parsed[0])) parsed = parsed[0];
+          invoiceLog = parsed;
+          console.log("FORCED FETCH: Success. Loaded", invoiceLog.length, "invoices.");
+        } else {
+          console.error("FORCED FETCH failed. GS returned HTML.");
+        }
+      } catch (e) {
+        console.error("FORCED FETCH error:", e);
+      }
+    }
+
     async function fetchCatalog() {
       try {
         // 1. Fetch Products from Python (Local)
@@ -988,8 +1007,9 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchCatalog();
+    document.addEventListener("DOMContentLoaded", async () => {
+      await forceFetchInvoices(); // Fetch direct from Google Sheets first
+      await fetchCatalog();       // Then fetch products and render
       checkBackendHealth();
       loadSavedLogo();
     });
