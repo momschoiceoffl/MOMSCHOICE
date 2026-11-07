@@ -109,7 +109,7 @@
       <button class="nav-btn" onclick="switchTab('purchases', this)">📥 Purchases</button>
       <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
-      <button class="nav-btn" onclick="switchTab('catalog', this)">📦 Store Catalog</button>
+      <button class="nav-btn" onclick="switchTab('stock', this)">📦 Stock Availability</button>
       <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
     </div>
   </nav>
@@ -253,7 +253,16 @@
       </div>
     </div>
 
-    <!-- TAB 6: SETTINGS -->
+    <!-- TAB 6: STOCK AVAILABILITY -->
+    <div id="tab-stock" class="tab-content">
+      <div class="card">
+        <h2>Live Stock Availability</h2>
+        <p class="sub">Current items in your inventory, categorized by availability</p>
+        <div id="stockContainer">Loading...</div>
+      </div>
+    </div>
+
+    <!-- TAB 7: SETTINGS -->
     <div id="tab-settings" class="tab-content">
       <div class="card">
         <h2>Brand Logo</h2>
@@ -298,7 +307,7 @@
       if (tabId === 'dashboard') renderDashboard();
       if (tabId === 'purchases') renderPurchases();
       if (tabId === 'sales') renderSales();
-      if (tabId === 'catalog') renderCatalog();
+      if (tabId === 'stock') renderStockAvailability();
     }
 
     function updateDashboardStats() {
@@ -474,31 +483,51 @@
 
     function renderPurchases() {
       const container = document.getElementById("purchaseList");
-      // Show all products grouped by Category as purchased stock
-      let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
-        <tr style="background:#f1f5f9; text-align:left;">
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Date Added</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Product</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Qty</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Cost Price</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Status</th>
-        </tr>`;
       
-      productsList.sort((a,b) => b.id.localeCompare(a.id)).forEach(p => {
-        const match = p.id.match(/[A-Z]{2}(\d{6})/);
-        const dateStr = match ? match[1] : "";
-        const formattedDate = dateStr ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` : "Unknown";
-        const status = p.status || "AVAILABLE";
+      // Group by Category
+      const grouped = {};
+      productsList.forEach(p => {
+        const cat = p.category || "Uncategorized";
+        if (!grouped[cat]) grouped[cat] = { qty: 0, value: 0, items: [] };
         
-        html += `<tr>
-          <td style="padding:8px; border-bottom:1px solid #eee;">${formattedDate}</td>
-          <td style="padding:8px; border-bottom:1px solid #eee;"><strong>${p.title}</strong><br><small>${p.id}</small></td>
-          <td style="padding:8px; border-bottom:1px solid #eee;">1</td>
-          <td style="padding:8px; border-bottom:1px solid #eee;">₹${p.purchaseRate || 0}</td>
-          <td style="padding:8px; border-bottom:1px solid #eee;"><span style="color:${status === 'SOLD' ? 'red' : 'green'}; font-weight:bold;">${status}</span></td>
-        </tr>`;
+        grouped[cat].qty += 1;
+        grouped[cat].value += Number(p.purchaseRate) || 0;
+        grouped[cat].items.push(p);
       });
-      container.innerHTML = html + `</table>`;
+
+      let html = "";
+      Object.keys(grouped).sort().forEach(cat => {
+        const safeId = cat.replace(/\s+/g, '_');
+        html += `<div style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafaf9;">`;
+        
+        // Category Header
+        html += `<div style="padding: 12px; font-weight: bold; background: #f1f5f9; cursor: pointer; display: flex; justify-content: space-between;" onclick="document.getElementById('purch-${safeId}').classList.toggle('open')">
+          <span>📦 ${cat} (${grouped[cat].qty} items)</span>
+          <span>Total Value: ₹${grouped[cat].value.toLocaleString('en-IN')}</span>
+        </div>`;
+        
+        // Drill Down
+        html += `<div class="date-content" id="purch-${safeId}" style="padding: 10px;">`;
+        html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
+          <tr style="background:#fff; text-align:left;">
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Date Added</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Product</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Cost Price</th>
+          </tr>`;
+          
+        grouped[cat].items.forEach(p => {
+          const match = p.id.match(/[A-Z]{2}(\d{6})/);
+          const dateStr = match ? match[1] : "";
+          const formattedDate = dateStr ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` : "Unknown";
+          html += `<tr>
+            <td style="padding:8px; border-bottom:1px solid #eee;">${formattedDate}</td>
+            <td style="padding:8px; border-bottom:1px solid #eee;"><strong>${p.title}</strong><br><small>${p.id}</small></td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">₹${p.purchaseRate || 0}</td>
+          </tr>`;
+        });
+        html += `</table></div></div>`;
+      });
+      container.innerHTML = html || "<p>No purchases yet.</p>";
     }
 
     function renderSales() {
@@ -508,27 +537,122 @@
         return;
       }
 
-      let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
-        <tr style="background:#f1f5f9; text-align:left;">
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Date</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Invoice</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Customer</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Item</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Qty</th>
-          <th style="padding:8px; border-bottom:1px solid #ddd;">Amount</th>
-        </tr>`;
-      
-      invoiceLog.sort((a,b) => parseDate(b[0]) - parseDate(a[0])).forEach(inv => {
-        html += `<tr>
-          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[0].split(',')[0]}</td>
-          <td style="padding:8px; border-bottom:1px solid #eee;"><strong>${inv[1]}</strong></td>
-          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[3]}<br><small>${inv[4]}</small></td>
-          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[7]}<br><small>${inv[6]}</small></td>
-          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[8]}</td>
-          <td style="padding:8px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv[10]}</td>
-        </tr>`;
+      // Group by Invoice No (or Date)
+      const grouped = {};
+      invoiceLog.forEach(inv => {
+        const dateStr = inv[0].split(',')[0] || "Unknown Date";
+        if (!grouped[dateStr]) grouped[dateStr] = { qty: 0, revenue: 0, invoices: [] };
+        
+        grouped[dateStr].qty += Number(inv[8]) || 1;
+        grouped[dateStr].revenue += Number(String(inv[10]).replace(/[^0-9.]/g, '')) || 0;
+        grouped[dateStr].invoices.push(inv);
       });
-      container.innerHTML = html + `</table>`;
+
+      let html = "";
+      Object.keys(grouped).sort((a,b) => parseDate(b) - parseDate(a)).forEach(date => {
+        const safeId = date.replace(/[\/\s,]/g, '_');
+        html += `<div style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafaf9;">`;
+        
+        // Date Header
+        html += `<div style="padding: 12px; font-weight: bold; background: #f1f5f9; cursor: pointer; display: flex; justify-content: space-between;" onclick="document.getElementById('sales-${safeId}').classList.toggle('open')">
+          <span>📅 ${date} (${grouped[date].qty} items)</span>
+          <span style="color: #16a34a;">Revenue: ₹${grouped[date].revenue.toLocaleString('en-IN')}</span>
+        </div>`;
+        
+        // Drill Down
+        html += `<div class="date-content" id="sales-${safeId}" style="padding: 10px;">`;
+        html += `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
+          <tr style="background:#fff; text-align:left;">
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Invoice</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Customer</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Item</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd;">Amount</th>
+          </tr>`;
+          
+        grouped[date].invoices.forEach(inv => {
+          const amount = Number(String(inv[10]).replace(/[^0-9.]/g, '')) || 0;
+          html += `<tr>
+            <td style="padding:8px; border-bottom:1px solid #eee;"><strong>${inv[1]}</strong></td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">${inv[3]}<br><small>${inv[4]}</small></td>
+            <td style="padding:8px; border-bottom:1px solid #eee;">${inv[7]}<br><small>${inv[6]}</small></td>
+            <td style="padding:8px; border-bottom:1px solid #eee; font-weight:bold; color: #16a34a;">₹${amount}</td>
+          </tr>`;
+        });
+        html += `</table></div></div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderStockAvailability() {
+      const container = document.getElementById("stockContainer");
+      
+      // Group by Category > Status > Date
+      const grouped = {};
+      productsList.forEach(p => {
+        const cat = p.category || "Uncategorized";
+        const status = (p.status || "AVAILABLE").toUpperCase();
+        
+        const match = p.id.match(/[A-Z]{2}(\d{6})/);
+        const dateStr = match ? match[1] : "000000";
+        const formattedDate = dateStr !== "000000" 
+          ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` 
+          : "Unknown Date";
+
+        if (!grouped[cat]) grouped[cat] = { "AVAILABLE": {}, "SOLD": {} };
+        if (!grouped[cat][status]) grouped[cat][status] = {};
+        if (!grouped[cat][status][formattedDate]) grouped[cat][status][formattedDate] = [];
+        
+        grouped[cat][status][formattedDate].push(p);
+      });
+
+      let html = "";
+      Object.keys(grouped).sort().forEach(cat => {
+        const catSafeId = cat.replace(/\s+/g, '_');
+        
+        html += `<div style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">`;
+        html += `<div style="padding: 12px; font-weight: bold; background: #fef3c7; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; justify-content: space-between;" onclick="document.getElementById('stock-${catSafeId}').classList.toggle('open')">
+          <span>🗂️ ${cat}</span>
+          <span>▼</span>
+        </div>`;
+        
+        html += `<div class="date-content" id="stock-${catSafeId}" style="padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
+
+        ['AVAILABLE', 'SOLD'].forEach(status => {
+          const isSold = status === "SOLD";
+          const bg = isSold ? "#fee2e2" : "#dcfce7";
+          const color = isSold ? "#dc2626" : "#16a34a";
+          const itemsData = grouped[cat][status] || {};
+          const totalItems = Object.values(itemsData).flat().length;
+
+          html += `<div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">`;
+          html += `<div style="background: ${bg}; color: ${color}; padding: 10px; font-weight: bold; text-align: center;">${isSold ? '🔴 SOLD' : '🟢 AVAILABLE'} (${totalItems})</div>`;
+          html += `<div style="padding: 10px; max-height: 300px; overflow-y: auto;">`;
+
+          Object.keys(itemsData).sort().forEach(date => {
+            const dateSafeId = `${catSafeId}_${status}_${date}`;
+            html += `<div style="margin-bottom: 8px; border: 1px dashed #ccc; border-radius: 4px;">`;
+            html += `<div style="padding: 6px 10px; background: #f9f9f9; font-size: 0.8rem; font-weight: bold; cursor: pointer;" onclick="document.getElementById('date-${dateSafeId}').classList.toggle('open')">📅 ${date} (${itemsData[date].length})</div>`;
+            html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 8px; background: #fff;">`;
+            
+            html += itemsData[date].map(item => `
+              <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+                <img src="${item.image || ''}" style="width: 35px; height: 35px; border-radius: 4px; object-fit: cover;">
+                <div style="flex: 1; font-size: 0.75rem;">
+                  <strong style="display: block; line-height: 1.2;">${item.title}</strong>
+                  <span style="color: #64748b;">${item.id}</span>
+                </div>
+              </div>
+            `).join("");
+            
+            html += `</div></div>`;
+          });
+
+          html += `</div></div>`;
+        });
+
+        html += `</div></div>`;
+      });
+      container.innerHTML = html || "<p>No stock available.</p>";
     }
 
     // ── LOGO ──
