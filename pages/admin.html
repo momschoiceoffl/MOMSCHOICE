@@ -517,11 +517,11 @@
     }
 
     function getNormalizedInvoices() {
-      // ONLY return real data. If Google Sheets fails, return empty so we know it failed.
+      // Process the data from Google Sheets
       if (Array.isArray(invoiceLog) && invoiceLog.length > 0) {
         return invoiceLog.map(normalizeInvoice).filter(Boolean);
       }
-      return []; // NO MORE FAKE DATA
+      return [];
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -794,7 +794,8 @@
       });
 
       let filtered = enriched.filter(inv => {
-        if (timeFilter !== 'all' && !filterByTime(parseDate(inv.rawDate || inv.dateStr), timeFilter)) return false;
+        const d = parseDate(inv.rawDate || inv.dateStr);
+        if (timeFilter !== 'all' && !filterByTime(d, timeFilter)) return false;
         if (saleFilters.cat && inv._cat !== saleFilters.cat) return false;
         if (saleFilters.prod && inv.title !== saleFilters.prod) return false;
         if (saleFilters.date && inv.dateStr !== saleFilters.date) return false;
@@ -917,17 +918,21 @@
     function parseDate(dateStr) {
       if (!dateStr) return new Date();
       const s = String(dateStr).trim();
-      // Handle DD/MM/YYYY, HH:MM:SS (from Google Sheets)
+      
+      // 1. Handle DD/MM/YYYY (with or without time)
       const parts = s.split(',')[0].trim().split('/');
       if (parts.length === 3) {
         const d = Number(parts[0]), m = Number(parts[1]), y = Number(parts[2]);
         if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return new Date(y, m - 1, d);
       }
-      // Handle YYYY-MM-DD
+      
+      // 2. Handle YYYY-MM-DD
       const ymd = s.split('-');
       if (ymd.length === 3) {
         return new Date(Number(ymd[0]), Number(ymd[1]) - 1, Number(ymd[2]));
       }
+      
+      // 3. Fallback
       const fallback = new Date(s);
       return isNaN(fallback.getTime()) ? new Date() : fallback;
     }
