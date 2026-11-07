@@ -93,6 +93,7 @@
       .row { flex-direction: column; gap: 0; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -105,6 +106,8 @@
     <div class="nav-links">
       <button class="nav-btn active" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
       <button class="nav-btn" onclick="switchTab('add-product', this)">➕ Add Product</button>
+      <button class="nav-btn" onclick="switchTab('purchases', this)">📥 Purchases</button>
+      <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
       <button class="nav-btn" onclick="switchTab('catalog', this)">📦 Store Catalog</button>
     </div>
@@ -114,13 +117,44 @@
 
     <!-- TAB 1: DASHBOARD -->
     <div id="tab-dashboard" class="tab-content active">
-      <h2>Welcome back, Admin!</h2>
-      <p class="sub">Here is a quick overview of your store.</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h2>Welcome back, Admin!</h2>
+          <p class="sub">Here is your store's financial overview.</p>
+        </div>
+        <select id="dashTimeFilter" style="width: 150px; margin: 0;" onchange="renderDashboard()">
+          <option value="week">This Week</option>
+          <option value="month" selected>This Month</option>
+          <option value="year">This Year</option>
+          <option value="all">All Time</option>
+        </select>
+      </div>
 
-      <div class="stats-grid">
-        <div class="stat-card"><h3>Total Products</h3><div class="value" id="statTotalProducts">0</div></div>
-        <div class="stat-card"><h3>Visible Products</h3><div class="value" id="statVisibleProducts">0</div></div>
-        <div class="stat-card"><h3>Hidden Products</h3><div class="value" id="statHiddenProducts">0</div></div>
+      <!-- STATS CARDS -->
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+        <div class="stat-card" style="border-left-color: #3b82f6;">
+          <h3>Purchased Stock</h3>
+          <div class="value" id="statPurchasedQty" style="color: #3b82f6;">0 Qty</div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Value: ₹<span id="statPurchasedVal">0</span></div>
+        </div>
+        <div class="stat-card" style="border-left-color: #16a34a;">
+          <h3>Sold Stock</h3>
+          <div class="value" id="statSoldQty" style="color: #16a34a;">0 Qty</div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Revenue: ₹<span id="statSoldVal">0</span></div>
+        </div>
+        <div class="stat-card" style="border-left-color: #d97706;">
+          <h3>Available Stock</h3>
+          <div class="value" id="statAvailQty" style="color: #d97706;">0 Qty</div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Value: ₹<span id="statAvailVal">0</span></div>
+        </div>
+      </div>
+
+      <!-- CHART -->
+      <div class="card" style="margin-top: 24px;">
+        <h2>Stock Movement</h2>
+        <div style="height: 300px; width: 100%;">
+          <canvas id="stockChart"></canvas>
+        </div>
       </div>
 
       <div class="card">
@@ -214,7 +248,25 @@
       </div>
     </div>
 
-    <!-- TAB 4: CATALOG -->
+    <!-- TAB 4: PURCHASES -->
+    <div id="tab-purchases" class="tab-content">
+      <div class="card">
+        <h2>Purchase Log (Stock In)</h2>
+        <p class="sub">Overview of all purchased stock</p>
+        <div id="purchaseList">Loading...</div>
+      </div>
+    </div>
+
+    <!-- TAB 5: SALES -->
+    <div id="tab-sales" class="tab-content">
+      <div class="card">
+        <h2>Sales Log (Stock Out)</h2>
+        <p class="sub">Overview of all sold items</p>
+        <div id="salesList">Loading...</div>
+      </div>
+    </div>
+
+    <!-- TAB 6: CATALOG -->
     <div id="tab-catalog" class="tab-content">
       <div class="card">
         <h2>Store Catalog</h2>
@@ -227,15 +279,21 @@
 
   <script>
     let productsList = [];
+    let invoiceLog = [];
     let currentImageFiles = [];
     let existingImageUrls = [];
+    let myChart = null;
 
     function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + tabId).classList.add('active');
       btnEl.classList.add('active');
-      if (tabId === 'dashboard' || tabId === 'catalog') updateDashboardStats();
+      
+      if (tabId === 'dashboard') renderDashboard();
+      if (tabId === 'purchases') renderPurchases();
+      if (tabId === 'sales') renderSales();
+      if (tabId === 'catalog') renderCatalog();
     }
 
     function updateDashboardStats() {
@@ -262,13 +320,208 @@
 
     async function fetchCatalog() {
       try {
+        // Fetch Products
         const res = await fetch("http://localhost:5000/get-products");
         productsList = await res.json();
+        
+        // Fetch Invoice Log
+        const invRes = await fetch("http://localhost:5000/get-invoices");
+        if (invRes.ok) {
+          invoiceLog = await invRes.json();
+        } else {
+          invoiceLog = []; // Fallback if no log exists
+        }
+        
+        renderDashboard();
         renderCatalog();
-        updateDashboardStats();
       } catch (e) {
-        document.getElementById("itemsContainer").innerHTML = "<p style='color:red;'>Could not load products from Google Sheets. Is the backend running?</p>";
+        document.getElementById("itemsContainer").innerHTML = "<p style='color:red;'>Could not load data. Is the backend running?</p>";
       }
+    }
+
+    function parseDate(dateStr) {
+      if (!dateStr) return new Date();
+      // Handles format like "6/11/2026, 17:30:00" or DD/MM/YYYY
+      const parts = dateStr.split(',')[0].split('/');
+      if (parts.length === 3) {
+        return new Date(parts[2], parts[1]-1, parts[0]);
+      }
+      return new Date(dateStr);
+    }
+
+    function filterByTime(date, filter) {
+      const now = new Date();
+      const d = parseDate(date);
+      if (filter === 'all') return true;
+      if (filter === 'week') {
+        const diff = now - d;
+        return diff >= 0 && diff <= 7 * 24 * 60 * 60 * 1000;
+      }
+      if (filter === 'month') {
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }
+      if (filter === 'year') {
+        return d.getFullYear() === now.getFullYear();
+      }
+      return true;
+    }
+
+    function renderDashboard() {
+      const filter = document.getElementById("dashTimeFilter").value;
+      
+      // 1. CALCULATE STATS
+      let totalPurchasedQty = 0;
+      let totalPurchasedVal = 0;
+      let totalSoldQty = 0;
+      let totalSoldVal = 0;
+      let availQty = 0;
+      let availVal = 0;
+
+      // Available stock is current snapshot (ignores date filter)
+      productsList.forEach(p => {
+        if (p.status !== 'SOLD') {
+          availQty++;
+          availVal += (Number(p.purchaseRate) || 0);
+        }
+      });
+
+      // Sold & Purchased requires invoice filtering
+      const filteredInvoices = invoiceLog.filter(inv => filterByTime(inv[0], filter));
+      
+      filteredInvoices.forEach(inv => {
+        // Invoice array structure: [Date, InvNo, OrderID, Name, Phone, Addr, ProdID, Title, Qty, Price, Total]
+        const qty = Number(inv[8]) || 1;
+        const price = Number(inv[9]) || 0;
+        const grandTotal = Number(inv[10]) || 0;
+        
+        totalSoldQty += qty;
+        totalSoldVal += grandTotal;
+
+        // Estimate purchase value for sold items
+        const prod = productsList.find(p => p.id === inv[6]);
+        if (prod) totalPurchasedVal += (Number(prod.purchaseRate) || 0) * qty;
+      });
+
+      // Total purchased includes available stock + sold stock (within time frame)
+      // For simplicity, we sum available + sold in this timeframe
+      totalPurchasedQty = availQty + totalSoldQty;
+      // Rough estimate of total purchase value
+      productsList.forEach(p => { totalPurchasedVal += (Number(p.purchaseRate) || 0); });
+
+      document.getElementById("statSoldQty").innerText = totalSoldQty + " Qty";
+      document.getElementById("statSoldVal").innerText = totalSoldVal.toLocaleString("en-IN");
+      document.getElementById("statPurchasedQty").innerText = totalPurchasedQty + " Qty";
+      document.getElementById("statPurchasedVal").innerText = totalPurchasedVal.toLocaleString("en-IN");
+      document.getElementById("statAvailQty").innerText = availQty + " Qty";
+      document.getElementById("statAvailVal").innerText = availVal.toLocaleString("en-IN");
+
+      // 2. DRAW CHART
+      drawChart(filteredInvoices, filter);
+    }
+
+    function drawChart(invoices, filter) {
+      const ctx = document.getElementById('stockChart').getContext('2d');
+      
+      // Group by Date
+      const grouped = {};
+      invoices.forEach(inv => {
+        const d = parseDate(inv[0]);
+        const dateStr = `${d.getDate()}-${d.getMonth()+1}`;
+        if (!grouped[dateStr]) grouped[dateStr] = 0;
+        grouped[dateStr] += Number(inv[8]) || 1; // Qty
+      });
+
+      const labels = Object.keys(grouped).sort((a,b) => {
+        const [d1,m1] = a.split('-').map(Number);
+        const [d2,m2] = b.split('-').map(Number);
+        return new Date(2026, m1-1, d1) - new Date(2026, m2-1, d2);
+      });
+      const data = labels.map(l => grouped[l]);
+
+      if (myChart) myChart.destroy();
+
+      myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['No Data'],
+          datasets: [{
+            label: 'Items Sold (Qty)',
+            data: data.length ? data : [0],
+            borderColor: '#6B0F2E',
+            backgroundColor: 'rgba(107, 15, 46, 0.1)',
+            borderWidth: 2,
+            tension: 0.4, // Makes the wave effect
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    function renderPurchases() {
+      const container = document.getElementById("purchaseList");
+      // Show all products grouped by Category as purchased stock
+      let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
+        <tr style="background:#f1f5f9; text-align:left;">
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Date Added</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Product</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Qty</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Cost Price</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Status</th>
+        </tr>`;
+      
+      productsList.sort((a,b) => b.id.localeCompare(a.id)).forEach(p => {
+        const match = p.id.match(/[A-Z]{2}(\d{6})/);
+        const dateStr = match ? match[1] : "";
+        const formattedDate = dateStr ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` : "Unknown";
+        const status = p.status || "AVAILABLE";
+        
+        html += `<tr>
+          <td style="padding:8px; border-bottom:1px solid #eee;">${formattedDate}</td>
+          <td style="padding:8px; border-bottom:1px solid #eee;"><strong>${p.title}</strong><br><small>${p.id}</small></td>
+          <td style="padding:8px; border-bottom:1px solid #eee;">1</td>
+          <td style="padding:8px; border-bottom:1px solid #eee;">₹${p.purchaseRate || 0}</td>
+          <td style="padding:8px; border-bottom:1px solid #eee;"><span style="color:${status === 'SOLD' ? 'red' : 'green'}; font-weight:bold;">${status}</span></td>
+        </tr>`;
+      });
+      container.innerHTML = html + `</table>`;
+    }
+
+    function renderSales() {
+      const container = document.getElementById("salesList");
+      if (invoiceLog.length === 0) {
+        container.innerHTML = "<p>No sales recorded yet.</p>";
+        return;
+      }
+
+      let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem;">
+        <tr style="background:#f1f5f9; text-align:left;">
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Date</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Invoice</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Customer</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Item</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Qty</th>
+          <th style="padding:8px; border-bottom:1px solid #ddd;">Amount</th>
+        </tr>`;
+      
+      invoiceLog.sort((a,b) => parseDate(b[0]) - parseDate(a[0])).forEach(inv => {
+        html += `<tr>
+          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[0].split(',')[0]}</td>
+          <td style="padding:8px; border-bottom:1px solid #eee;"><strong>${inv[1]}</strong></td>
+          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[3]}<br><small>${inv[4]}</small></td>
+          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[7]}<br><small>${inv[6]}</small></td>
+          <td style="padding:8px; border-bottom:1px solid #eee;">${inv[8]}</td>
+          <td style="padding:8px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv[10]}</td>
+        </tr>`;
+      });
+      container.innerHTML = html + `</table>`;
     }
 
     // ── LOGO ──

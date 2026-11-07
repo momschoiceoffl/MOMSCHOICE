@@ -63,6 +63,16 @@ class Handler(SimpleHTTPRequestHandler):
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return
+
+        if self.path.startswith("/get-invoices"):
+            try:
+                req = Request(GSHEET_URL + "?action=get_invoices")
+                with urlopen(req) as r:
+                    data = r.read()
+                self._json(200, json.loads(data))
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
             
         return super().do_GET()
 
