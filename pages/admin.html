@@ -238,14 +238,29 @@
     <!-- TAB 4: PURCHASES -->
     <div id="tab-purchases" class="tab-content">
       <div class="card">
-        <h2>Purchase Log (Stock In)</h2>
-        <p class="sub">Filter and view all purchased stock</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2>Purchase Log</h2>
+            <p class="sub">Filter and view all purchased stock</p>
+          </div>
+          <select id="purTimeFilter" style="width: 150px; margin: 0;" onchange="renderPurchases()">
+            <option value="all">All Time</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
         
-        <div class="row" style="margin-bottom: 16px;">
-          <div><input type="text" id="filtPurDate" placeholder="Filter Date (YYYY-MM-DD)..." oninput="renderPurchases()"></div>
-          <div><input type="text" id="filtPurId" placeholder="Filter ID..." oninput="renderPurchases()"></div>
-          <div><input type="text" id="filtPurCat" placeholder="Filter Category..." oninput="renderPurchases()"></div>
-          <div><input type="text" id="filtPurName" placeholder="Filter Name..." oninput="renderPurchases()"></div>
+        <!-- Tiles -->
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+          <div class="stat-card" style="border-left-color: #3b82f6;">
+            <h3>Total Purchase Value</h3>
+            <div class="value" id="statPurValue" style="color: #3b82f6;">₹0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #d97706;">
+            <h3>Total Items Purchased</h3>
+            <div class="value" id="statPurQty" style="color: #d97706;">0</div>
+          </div>
         </div>
 
         <div id="purchaseList" style="overflow-x: auto;">Loading...</div>
@@ -255,13 +270,29 @@
     <!-- TAB 5: SALES -->
     <div id="tab-sales" class="tab-content">
       <div class="card">
-        <h2>Sales Log (Stock Out)</h2>
-        <p class="sub">Filter and view all sold items</p>
-        
-        <div class="row" style="margin-bottom: 16px;">
-          <div><input type="text" id="filtSaleDate" placeholder="Filter Date (YYYY-MM-DD)..." oninput="renderSales()"></div>
-          <div><input type="text" id="filtSaleId" placeholder="Filter Invoice/ID..." oninput="renderSales()"></div>
-          <div><input type="text" id="filtSaleName" placeholder="Filter Customer/Name..." oninput="renderSales()"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2>Sales Log</h2>
+            <p class="sub">Filter and view all sold items</p>
+          </div>
+          <select id="salesTimeFilter" style="width: 150px; margin: 0;" onchange="renderSales()">
+            <option value="all">All Time</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+
+        <!-- Tiles -->
+        <div class="stats-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+          <div class="stat-card" style="border-left-color: #16a34a;">
+            <h3>Total Sales Revenue</h3>
+            <div class="value" id="statSaleValue" style="color: #16a34a;">₹0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #dc2626;">
+            <h3>Total Items Sold</h3>
+            <div class="value" id="statSaleQty" style="color: #dc2626;">0</div>
+          </div>
         </div>
 
         <div id="salesList" style="overflow-x: auto;">Loading...</div>
@@ -496,52 +527,93 @@
       });
     }
 
+    let purSortCol = 'date';
+    let purSortAsc = false;
+    let saleSortCol = 'date';
+    let saleSortAsc = false;
+
+    function sortPurchase(col) {
+      if (purSortCol === col) purSortAsc = !purSortAsc;
+      else { purSortCol = col; purSortAsc = true; }
+      renderPurchases();
+    }
+    function sortSale(col) {
+      if (saleSortCol === col) saleSortAsc = !saleSortAsc;
+      else { saleSortCol = col; saleSortAsc = true; }
+      renderSales();
+    }
+
     function renderPurchases() {
       const container = document.getElementById("purchaseList");
-      
-      const fDate = document.getElementById("filtPurDate").value.toLowerCase();
-      const fId = document.getElementById("filtPurId").value.toLowerCase();
-      const fCat = document.getElementById("filtPurCat").value.toLowerCase();
-      const fName = document.getElementById("filtPurName").value.toLowerCase();
+      const timeFilter = document.getElementById("purTimeFilter").value;
 
       let filtered = productsList.filter(p => {
         const match = p.id.match(/[A-Z]{2}(\d{6})/);
         const dateStr = match ? match[1] : "";
         const formattedDate = dateStr ? `20${dateStr.substring(0,2)}-${dateStr.substring(2,4)}-${dateStr.substring(4,6)}` : "";
         
-        return (formattedDate.includes(fDate) || fDate === "") &&
-               (p.id.toLowerCase().includes(fId) || fId === "") &&
-               ((p.category || "").toLowerCase().includes(fCat) || fCat === "") &&
-               (p.title.toLowerCase().includes(fName) || fName === "");
+        // Time filter
+        if (timeFilter !== 'all') {
+          const d = parseDate(formattedDate);
+          if (!filterByTime(d, timeFilter)) return false;
+        }
+        return true;
+      });
+
+      // Calculate Tiles
+      let totalVal = 0;
+      let totalQty = 0;
+      filtered.forEach(p => {
+        totalVal += Number(p.purchaseRate) || 0;
+        totalQty += 1;
+      });
+      document.getElementById("statPurValue").innerText = "₹" + totalVal.toLocaleString("en-IN");
+      document.getElementById("statPurQty").innerText = totalQty;
+
+      // Sorting
+      filtered.sort((a, b) => {
+        let valA, valB;
+        if (purSortCol === 'date') {
+          const m1 = a.id.match(/[A-Z]{2}(\d{6})/); const m2 = b.id.match(/[A-Z]{2}(\d{6})/);
+          valA = m1 ? m1[1] : ""; valB = m2 ? m2[1] : "";
+        } else if (purSortCol === 'id') { valA = a.id; valB = b.id; }
+        else if (purSortCol === 'cat') { valA = a.category || ""; valB = b.category || ""; }
+        else if (purSortCol === 'name') { valA = a.title; valB = b.title; }
+        else if (purSortCol === 'rate') { valA = Number(a.purchaseRate) || 0; valB = Number(b.purchaseRate) || 0; }
+        
+        if (valA < valB) return purSortAsc ? -1 : 1;
+        if (valA > valB) return purSortAsc ? 1 : -1;
+        return 0;
       });
 
       let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
         <thead>
           <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Date</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Unique ID</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">Date ${purSortCol==='date'?(purSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('id')">Unique ID ${purSortCol==='id'?(purSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">Category ${purSortCol==='cat'?(purSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Sub Cat</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Product Name</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Purchase Rate</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('name')">Product Name ${purSortCol==='name'?(purSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('rate')">Purchase Rate ${purSortCol==='rate'?(purSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Total Amount</th>
           </tr>
         </thead>
         <tbody>`;
       
-      filtered.sort((a,b) => b.id.localeCompare(a.id)).forEach(p => {
+      filtered.forEach(p => {
         const match = p.id.match(/[A-Z]{2}(\d{6})/);
         const dateStr = match ? match[1] : "";
         const formattedDate = dateStr ? `20${dateStr.substring(0,2)}-${dateStr.substring(2,4)}-${dateStr.substring(4,6)}` : "Unknown";
         const rate = Number(p.purchaseRate) || 0;
         
+        // Shrink text sizes slightly to keep date on one line
         html += `<tr>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${formattedDate}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem;">${p.id}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${formattedDate}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${p.id}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${p.category || "-"}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${p.subcategory || "-"}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${p.title}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${p.title}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">₹${rate}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">1</td>
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${rate}</td>
@@ -552,35 +624,71 @@
 
     function renderSales() {
       const container = document.getElementById("salesList");
-      
-      const fDate = document.getElementById("filtSaleDate").value.toLowerCase();
-      const fId = document.getElementById("filtSaleId").value.toLowerCase();
-      const fName = document.getElementById("filtSaleName").value.toLowerCase();
+      const timeFilter = document.getElementById("salesTimeFilter").value;
+
+      // Safety check: If invoiceLog is not an array, force it to empty to prevent hanging
+      if (!Array.isArray(invoiceLog)) invoiceLog = [];
+
+      let filtered = invoiceLog.filter(inv => {
+        const dateStr = (inv[0] || "").split(',')[0];
+        if (timeFilter !== 'all') {
+          const d = parseDate(dateStr);
+          if (!filterByTime(d, timeFilter)) return false;
+        }
+        return true;
+      });
+
+      // Calculate Tiles
+      let totalVal = 0;
+      let totalQty = 0;
+      filtered.forEach(inv => {
+        totalVal += Number(String(inv[10] || 0).replace(/[^0-9.]/g, '')) || 0;
+        totalQty += Number(inv[8]) || 1;
+      });
+      document.getElementById("statSaleValue").innerText = "₹" + totalVal.toLocaleString("en-IN");
+      document.getElementById("statSaleQty").innerText = totalQty;
+
+      // Sorting
+      filtered.sort((a, b) => {
+        let valA, valB;
+        if (saleSortCol === 'date') { valA = parseDate(a[0]); valB = parseDate(b[0]); }
+        else if (saleSortCol === 'id') { valA = a[1] || ""; valB = b[1] || ""; }
+        else if (saleSortCol === 'prod') { valA = a[7] || ""; valB = b[7] || ""; }
+        else if (saleSortCol === 'cust') { valA = a[3] || ""; valB = b[3] || ""; }
+        else if (saleSortCol === 'total') { 
+          valA = Number(String(a[10] || 0).replace(/[^0-9.]/g, '')); 
+          valB = Number(String(b[10] || 0).replace(/[^0-9.]/g, '')); 
+        }
+        
+        if (valA < valB) return saleSortAsc ? -1 : 1;
+        if (valA > valB) return saleSortAsc ? 1 : -1;
+        return 0;
+      });
 
       let html = `<table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
         <thead>
           <tr style="background:#f1f5f9; text-align:left;">
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Date</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Invoice ID</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">Date ${saleSortCol==='date'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('id')">Invoice ID ${saleSortCol==='id'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Product Name</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Customer</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name ${saleSortCol==='prod'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('cust')">Customer ${saleSortCol==='cust'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Sale Rate</th>
             <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
-            <th style="padding:10px; border-bottom:2px solid #ccc;">Total Amount</th>
+            <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('total')">Total Amount ${saleSortCol==='total'?(saleSortAsc?'▲':'▼'):'⇅'}</th>
           </tr>
         </thead>
         <tbody>`;
       
-      invoiceLog.sort((a,b) => parseDate(b[0]) - parseDate(a[0])).forEach(inv => {
-        const dateStr = inv[0].split(',')[0];
-        const invId = inv[1];
-        const prodId = inv[6];
-        const prodTitle = inv[7];
-        const custName = inv[3];
+      filtered.forEach(inv => {
+        const dateStr = (inv[0] || "").split(',')[0];
+        const invId = inv[1] || "-";
+        const prodId = inv[6] || "";
+        const prodTitle = inv[7] || "-";
+        const custName = inv[3] || "-";
         const qty = Number(inv[8]) || 1;
-        const rateStr = String(inv[9]).replace(/[^0-9.]/g, '');
-        const totalStr = String(inv[10]).replace(/[^0-9.]/g, '');
+        const rateStr = String(inv[9] || 0).replace(/[^0-9.]/g, '');
+        const totalStr = String(inv[10] || 0).replace(/[^0-9.]/g, '');
         
         const rate = Number(rateStr) || 0;
         const total = Number(totalStr) || 0;
@@ -588,16 +696,11 @@
         const prod = productsList.find(p => p.id === prodId);
         const cat = prod ? prod.category : "-";
 
-        // Filter logic
-        if (!dateStr.toLowerCase().includes(fDate)) return;
-        if (!invId.toLowerCase().includes(fId) && !prodId.toLowerCase().includes(fId)) return;
-        if (!custName.toLowerCase().includes(fName) && !prodTitle.toLowerCase().includes(fName)) return;
-
         html += `<tr>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${dateStr}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem;">${invId}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${dateStr}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${invId}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${cat}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${prodTitle}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${prodTitle}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${custName}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">₹${rate}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${qty}</td>
