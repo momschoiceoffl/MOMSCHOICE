@@ -854,13 +854,39 @@
     async function checkBackendHealth() {
       const badge = document.getElementById("syncStatusBadge");
       if (!badge) return;
+
+      // Show connecting state
+      badge.className = "bg-yellow";
+      badge.innerText = "🟡 Checking...";
+
       try {
-        const res = await fetch("http://localhost:5000/health", { cache: "no-store" });
-        const data = await res.json();
-        if (data.ok) { badge.className = "bg-green"; badge.innerText = "🟢 Auto-Sync Active"; }
-        else { badge.className = "bg-yellow"; badge.innerText = "🟡 Backend up, no token"; }
-      } catch {
-        badge.className = "bg-red"; badge.innerText = "🔴 Backend offline";
+        // 1. Check if Python server is on
+        const pyRes = await fetch("http://localhost:5000/health", { cache: "no-store" });
+        if (!pyRes.ok) throw new Error("Python offline");
+        
+        // 2. Check if Google Sheets is actually returning invoice data
+        try {
+          const gsRes = await fetch("http://localhost:5000/get-invoices", { cache: "no-store" });
+          const text = await gsRes.text();
+          
+          // If we get valid JSON back (even an empty array []), Google Sheets is connected
+          if (text.trim().startsWith('[') || text.trim().startsWith('{')) {
+            badge.className = "bg-green";
+            badge.innerText = "🟢 Google Sheet Connected";
+          } else {
+            // If we get HTML (like a login page), the connection failed
+            badge.className = "bg-yellow";
+            badge.innerText = "🟡 Python OK, GS failed";
+          }
+        } catch (gsErr) {
+          badge.className = "bg-yellow";
+          badge.innerText = "🟡 Python OK, GS failed";
+        }
+        
+      } catch (e) {
+        // Python is completely off
+        badge.className = "bg-red";
+        badge.innerText = "🔴 Backend Offline";
       }
     }
 
