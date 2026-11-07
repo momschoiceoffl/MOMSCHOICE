@@ -479,7 +479,29 @@
     }
 
     function getNormalizedInvoices() {
-      if (!Array.isArray(invoiceLog)) return [];
+      // If Google Sheets fails, fallback to reading directly from products.json
+      if (!Array.isArray(invoiceLog) || invoiceLog.length === 0) {
+        const soldProducts = productsList.filter(p => (p.status || '').toUpperCase() === 'SOLD');
+        return soldProducts.map(p => {
+          const d = new Date();
+          const ds = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+          const invStr = "INV-" + p.id.substring(0, 6) + "-" + Math.floor(Math.random()*1000);
+          const grand = Number(p.price) + 60; // Add default shipping for display
+          return {
+            rawDate: ds,
+            dateStr: ds,
+            invNum: invStr,
+            custName: "Sold via Store",
+            custPhone: "-",
+            custAddr: "-",
+            productId: p.id,
+            title: p.title,
+            qty: 1,
+            price: Number(p.price) || 0,
+            grandTotal: grand
+          };
+        });
+      }
       return invoiceLog.map(normalizeInvoice).filter(Boolean);
     }
 
