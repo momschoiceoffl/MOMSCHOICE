@@ -98,7 +98,7 @@
 
   <nav class="top-nav">
     <div class="brand-area">
-      <div><h2>Mom's Pick</h2><small style="color:var(--muted)">Admin Studio</small></div>
+      <div><h2>Mom's Pick</h2><small style="color:var(--muted)">M. Madhan, Thanjavur | +91 94899 38290</small></div>
       <span id="syncStatusBadge" class="bg-green">🟢 Auto-Sync Active</span>
     </div>
     
@@ -176,7 +176,6 @@
       </div>
     </div>
 
-    <!-- TAB 3: INVOICE -->
     <!-- TAB 3: INVOICE -->
     <div id="tab-invoices" class="tab-content">
       <div class="card" style="background: #fef3c7; border-color: #fde68a;">
@@ -391,21 +390,8 @@
       if (action === 'edit') editProduct(index);
       if (action === 'delete') deleteProduct(index);
       if (action === 'invoice') {
-        // Do NOT delete or hide the product. Just switch tabs and pre-fill the ID.
         switchTab('invoices', document.querySelectorAll('.nav-btn')[2]);
         document.getElementById("invSearchInput").value = productsList[index].id;
-      }
-    }
-
-    // ── INVOICE ──
-    // ── INVOICE ──
-    async function promptInvoiceDetails() {
-      // If they click the "Bill" button from the catalog, this just pre-fills the search box and takes them to the Invoice tab.
-      const query = document.getElementById("invSearchInput").value.trim().toLowerCase();
-      if (query) {
-        switchTab('invoices', document.querySelectorAll('.nav-btn')[2]);
-      } else {
-        switchTab('invoices', document.querySelectorAll('.nav-btn')[2]);
       }
     }
 
@@ -421,7 +407,6 @@
 
       const pin = parseInt(pinStr, 10);
       
-      // Default zones (matching your store frontend)
       const zones = [
         { from: 600001, to: 643999, fee:  60 }, // Tamil Nadu
         { from: 560001, to: 591999, fee:  80 }, // Karnataka
@@ -449,7 +434,7 @@
       if (!custName || !custPhone || !custAddress) return alert("Please fill in all customer details.");
       if (!pincode || pincode.length !== 6) return alert("Please enter a valid 6-digit Pincode.");
 
-      const fullAddress = `${custAddress} - ${pincode}`; // Combine address and pincode for the invoice
+      const fullAddress = `${custAddress} - ${pincode}`; 
 
       const product = productsList.find(p => p.id.toLowerCase() === query || p.title.toLowerCase().includes(query));
       if (!product) return alert("❌ Product not found in Database.");
@@ -463,15 +448,13 @@
       
       const catPrefix = (product.category || "GEN").substring(0, 3).toUpperCase();
 
-      // Fetch the last invoice sequence from Google Sheets
-      let seqPart = "A0001"; // Default
+      let seqPart = "A0001"; 
       try {
         const logRes = await fetch("http://localhost:5000/get-last-invoice");
         if (logRes.ok) {
           const logData = await logRes.json();
           const lastInv = logData.lastInv || "A0000"; 
           
-          // Extract just the sequence part (the last 5 chars, e.g., A0000)
           const lastSeq = lastInv.split('-').pop() || "A0000";
           
           const letter = lastSeq.charAt(0);
@@ -508,14 +491,13 @@
         grandTotal: (Number(product.price) * Number(qty)) + Number(shipping)
       };
 
-      // Send it to the server silently in the background
       fetch("http://localhost:5000/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(invoiceData)
       });
 
-      // 3. Open label.html and pass the new Invoice Number
+      // 3. Open label.html
       const url = `label.html?id=${encodeURIComponent(product.id)}` +
                   `&title=${encodeURIComponent(product.title)}` +
                   `&price=${product.price}` +
@@ -565,18 +547,12 @@
         const catSafeId = cat.replace(/\s+/g, '_');
         
         html += `<div class="category-group">`;
-        
-        // Level 1: Category Header
-        html += `<div class="date-header" onclick="document.getElementById('cat-${catSafeId}').classList.toggle('open'); this.classList.toggle('open')">
-          <span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span>
-        </div>`;
-        
+        html += `<div class="date-header" onclick="document.getElementById('cat-${catSafeId}').classList.toggle('open'); this.classList.toggle('open')"><span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span></div>`;
         html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: #fff; border-radius: 0 0 8px 8px;">`;
 
         // Level 2: Side-by-Side Split (Available vs Sold)
         html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
 
-        // Render the Left (Available) and Right (Sold) Columns
         ['AVAILABLE', 'SOLD'].forEach(status => {
           const isSold = status === "SOLD";
           const statusColor = isSold ? "#dc2626" : "#16a34a";
@@ -585,15 +561,9 @@
           const totalItems = Object.values(itemsData).flat().length;
 
           html += `<div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">`;
-          
-          // Column Header
-          html += `<div style="background: ${statusBg}; color: ${statusColor}; padding: 12px; font-weight: bold; text-align: center; border-bottom: 1px solid #ddd;">
-            ${isSold ? '🔴 SOLD STOCK' : '🟢 AVAILABLE STOCK'} (${totalItems})
-          </div>`;
-          
+          html += `<div style="background: ${statusBg}; color: ${statusColor}; padding: 12px; font-weight: bold; text-align: center; border-bottom: 1px solid #ddd;">${isSold ? '🔴 SOLD STOCK' : '🟢 AVAILABLE STOCK'} (${totalItems})</div>`;
           html += `<div style="padding: 10px; max-height: 400px; overflow-y: auto;">`;
 
-          // Level 3: Dates inside the column
           Object.keys(itemsData).sort((a, b) => {
             if (a === "Unknown Date") return 1;
             if (b === "Unknown Date") return -1;
@@ -602,12 +572,9 @@
             const dateSafeId = `${catSafeId}_${status}_${date.replace(/\//g, '-')}`;
             
             html += `<div style="margin-bottom: 8px; border: 1px dashed #ccc; border-radius: 4px; background: #fafaf9;">`;
-            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #555; display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('date-${dateSafeId}').classList.toggle('open'); this.querySelector('.arrow').classList.toggle('open')">
-              <span>📅 ${date} (${itemsData[date].length})</span><span class="arrow" style="transition: transform 0.3s;">▼</span>
-            </div>`;
+            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #555; display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('date-${dateSafeId}').classList.toggle('open'); this.querySelector('.arrow').classList.toggle('open')"><span>📅 ${date} (${itemsData[date].length})</span><span class="arrow" style="transition: transform 0.3s;">▼</span></div>`;
             html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 10px; border-top: 1px dashed #ccc; background: #fff;">`;
 
-            // Level 4: Products
             html += itemsData[date].map(item => {
               const idx = productsList.findIndex(p => p.id === item.id);
               return `
@@ -627,14 +594,14 @@
               </div>`;
             }).join("");
 
-            html += `</div></div>`; // Close Date content & folder
+            html += `</div></div>`; 
           });
 
-          html += `</div></div>`; // Close Column content & container
+          html += `</div></div>`; 
         });
 
-        html += `</div>`; // Close 2-column grid
-        html += `</div></div>`; // Close Category content & group
+        html += `</div>`; 
+        html += `</div></div>`; 
       });
       
       container.innerHTML = html;
