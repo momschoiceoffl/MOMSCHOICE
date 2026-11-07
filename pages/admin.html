@@ -396,7 +396,7 @@
       
       let body = '';
       sections.forEach(sec => {
-        if (sec.values.length === 0) return;
+        if (sec.values.length === 0) return; // Hide if no values to drill down to
         const active = store[sec.col];
         body += `<div style="margin-bottom:16px;">
           <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; color:#92400e; margin-bottom:6px;">${sec.label}</div>
@@ -414,9 +414,9 @@
 
       return `
         <button onclick="toggleFilter('${type}')" style="width:100%; margin-bottom:10px; padding:8px; background:#fff; border:1px solid #d97706; color:#d97706; font-weight:700; border-radius:6px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px;">
-          ▼ ${type === 'pur' ? 'Filter Purchases' : 'Filter Sales'} ${activeCount ? `(${activeCount})` : ''}
+          ▼ Filter ${activeCount ? `(${activeCount})` : ''}
         </button>
-        <div id="${type}InlineFilter" style="display:${activeCount ? 'block' : 'none'}; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <div id="${type}InlineFilter" style="display:none; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <strong style="font-size:0.9rem; color:#92400e;">Filters</strong>
             ${activeCount ? `<button onclick="clearFilters('${type}'); render${type === 'pur' ? 'Purchases' : 'Sales'}();" style="background:none; border:none; color:#dc2626; font-size:0.75rem; font-weight:700; cursor:pointer;">Clear All</button>` : ''}
@@ -489,6 +489,14 @@
     function renderDashboard() {
       const filter = document.getElementById("dashTimeFilter").value;
 
+      // Purchased = ALL products (both Available and Sold)
+      let purchasedQty = productsList.length;
+      let purchasedVal = 0;
+      productsList.forEach(p => {
+        purchasedVal += (Number(p.purchaseRate) || 0);
+      });
+
+      // Available = Only those NOT sold
       let availQty = 0, availVal = 0;
       productsList.forEach(p => {
         if ((p.status || 'AVAILABLE').toUpperCase() !== 'SOLD') {
@@ -500,21 +508,16 @@
       const all = getNormalizedInvoices();
       const inWindow = all.filter(inv => filterByTime(inv.rawDate || inv.dateStr, filter));
 
-      let soldQty = 0, soldVal = 0, cogs = 0;
+      let soldQty = 0, soldVal = 0;
       inWindow.forEach(inv => {
         soldQty += inv.qty;
         soldVal += inv.grandTotal;
-        const prod = productsList.find(p => p.id === inv.productId);
-        if (prod) cogs += (Number(prod.purchaseRate) || 0) * inv.qty;
       });
-
-      const purQty = availQty + soldQty;
-      const purVal = availVal + cogs;
 
       document.getElementById("statSoldQty").innerText = soldQty + " Qty";
       document.getElementById("statSoldVal").innerText = soldVal.toLocaleString("en-IN");
-      document.getElementById("statPurchasedQty").innerText = purQty + " Qty";
-      document.getElementById("statPurchasedVal").innerText = purVal.toLocaleString("en-IN");
+      document.getElementById("statPurchasedQty").innerText = purchasedQty + " Qty";
+      document.getElementById("statPurchasedVal").innerText = purchasedVal.toLocaleString("en-IN");
       document.getElementById("statAvailQty").innerText = availQty + " Qty";
       document.getElementById("statAvailVal").innerText = availVal.toLocaleString("en-IN");
 
@@ -626,7 +629,7 @@
       const activeCount = Object.keys(purFilters).length;
 
       let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
-        <div style="flex:1; overflow:hidden;">
+        <div style="flex:1; overflow-x:auto;">
           <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
             Showing <strong>${filtered.length}</strong> of ${productsList.length} items${activeCount ? ` • <span style="color:#d97706;">${activeCount} active</span>` : ''}
           </div>
@@ -646,12 +649,13 @@
             <tbody>`;
 
       filtered.forEach(p => {
+        const statusStr = (p.status || 'AVAILABLE').toUpperCase() === 'SOLD' ? `<span style="background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-size:0.7rem;font-weight:bold;margin-left:6px;">SOLD</span>` : '';
         html += `<tr>
           <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${p._date}</td>
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${p.id}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${p.category || "-"}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">${p.subcategory || "-"}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${p.title}</td>
+          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${p.title}${statusStr}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">₹${p._rate}</td>
           <td style="padding:10px; border-bottom:1px solid #eee;">1</td>
           <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${p._rate}</td>
@@ -726,7 +730,7 @@
       const activeCount = Object.keys(saleFilters).length;
 
       let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
-        <div style="flex:1; overflow:hidden;">
+        <div style="flex:1; overflow-x:auto;">
           <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
             Showing <strong>${filtered.length}</strong> of ${enriched.length} invoices${activeCount ? ` • <span style="color:#d97706;">${activeCount} active</span>` : ''}
           </div>
@@ -745,18 +749,22 @@
             </thead>
             <tbody>`;
 
-      filtered.forEach(inv => {
-        html += `<tr>
-          <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${inv.dateStr}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${inv.invNum || "-"}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${inv._cat}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${inv.title || "-"}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${inv.custName || "-"}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.price}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee;">${inv.qty}</td>
-          <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
-        </tr>`;
-      });
+      if (filtered.length === 0) {
+        html += `<tr><td colspan="8" style="text-align:center; padding:20px; color:#64748b;">No sales found. Generate an invoice to see data here.</td></tr>`;
+      } else {
+        filtered.forEach(inv => {
+          html += `<tr>
+            <td style="padding:10px; border-bottom:1px solid #eee; white-space:nowrap; font-size:0.8rem;">${inv.dateStr}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; font-size:0.75rem; white-space:nowrap;">${inv.invNum || "-"}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">${inv._cat}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;">${inv.title || "-"}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">${inv.custName || "-"}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">₹${inv.price}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee;">${inv.qty}</td>
+            <td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">₹${inv.grandTotal}</td>
+          </tr>`;
+        });
+      }
       html += `</tbody></table></div>
         <div style="width:260px; flex-shrink:0;">
           ${renderInlineFilter('sale', sections)}
