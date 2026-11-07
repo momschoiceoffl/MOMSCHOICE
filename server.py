@@ -66,10 +66,16 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path.startswith("/get-invoices"):
             try:
+                # Force Python to fetch the raw data directly from Google
                 req = Request(GSHEET_URL + "?action=get_invoices")
                 with urlopen(req) as r:
                     data = r.read()
-                self._json(200, json.loads(data))
+                # Return exactly what Google sent (JSON array)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(data)
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return

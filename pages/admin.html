@@ -517,33 +517,11 @@
     }
 
     function getNormalizedInvoices() {
-      // 1. If Google Sheets returned invoices, use them immediately.
+      // ONLY return real data. If Google Sheets fails, return empty so we know it failed.
       if (Array.isArray(invoiceLog) && invoiceLog.length > 0) {
         return invoiceLog.map(normalizeInvoice).filter(Boolean);
       }
-      
-      // 2. Fallback: Read from products.json ONLY if Google Sheets fails.
-      const soldProducts = productsList.filter(p => (p.status || '').toUpperCase() === 'SOLD');
-      return soldProducts.map(p => {
-        const d = new Date();
-        const ds = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-        const invStr = "INV-" + p.id.substring(0, 6) + "-" + Math.floor(Math.random()*1000);
-        const grand = Number(p.price) + 60;
-        return {
-          rawDate: ds,
-          dateStr: ds,
-          invNum: invStr,
-          custName: "Sold via Store",
-          custPhone: "-",
-          custAddr: "-",
-          productId: p.id,
-          title: p.title,
-          qty: 1,
-          price: Number(p.price) || 0,
-          courier: 60, // Force fallback courier to 60 so cards show numbers
-          grandTotal: grand
-        };
-      });
+      return []; // NO MORE FAKE DATA
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -1011,26 +989,7 @@
       }
     }
 
-    // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT URL HERE (from your .env file)
-    const GOOGLE_SHEET_URL = "PASTE_YOUR_URL_HERE";
-
-    // Force the Admin Panel to fetch directly from Google Sheets on load
-    async function forceFetchInvoices() {
-      try {
-        const res = await fetch(GOOGLE_SHEET_URL + "?action=get_invoices");
-        const textData = await res.text();
-        if (textData.trim().startsWith('[')) {
-          let parsed = JSON.parse(textData);
-          if (Array.isArray(parsed) && parsed.length === 1 && Array.isArray(parsed[0])) parsed = parsed[0];
-          invoiceLog = parsed;
-          console.log("FORCED FETCH: Success. Loaded", invoiceLog.length, "invoices.");
-        } else {
-          console.error("FORCED FETCH failed. GS returned HTML.");
-        }
-      } catch (e) {
-        console.error("FORCED FETCH error:", e);
-      }
-    }
+    // No more direct Google URLs here. Trust Python.
 
     async function fetchCatalog() {
       try {
@@ -1038,25 +997,24 @@
         const res = await fetch("http://localhost:5000/get-products");
         productsList = await res.json();
 
-        // 2. Fetch Invoices DIRECTLY from Google Sheets (Bypass Python)
+        // 2. Fetch Invoices from Python (which fetches from Google Sheets)
         try {
-          console.log("Fetching invoices directly from Google Sheets...");
-          const invRes = await fetch(GOOGLE_SHEET_URL + "?action=get_invoices");
+          const invRes = await fetch("http://localhost:5000/get-invoices");
           const textData = await invRes.text();
           
           if (textData.trim().startsWith('[') || textData.trim().startsWith('{')) {
             let parsed = JSON.parse(textData);
             if (Array.isArray(parsed) && parsed.length === 1 && Array.isArray(parsed[0])) {
-               parsed = parsed[0]; // Unwrap double array
+               parsed = parsed[0];
             }
             invoiceLog = Array.isArray(parsed) ? parsed : [];
-            console.log("SUCCESS: Retrieved", invoiceLog.length, "invoices directly from Google Sheets.");
+            console.log("SUCCESS: Retrieved", invoiceLog.length, "invoices from Python.");
           } else {
-            console.warn("GS returned HTML (likely login page):", textData.substring(0, 50));
+            console.error("Python returned invalid JSON.");
             invoiceLog = [];
           }
         } catch (e) {
-          console.error("GS Fetch failed (CORS or offline):", e);
+          console.error("Python Fetch failed:", e);
           invoiceLog = [];
         }
 
@@ -1068,9 +1026,8 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      await forceFetchInvoices(); // Fetch direct from Google Sheets first
-      await fetchCatalog();       // Then fetch products and render
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchCatalog();
       checkBackendHealth();
       loadSavedLogo();
     });
