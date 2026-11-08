@@ -136,7 +136,6 @@
       <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
       <button class="nav-btn" onclick="switchTab('stock', this)">📦 Stock Availability</button>
-      <button class="nav-btn" onclick="switchTab('catalog', this)">📚 Catalog</button>
       <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
     </div>
   </nav>
@@ -914,7 +913,6 @@
       if (tabId === 'purchases') renderPurchases();
       if (tabId === 'sales')     renderSales();
       if (tabId === 'stock')     renderStockAvailability();
-      if (tabId === 'catalog')   renderCatalog();
     }
 
     function parseDate(dateStr) {
