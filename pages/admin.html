@@ -202,7 +202,7 @@
     .item-card:last-child { border-bottom: none; }
     .item-card img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
     .item-meta { flex: 1; }
-    .item-meta strong { display: block; font-size: 0.8rem; }
+    .item-meta strong { display: block; font-size: 0.8rem; color: var(--text); }
     .item-meta .sub-text { color: var(--muted); font-size: 0.7rem; display: flex; justify-content: space-between; margin-top: 2px; }
     .item-actions { display: flex; gap: 4px; }
     .item-card.hidden-item { opacity: 0.5; }
@@ -390,11 +390,11 @@
 
     <!-- TAB 3: INVOICE -->
     <div id="tab-invoices" class="tab-content">
-      <div class="card" style="background: #fef3c7; border-color: #fde68a;">
+      <div class="card" style="background: rgba(36,10,20,0.6); border-color: var(--border);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
           <div>
-            <h2 style="color: #92400e; margin: 0;">🧾 Create Invoice & Label</h2>
-            <p class="sub" style="color: #b45309; margin: 4px 0 0 0;">Scan the QR code or type the Product ID, then fill in the customer details below.</p>
+            <h2 style="color: var(--primary); margin: 0;">🧾 Create Invoice & Label</h2>
+            <p class="sub" style="color: var(--muted); margin: 4px 0 0 0;">Scan the QR code or type the Product ID, then fill in the customer details below.</p>
           </div>
           <div style="display: flex; gap: 8px;">
             <button class="btn-sm" style="background:#fff; border:1px solid #d97706; color:#d97706;" onclick="window.print()">🖨️ Print</button>
@@ -412,8 +412,8 @@
         
         <div class="row">
           <div style="flex: 1;">
-            <label style="color: #92400e;">Product ID or Name</label>
-            <input type="text" id="invSearchInput" placeholder="Scan QR here..." style="border-color: #d97706;">
+            <label style="color: var(--primary);">Product ID or Name</label>
+            <input type="text" id="invSearchInput" placeholder="Scan QR here..." style="border-color: var(--primary); background: rgba(0,0,0,0.5); color: var(--text);">
           </div>
         </div>
 
@@ -439,7 +439,7 @@
           <div><label>Shipping Fee (₹)</label><input type="number" id="invShipping" value="0" readonly style="background:#f0f0f0; font-weight:bold;"></div>
         </div>
 
-        <button class="btn" style="background: #d97706; color: #fff; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate A4 Invoice</button>
+        <button class="btn" style="background: var(--primary); color: #14050B; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate A4 Invoice</button>
       </div>
 
       <!-- RECENT BILLS SECTION -->
@@ -641,8 +641,8 @@
             ${sec.values.map(v => {
                   const safe = String(v).replace(/'/g, "\\'").replace(/"/g, '&quot;');
                   const sel = active === v;
-                  return `<div onclick="pickFilter('${type}', '${sec.col}', '${safe}', event)" style="padding:6px 10px; font-size:0.78rem; cursor:pointer; background:${sel ? '#fef3c7' : '#fff'}; color:${sel ? '#92400e' : '#334155'}; font-weight:${sel ? '700' : '500'};" onmouseover="if(!this.style.fontWeight.includes('700')) this.style.background='#f8fafc'" onmouseout="if(!this.style.fontWeight.includes('700')) this.style.background='#fff'">
-                    ${v} ${sel ? '<span style="float:right;color:#dc2626;">×</span>' : ''}
+                  return `<div onclick="pickFilter('${type}', '${sec.col}', '${safe}', event)" style="padding:6px 10px; font-size:0.78rem; cursor:pointer; background:${sel ? 'rgba(217,160,139,0.2)' : 'transparent'}; color:${sel ? 'var(--primary)' : 'var(--text)'}; font-weight:${sel ? '700' : '400'}; border-radius:4px;" onmouseover="if(!this.style.fontWeight.includes('700')) this.style.background='rgba(255,255,255,0.05)'" onmouseout="if(!this.style.fontWeight.includes('700')) this.style.background='transparent'">
+                    ${v} ${sel ? '<span style="float:right;color:#f87171;">×</span>' : ''}
                   </div>`;
                 }).join('')}
           </div>
@@ -650,15 +650,15 @@
       });
 
       return `
-        <button onclick="toggleFilter('${type}')" style="width:100%; margin-bottom:10px; padding:8px; background:#fff; border:1px solid #d97706; color:#d97706; font-weight:700; border-radius:6px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px;">
+        <button onclick="toggleFilter('${type}')" style="width:100%; margin-bottom:10px; padding:8px; background:rgba(217,160,139,0.1); border:1px solid var(--primary); color:var(--primary); font-weight:700; border-radius:6px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px;">
           ▼ Filter ${activeCount ? `(${activeCount})` : ''}
         </button>
-        <div id="${type}InlineFilter" style="display:none; background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <div id="${type}InlineFilter" style="display:none; background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <strong style="font-size:0.9rem; color:#92400e;">Filters</strong>
-            ${activeCount ? `<button onclick="clearFilters('${type}'); render${type === 'pur' ? 'Purchases' : 'Sales'}();" style="background:none; border:none; color:#dc2626; font-size:0.75rem; font-weight:700; cursor:pointer;">Clear All</button>` : ''}
+            <strong style="font-size:0.9rem; color:var(--primary);">Filters</strong>
+            ${activeCount ? `<button onclick="clearFilters('${type}'); render${type === 'pur' ? 'Purchases' : 'Sales'}();" style="background:none; border:none; color:#f87171; font-size:0.75rem; font-weight:700; cursor:pointer;">Clear All</button>` : ''}
           </div>
-          ${body || '<div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:10px;">No filters available</div>'}
+          ${body || '<div style="font-size:0.8rem; color:var(--muted); text-align:center; padding:10px;">No filters available</div>'}
         </div>
       `;
     }
@@ -1123,14 +1123,14 @@
           <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
             <thead>
               <tr style="background:#f1f5f9; text-align:left;">
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('date')">Date</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('id')">Unique ID</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('cat')">Category</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Sub Cat</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('name')">Product Name</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortPurchase('rate')">Purchase Rate</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Total Amount</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('date')">Date</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('id')">Unique ID</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('cat')">Category</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Sub Cat</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('name')">Product Name</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('rate')">Purchase Rate</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Qty</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Total Amount</th>
               </tr>
             </thead>
             <tbody>`;
@@ -1149,7 +1149,9 @@
       });
       html += `</tbody></table></div>
         <div style="width:260px; flex-shrink:0;">
-          ${renderInlineFilter('pur', sections)}
+          <div style="background: rgba(36,10,20,0.8); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+            ${renderInlineFilter('pur', sections)}
+          </div>
         </div>
       </div>`;
       container.innerHTML = html;
@@ -1244,15 +1246,15 @@
           <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
             <thead>
               <tr style="background:#f1f5f9; text-align:left;">
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('date')">Date</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('id')">Invoice ID</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Category</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('prod')">Product Name</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('cust')">Customer</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Sale Rate</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Courier</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc;">Qty</th>
-                <th style="padding:10px; border-bottom:2px solid #ccc; cursor:pointer;" onclick="sortSale('total')">Total Amount</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('date')">Date</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('id')">Invoice ID</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Category</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('prod')">Product Name</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('cust')">Customer</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Sale Rate</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Courier</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Qty</th>
+                <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('total')">Total Amount</th>
               </tr>
             </thead>
             <tbody>`;
@@ -1276,7 +1278,9 @@
       }
       html += `</tbody></table></div>
         <div style="width:260px; flex-shrink:0;">
-          ${renderInlineFilter('sale', sections)}
+          <div style="background: rgba(36,10,20,0.8); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+            ${renderInlineFilter('sale', sections)}
+          </div>
         </div>
       </div>`;
       container.innerHTML = html;
