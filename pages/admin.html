@@ -747,7 +747,7 @@
 
       const timeFilter = document.getElementById("dashTimeFilter").value;
       const now = new Date();
-      
+
       let labels = [];
       let data = [];
       let maxRevenue = 0;
@@ -768,7 +768,6 @@
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         labels = months;
       } else {
-        // All Time -> just show months
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         labels = months;
       }
@@ -777,18 +776,24 @@
       data = new Array(labels.length).fill(0);
 
       invoices.forEach(inv => {
-        const d = parseDate(inv.rawDate || inv.dateStr);
         const revenue = inv.grandTotal || 0;
         if (revenue > 0) maxRevenue += revenue;
 
+        // Parse invoice date string: "DD/MM/YYYY, HH:MM:SS" or "DD/MM/YYYY"
+        const rawDate = String(inv.rawDate || inv.dateStr || '').split(',')[0].trim();
+        const parts = rawDate.split('/');
+        if (parts.length !== 3) return;
+        const day   = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year  = parseInt(parts[2], 10);
+
         if (timeFilter === 'week' || timeFilter === 'month') {
-          const dayStr = `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}`;
+          const dayStr = `${String(day).padStart(2,'0')}-${String(month+1).padStart(2,'0')}`;
           const idx = labels.indexOf(dayStr);
           if (idx !== -1) data[idx] += revenue;
         } else {
           // Year / All time
-          const idx = d.getMonth();
-          if (idx >= 0 && idx < 12) data[idx] += revenue;
+          if (month >= 0 && month < 12) data[month] += revenue;
         }
       });
 
@@ -1291,11 +1296,12 @@
       allInvoices.forEach(inv => {
         if (inv.productId) {
           soldProductIds.add(inv.productId);
-          // Convert inv dateStr (DD/MM/YYYY) to DD-MM-YYYY for display
-          const parts = String(inv.dateStr || '').split('/');
+          // Convert inv dateStr (DD/MM/YYYY or DD/MM/YYYY, HH:MM:SS) to DD-MM-YYYY only
+          const cleanDate = String(inv.dateStr || '').split(',')[0].trim();
+          const parts = cleanDate.split('/');
           const displayDate = parts.length === 3
             ? `${parts[0]}-${parts[1]}-${parts[2]}`
-            : inv.dateStr;
+            : cleanDate;
           soldDateMap[inv.productId] = displayDate;
         }
       });
