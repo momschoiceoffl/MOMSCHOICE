@@ -66,37 +66,11 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path.startswith("/get-invoices"):
             try:
-                import csv
-                import io
-                
-                # 1. Extract the Sheet ID from your GSHEET_URL
-                # Format: https://script.google.com/macros/s/AKfy.../exec
-                # We need the Google Sheet ID. Get it from your .env or hardcode it here.
-                SHEET_ID = "1Jw4fXhhlgT6IDpj_wCRGvNz-IGBR4Ihs1i850Et0O2k"
-                
-                # 2. Fetch the raw CSV from Google Sheets
-                csv_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Invoice%20Log"
-                req = Request(csv_url)
-                with urlopen(req) as r:
-                    csv_data = r.read().decode('utf-8')
-                
-                # 3. Parse CSV into a list of rows
-                reader = csv.reader(io.StringIO(csv_data))
-                rows = list(reader)
-                
-                # 4. Remove the header row
-                if len(rows) > 0:
-                    rows = rows[1:]
-                
-                # 5. Send back as JSON
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(json.dumps(rows).encode())
-            except Exception as e:
-                print("INVOICE CSV FETCH ERROR:", e)
-                self._json(500, {"error": str(e)})
+                with open("sales.json", "r", encoding="utf-8") as f:
+                    sales = json.load(f)
+                self._json(200, sales)
+            except:
+                self._json(200, [])
             return
             
         return super().do_GET()
@@ -147,15 +121,44 @@ class Handler(SimpleHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length).decode("utf-8")
             data = json.loads(raw)
-            
-            # Push to Google Sheets
+
             try:
+                # If this is an INVOICE: save to sales.json AND push to Google Sheet
+                if data.get("action") == "save_invoice":
+                    try:
+                        with open("sales.json", "r", encoding="utf-8") as f:
+                            sales = json.load(f)
+                    except:
+                        sales = []
+
+                    sales.append([
+                        data.get("invNumber", ""),
+                        data.get("invNumber", ""),
+                        "Auto",
+                        data.get("cName", ""),
+                        data.get("cPhone", ""),
+                        data.get("cAddr", ""),
+                        data.get("id", ""),
+                        data.get("title", ""),
+                        data.get("qty", 1),
+                        data.get("price", 0),
+                        data.get("courier", 0),
+                        data.get("grandTotal", 0)
+                    ])
+
+                    with open("sales.json", "w", encoding="utf-8") as f:
+                        json.dump(sales, f, indent=2, ensure_ascii=False)
+
+                    print(f"Invoice {data.get('invNumber')} saved to sales.json ({len(sales)} total)")
+
+                # ALWAYS push to Google Sheet
                 req = Request(GSHEET_URL, method="POST", data=json.dumps(data).encode("utf-8"),
                               headers={"Content-Type": "application/json"})
                 with urlopen(req) as r:
                     pass
                 self._json(200, {"ok": True})
             except Exception as e:
+                print("SAVE ERROR:", e)
                 self._json(500, {"ok": False, "error": str(e)})
             return
 
