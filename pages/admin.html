@@ -282,8 +282,17 @@
         </select>
         <div style="display: flex; gap: 8px;">
           <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="window.print()">🖨️ Print</button>
-          <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="exportDashboard()">⬇️ Export</button>
-          <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareDashboard()">📲 Share</button>
+          
+          <div class="dropdown" style="position: relative; display: inline-block;">
+            <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="toggleExportMenu('dashExportMenu')">⬇️ Export ▾</button>
+            <div id="dashExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; background: #fff; min-width: 120px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 100; border-radius: 6px; border: 1px solid #ccc; text-align: left;">
+              <div onclick="exportTableToCSV('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">CSV</div>
+              <div onclick="exportTableToJSON('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">JSON</div>
+              <div onclick="exportToPDF('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">PDF</div>
+            </div>
+          </div>
+
+          <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareData('dashboard')">📲 Share</button>
         </div>
       </div>
 
@@ -372,8 +381,24 @@
     <!-- TAB 3: INVOICE -->
     <div id="tab-invoices" class="tab-content">
       <div class="card" style="background: #fef3c7; border-color: #fde68a;">
-        <h2 style="color: #92400e;">🧾 Create Invoice & Label</h2>
-        <p class="sub" style="color: #b45309;">Scan the QR code or type the Product ID, then fill in the customer details below.</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+          <div>
+            <h2 style="color: #92400e; margin: 0;">🧾 Create Invoice & Label</h2>
+            <p class="sub" style="color: #b45309; margin: 4px 0 0 0;">Scan the QR code or type the Product ID, then fill in the customer details below.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-sm" style="background:#fff; border:1px solid #d97706; color:#d97706;" onclick="window.print()">🖨️ Print</button>
+            <div class="dropdown" style="position: relative; display: inline-block;">
+              <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="toggleExportMenu('invExportMenu')">⬇️ Export ▾</button>
+              <div id="invExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; background: #fff; min-width: 120px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 100; border-radius: 6px; border: 1px solid #ccc; text-align: left;">
+                <div onclick="exportTableToCSV('invoices')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">CSV</div>
+                <div onclick="exportTableToJSON('invoices')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">JSON</div>
+                <div onclick="exportToPDF('invoices')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">PDF</div>
+              </div>
+            </div>
+            <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareData('invoices')">📲 Share</button>
+          </div>
+        </div>
         
         <div class="row">
           <div style="flex: 1;">
@@ -1840,7 +1865,33 @@
       let headers = [];
       let rows = [];
       
-      if (type === 'purchases' || type === 'sales') {
+      if (type === 'dashboard') {
+        const grid = document.querySelector('#tab-dashboard .stats-grid');
+        const cards = grid.querySelectorAll('.stat-card');
+        headers = ["Metric", "Main Value", "Sub Value 1", "Sub Value 2", "Sub Value 3"];
+        cards.forEach(card => {
+           const h3 = card.querySelector('h3').innerText.trim();
+           const val = card.querySelector('.value').innerText.trim();
+           const subs = Array.from(card.querySelectorAll('div > span')).map(s => s.parentElement.innerText.trim());
+           // Clean up sub arrays
+           let sub1 = subs[0] ? subs[0].replace('Value: ', '') : "";
+           let sub2 = subs[1] ? subs[1].replace('Revenue: ', '') : "";
+           let sub3 = "";
+           if (h3 === 'Available Stock') {
+              sub1 = "Purchase: " + sub1;
+              sub2 = "MRP: " + sub2;
+           }
+           rows.push([h3, val, sub1, sub2, sub3]);
+        });
+      } 
+      else if (type === 'invoices') {
+        headers = ["Invoice No", "Date", "Customer Name", "Phone", "Product Name", "Qty", "Price", "Courier", "Grand Total"];
+        const allNorm = getNormalizedInvoices();
+        allNorm.forEach(inv => {
+          rows.push([inv.invNum, inv.dateStr, inv.custName, inv.custPhone, inv.title, inv.qty, inv.price, inv.courier, inv.grandTotal]);
+        });
+      }
+      else if (type === 'purchases' || type === 'sales') {
         // Data from the tables
         const tableId = type === 'purchases' ? 'purchaseList' : 'salesList';
         const container = document.getElementById(tableId);
