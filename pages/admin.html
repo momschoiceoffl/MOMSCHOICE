@@ -6,6 +6,97 @@
   <title>Mom's Pick - Seller Admin</title>
   <style>
     :root { --primary: #92400e; --surface: #fff; --bg: #f8fafc; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --accent: #d97706; --success: #16a34a; --danger: #dc2626; }
+
+    /* ─── BRAND AREA (Fixed alignment) ─── */
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 0;
+      flex-wrap: nowrap;
+    }
+    .brand-area > div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.2;
+    }
+    .brand-area h2 {
+      font-size: 1.15rem;
+      color: var(--primary);
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .brand-area small {
+      color: var(--muted);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    /* ─── SETTINGS DROPDOWN ─── */
+    .settings-wrap {
+      position: relative;
+    }
+    .settings-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      min-width: 260px;
+      z-index: 1000;
+      padding: 8px 0;
+      margin-top: 8px;
+    }
+    .settings-menu.open { display: block; }
+    .settings-menu .menu-title {
+      padding: 8px 16px 6px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .settings-menu .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      color: var(--text);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .settings-menu .menu-item:hover {
+      background: #fef3c7;
+      border-left-color: var(--primary);
+      color: var(--primary);
+    }
+    .settings-menu .menu-item .icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+    .settings-menu .menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+    .settings-menu .menu-item.green { color: #16a34a; font-weight: 700; }
+    .settings-menu .menu-item.green:hover { background: #dcfce7; border-left-color: #16a34a; }
+    .settings-menu .menu-item.blue { color: #2563eb; font-weight: 700; }
+    .settings-menu .menu-item.blue:hover { background: #dbeafe; border-left-color: #2563eb; }
+    .settings-menu .menu-item .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      display: inline-block;
+    }
     
     /* Excel Filter Dropdown */
     .excel-filter-wrap { position: relative; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
@@ -125,10 +216,16 @@
 
   <nav class="top-nav">
     <div class="brand-area">
-      <div><h2>Mom's Pick</h2><small style="color:var(--muted)">M. Madhan, Thanjavur | +91 94899 38290</small></div>
-      <span id="syncStatusBadge" class="bg-green">🟢 Auto-Sync Active</span>
+      <img src="https://res.cloudinary.com/ft8zlz5x/image/upload/v1793235967/moms_pick/logo/MOMS%20CHOICE.png"
+           alt="Mom's Pick"
+           style="height: 42px; width: auto; border-radius: 6px; background: #fafaf9; padding: 3px;"
+           onerror="this.style.display='none';">
+      <div>
+        <h2>Mom's Pick</h2>
+        <small>M. Madhan, Thanjavur · +91 94899 38290</small>
+      </div>
     </div>
-    
+
     <div class="nav-links">
       <button class="nav-btn active" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
       <button class="nav-btn" onclick="switchTab('add-product', this)">➕ Add Product</button>
@@ -136,9 +233,38 @@
       <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
       <button class="nav-btn" onclick="switchTab('stock', this)">📦 Stock Availability</button>
-      <button class="nav-btn" onclick="pullFromSheet()" style="background:#dcfce7; color:#166534;">⬇ Pull from Sheet</button>
-      <button class="nav-btn" onclick="pushToSheet()" style="background:#dbeafe; color:#1e40af;">⬆ Push to Sheet</button>
-      <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
+
+      <div class="settings-wrap">
+        <button class="nav-btn" id="settingsBtn" onclick="toggleSettingsMenu(event)">⚙️ Settings ▾</button>
+        <div class="settings-menu" id="settingsMenu">
+          <div class="menu-title">Data Sync</div>
+          <div class="menu-item" onclick="checkBackendHealth(true); toggleSettingsMenu(event);">
+            <span class="icon"><span id="menuStatusDot" class="status-dot" style="background:#16a34a;"></span></span>
+            <span id="menuStatusText">🟢 Google Sheet Connected</span>
+          </div>
+          <div class="menu-item green" onclick="pullFromSheet(); toggleSettingsMenu(event);">
+            <span class="icon">⬇</span> Pull from Google Sheet
+          </div>
+          <div class="menu-item blue" onclick="pushToSheet(); toggleSettingsMenu(event);">
+            <span class="icon">⬆</span> Push to Google Sheet
+          </div>
+
+          <div class="menu-divider"></div>
+          <div class="menu-title">Store</div>
+          <div class="menu-item" onclick="switchTab('settings', document.querySelector('.settings-wrap .nav-btn')); toggleSettingsMenu(event);">
+            <span class="icon">🏷️</span> Brand Logo
+          </div>
+          <div class="menu-item" onclick="window.open('index.html', '_blank'); toggleSettingsMenu(event);">
+            <span class="icon">🌐</span> Open Store Front
+          </div>
+
+          <div class="menu-divider"></div>
+          <div class="menu-title">Info</div>
+          <div class="menu-item" style="cursor: default; color: #94a3b8; font-size: 0.75rem;">
+            <span class="icon">ℹ️</span> Mom's Pick Admin v2.0
+          </div>
+        </div>
+      </div>
     </div>
   </nav>
 
@@ -974,42 +1100,57 @@
       return true;
     }
 
-    async function checkBackendHealth() {
-      const badge = document.getElementById("syncStatusBadge");
-      if (!badge) return;
+    function toggleSettingsMenu(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const menu = document.getElementById("settingsMenu");
+      if (menu) menu.classList.toggle("open");
+    }
 
-      // Show connecting state
-      badge.className = "bg-yellow";
-      badge.innerText = "🟡 Checking...";
+    // Close settings menu when clicking outside
+    document.addEventListener("click", (e) => {
+      const menu = document.getElementById("settingsMenu");
+      if (!menu) return;
+      if (!e.target.closest(".settings-wrap")) {
+        menu.classList.remove("open");
+      }
+    });
+
+    async function checkBackendHealth(showAlert) {
+      const dot = document.getElementById("menuStatusDot");
+      const txt = document.getElementById("menuStatusText");
+      if (!dot || !txt) return;
+
+      dot.style.background = "#eab308";
+      txt.innerText = "🟡 Checking...";
 
       try {
-        // 1. Check if Python server is on
         const pyRes = await fetch("http://localhost:5000/health", { cache: "no-store" });
         if (!pyRes.ok) throw new Error("Python offline");
-        
-        // 2. Check if Google Sheets is actually returning invoice data
+
         try {
           const gsRes = await fetch("http://localhost:5000/get-invoices", { cache: "no-store" });
           const text = await gsRes.text();
-          
-          // If we get valid JSON back (even an empty array []), Google Sheets is connected
           if (text.trim().startsWith('[') || text.trim().startsWith('{')) {
-            badge.className = "bg-green";
-            badge.innerText = "🟢 Google Sheet Connected";
+            dot.style.background = "#16a34a";
+            txt.innerText = "🟢 Google Sheet Connected";
           } else {
-            // If we get HTML (like a login page), the connection failed
-            badge.className = "bg-yellow";
-            badge.innerText = "🟡 Python OK, GS failed";
+            dot.style.background = "#eab308";
+            txt.innerText = "🟡 Python OK, GS failed";
           }
         } catch (gsErr) {
-          badge.className = "bg-yellow";
-          badge.innerText = "🟡 Python OK, GS failed";
+          dot.style.background = "#eab308";
+          txt.innerText = "🟡 Python OK, GS failed";
         }
-        
       } catch (e) {
-        // Python is completely off
-        badge.className = "bg-red";
-        badge.innerText = "🔴 Backend Offline";
+        dot.style.background = "#dc2626";
+        txt.innerText = "🔴 Backend Offline";
+      }
+
+      if (showAlert) {
+        setTimeout(() => {
+          const menu = document.getElementById("settingsMenu");
+          if (menu) menu.classList.add("open");
+        }, 100);
       }
     }
 
@@ -1107,6 +1248,9 @@
       checkBackendHealth();
       loadSavedLogo();
     });
+
+    // Auto-refresh status every 30 seconds
+    setInterval(() => { checkBackendHealth(false); }, 30000);
 
     function renderStockAvailability() {
       const container = document.getElementById("stockContainer");
