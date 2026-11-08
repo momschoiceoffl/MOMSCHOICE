@@ -172,7 +172,8 @@
         <div class="stat-card" style="border-left-color: #d97706;">
           <h3>Available Stock</h3>
           <div class="value" id="statAvailQty" style="color: #d97706;">0 Qty</div>
-          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Value: ₹<span id="statAvailVal">0</span></div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Purchase Value: ₹<span id="statAvailVal">0</span></div>
+          <div style="font-size: 0.8rem; color: #16a34a; margin-top: 4px; font-weight: 600;">MRP Value: ₹<span id="statAvailMrpVal">0</span></div>
         </div>
       </div>
 
@@ -254,6 +255,7 @@
 
         <div class="row">
           <div><label>Quantity</label><input type="number" id="invQty" value="1" min="1"></div>
+          <div><label>Purchase Rate (₹)</label><input type="number" id="invPurchaseRate" placeholder="e.g. 591"></div>
           <div><label>Shipping Fee (₹)</label><input type="number" id="invShipping" value="0" readonly style="background:#f0f0f0; font-weight:bold;"></div>
         </div>
 
@@ -546,7 +548,7 @@
 
       // Purchased totals + Available totals
       let purchasedQty = 0, purchasedVal = 0;
-      let availQty = 0, availVal = 0;
+      let availQty = 0, availVal = 0, availMrpVal = 0;
 
       productsList.forEach(p => {
         purchasedQty += 1;
@@ -558,6 +560,7 @@
         if (!isSoldInSheet && !isSoldInJson) {
           availQty += 1;
           availVal += (Number(p.purchaseRate) || 0);
+          availMrpVal += (Number(p.originalPrice) || 0);
         }
       });
 
@@ -575,6 +578,7 @@
       document.getElementById("statPurchasedVal").innerText  = purchasedVal.toLocaleString("en-IN");
       document.getElementById("statAvailQty").innerText      = availQty + " Qty";
       document.getElementById("statAvailVal").innerText      = availVal.toLocaleString("en-IN");
+      document.getElementById("statAvailMrpVal").innerText   = availMrpVal.toLocaleString("en-IN");
 
       drawChart(inWindow);
     }
@@ -1436,6 +1440,7 @@
       const pincode = document.getElementById("invPincode").value.trim();
       const qty = document.getElementById("invQty").value;
       const shipping = document.getElementById("invShipping").value;
+      const purchaseRate = Number(document.getElementById("invPurchaseRate").value) || 0;
 
       if (!query) return alert("Please scan or enter a Product ID first.");
       if (!custName || !custPhone || !custAddress) return alert("Please fill in all customer details.");
@@ -1495,6 +1500,7 @@
         title: product.title,
         qty: qty,
         price: product.price,
+        purchaseRate: purchaseRate,
         courier: Number(shipping),
         grandTotal: (Number(product.price) * Number(qty)) + Number(shipping)
       };
@@ -1525,7 +1531,19 @@
       document.getElementById("invCustAddress").value = "";
       document.getElementById("invPincode").value = "";
       document.getElementById("invShipping").value = "0";
+      document.getElementById("invPurchaseRate").value = "";
     }
+
+    // Auto-fill purchaseRate from productsList when invoice product is scanned
+    document.getElementById("invSearchInput")?.addEventListener("change", (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      if (!query) return;
+      const prod = productsList.find(p => p.id.toLowerCase() === query || p.title.toLowerCase().includes(query));
+      if (prod) {
+        const prInput = document.getElementById("invPurchaseRate");
+        if (prInput && !prInput.value) prInput.value = prod.purchaseRate || "";
+      }
+    });
 
 
     // ── RENDER CATALOG (Category > 2-Column Split: Available | Sold) ──
