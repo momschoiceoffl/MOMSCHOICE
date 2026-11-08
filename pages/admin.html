@@ -418,17 +418,29 @@
     <!-- TAB 4: PURCHASES -->
     <div id="tab-purchases" class="tab-content">
       <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
           <div>
             <h2>Purchase Log</h2>
             <p class="sub">Filter and view all purchased stock</p>
           </div>
-          <select id="purTimeFilter" style="width: 150px; margin: 0;" onchange="renderPurchases()">
-            <option value="all">All Time</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </select>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="purTimeFilter" style="width: 120px; margin: 0;" onchange="renderPurchases()">
+              <option value="all">All Time</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+            </select>
+            <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="window.print()">🖨️ Print</button>
+            <div class="dropdown" style="position: relative; display: inline-block;">
+              <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="toggleExportMenu('purExportMenu')">⬇️ Export ▾</button>
+              <div id="purExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; background: #fff; min-width: 120px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 100; border-radius: 6px; border: 1px solid #ccc; text-align: left;">
+                <div onclick="exportTableToCSV('purchases')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">CSV</div>
+                <div onclick="exportTableToJSON('purchases')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">JSON</div>
+                <div onclick="exportToPDF('purchases')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">PDF</div>
+              </div>
+            </div>
+            <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareData('purchases')">📲 Share</button>
+          </div>
         </div>
         
         <!-- Tiles -->
@@ -450,17 +462,29 @@
     <!-- TAB 5: SALES -->
     <div id="tab-sales" class="tab-content">
       <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
           <div>
             <h2>Sales Log</h2>
             <p class="sub">Filter and view all sold items</p>
           </div>
-          <select id="salesTimeFilter" style="width: 150px; margin: 0;" onchange="renderSales()">
-            <option value="all">All Time</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </select>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="salesTimeFilter" style="width: 120px; margin: 0;" onchange="renderSales()">
+              <option value="all">All Time</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+            </select>
+            <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="window.print()">🖨️ Print</button>
+            <div class="dropdown" style="position: relative; display: inline-block;">
+              <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="toggleExportMenu('saleExportMenu')">⬇️ Export ▾</button>
+              <div id="saleExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; background: #fff; min-width: 120px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 100; border-radius: 6px; border: 1px solid #ccc; text-align: left;">
+                <div onclick="exportTableToCSV('sales')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">CSV</div>
+                <div onclick="exportTableToJSON('sales')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">JSON</div>
+                <div onclick="exportToPDF('sales')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">PDF</div>
+              </div>
+            </div>
+            <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareData('sales')">📲 Share</button>
+          </div>
         </div>
 
         <!-- Tiles -->
@@ -490,8 +514,24 @@
     <!-- TAB 6: STOCK AVAILABILITY -->
     <div id="tab-stock" class="tab-content">
       <div class="card">
-        <h2>Live Stock Availability</h2>
-        <p class="sub">Current items in your inventory, categorized by availability</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h2>Live Stock Availability</h2>
+            <p class="sub">Current items in your inventory, categorized by availability</p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="window.print()">🖨️ Print</button>
+            <div class="dropdown" style="position: relative; display: inline-block;">
+              <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="toggleExportMenu('stockExportMenu')">⬇️ Export ▾</button>
+              <div id="stockExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; background: #fff; min-width: 120px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 100; border-radius: 6px; border: 1px solid #ccc; text-align: left;">
+                <div onclick="exportTableToCSV('stock')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">CSV</div>
+                <div onclick="exportTableToJSON('stock')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">JSON</div>
+                <div onclick="exportToPDF('stock')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">PDF</div>
+              </div>
+            </div>
+            <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareData('stock')">📲 Share</button>
+          </div>
+        </div>
         <div id="stockContainer">Loading...</div>
       </div>
     </div>
@@ -1778,6 +1818,152 @@
       fetchCatalog();
     }
 
+    // ── EXPORT & SHARE UTILITIES ──
+    function toggleExportMenu(id) {
+      const menu = document.getElementById(id);
+      if (!menu) return;
+      // Close other menus
+      document.querySelectorAll('.dropdown-content').forEach(el => {
+        if (el.id !== id) el.style.display = 'none';
+      });
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-content').forEach(el => el.style.display = 'none');
+      }
+    });
+
+    function extractTableData(type) {
+      let headers = [];
+      let rows = [];
+      
+      if (type === 'purchases' || type === 'sales') {
+        // Data from the tables
+        const tableId = type === 'purchases' ? 'purchaseList' : 'salesList';
+        const container = document.getElementById(tableId);
+        if (!container) return null;
+        const table = container.querySelector('table');
+        if (!table) return null;
+
+        const ths = table.querySelectorAll('th');
+        headers = Array.from(ths).map(th => th.innerText.trim());
+
+        const trs = table.querySelectorAll('tbody tr');
+        rows = Array.from(trs).map(tr => {
+          return Array.from(tr.querySelectorAll('td')).map(td => td.innerText.trim());
+        });
+      } else if (type === 'stock') {
+        // Data from the custom DOM structure in Stock Availability
+        headers = ["Status", "Category", "Product ID", "Product Name", "Price", "Purchase Rate", "Sale Date"];
+        const container = document.getElementById('stockContainer');
+        if (!container) return null;
+        
+        // Iterate through categories and items
+        const categories = container.querySelectorAll('.category-group');
+        categories.forEach(catDiv => {
+          const catName = catDiv.querySelector('.date-header').innerText.replace('🗂️', '').trim();
+          ['AVAILABLE', 'SOLD'].forEach(status => {
+            const items = catDiv.querySelectorAll('.item-card');
+            items.forEach(item => {
+              const title = item.querySelector('strong').innerText.trim();
+              const subtext = item.querySelector('.sub-text').innerText.split('·');
+              const price = subtext[0].replace('₹', '').trim();
+              const id = subtext[1].trim();
+              // Try to find date from parent
+              let date = "Unknown";
+              let parent = item.parentElement;
+              while(parent && !parent.classList.contains('category-group')) {
+                if (parent.classList.contains('date-content') && parent.id.includes('_')) {
+                  date = parent.id.split('_').pop();
+                  break;
+                }
+                parent = parent.parentElement;
+              }
+              rows.push([status, catName, id, title, price, "-", date]);
+            });
+          });
+        });
+      }
+      return { headers, rows };
+    }
+
+    function downloadFile(content, fileName, contentType) {
+      const a = document.createElement("a");
+      const file = new Blob([content], { type: contentType });
+      a.href = URL.createObjectURL(file);
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function exportTableToCSV(type) {
+      const data = extractTableData(type);
+      if (!data || data.rows.length === 0) return alert("No data to export.");
+      
+      const csvRows = [];
+      csvRows.push(data.headers.join(",")); // Header
+      
+      data.rows.forEach(row => {
+        const escaped = row.map(v => `"${String(v).replace(/"/g, '""')}"`); // Escape quotes
+        csvRows.push(escaped.join(","));
+      });
+      
+      downloadFile(csvRows.join("\n"), `${type}_export.csv`, "text/csv");
+    }
+
+    function exportTableToJSON(type) {
+      const data = extractTableData(type);
+      if (!data || data.rows.length === 0) return alert("No data to export.");
+      
+      const jsonArr = data.rows.map(row => {
+        let obj = {};
+        data.headers.forEach((header, index) => {
+          obj[header] = row[index];
+        });
+        return obj;
+      });
+      
+      downloadFile(JSON.stringify(jsonArr, null, 2), `${type}_export.json`, "application/json");
+    }
+
+    function exportToPDF(type) {
+      // For PDF, we trigger the browser's native print dialog. 
+      // The user can select "Save as PDF" in the printer options.
+      // We add a temporary style to hide the buttons and nav for a cleaner PDF.
+      const style = document.createElement('style');
+      style.innerHTML = `
+        @media print {
+          .top-nav, .nav-links, .btn-sm, .dropdown, select { display: none !important; }
+          .main-container { padding: 0 !important; max-width: 100% !important; }
+          .card { box-shadow: none !important; border: none !important; }
+        }
+      `;
+      document.head.appendChild(style);
+      window.print();
+      setTimeout(() => document.head.removeChild(style), 1000);
+    }
+
+    function shareData(type) {
+      const data = extractTableData(type);
+      if (!data || data.rows.length === 0) return alert("No data to share.");
+      
+      // Create a summary text for WhatsApp
+      let txt = `📊 *Mom's Pick - ${type.toUpperCase()}*\n\n`;
+      
+      // Limit to top 10 rows to avoid massive URLs
+      const limit = Math.min(data.rows.length, 10);
+      for (let i = 0; i < limit; i++) {
+        txt += `• ${data.rows[i][1] || data.rows[i][0]} (${data.rows[i][data.rows[i].length - 1]})\n`;
+      }
+      if (data.rows.length > 10) txt += `...and ${data.rows.length - 10} more.\n`;
+      
+      txt += `\nView full details in the admin dashboard.`;
+      
+      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+    }
     // ═══════════════════════════════════════════════════════════════
     // PULL from Google Sheet → overwrites products.json
     // ═══════════════════════════════════════════════════════════════
