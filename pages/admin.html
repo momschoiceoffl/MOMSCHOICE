@@ -1213,6 +1213,7 @@
         // 2. Fetch Invoices from local sales.json via Python backend
         try {
           const invRes = await fetch("http://localhost:5000/get-sales", { cache: "no-store" });
+          if (!invRes.ok) throw new Error("Network response was not ok");
           invoiceLog = await invRes.json();
           console.log("SUCCESS: Retrieved", invoiceLog.length, "invoices from sales.json");
         } catch (e) {

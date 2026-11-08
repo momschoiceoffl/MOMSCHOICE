@@ -46,6 +46,16 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path == "/get-last-invoice":
             try:
+                # First try to get from sales.json
+                if os.path.exists("sales.json"):
+                    with open("sales.json", "r", encoding="utf-8") as f:
+                        sales = json.load(f)
+                    if len(sales) > 0:
+                        # Return the last invoice number found
+                        self._json(200, {"lastInv": sales[-1][1]})
+                        return
+                
+                # Fallback to Google Sheet
                 req = Request(GSHEET_URL + "?action=get_last_invoice")
                 with urlopen(req) as r:
                     data = r.read()
@@ -54,7 +64,7 @@ class Handler(SimpleHTTPRequestHandler):
                 self._json(500, {"error": str(e)})
             return
 
-        if self.path.startswith("/get-products"):
+        if self.path == "/get-products":
             try:
                 with open("products.json", "r", encoding="utf-8") as f:
                     prods = json.load(f)
@@ -63,7 +73,16 @@ class Handler(SimpleHTTPRequestHandler):
                 self._json(500, {"error": str(e)})
             return
 
-        if self.path.startswith("/get-invoices"):
+        if self.path == "/get-sales":
+            try:
+                with open("sales.json", "r", encoding="utf-8") as f:
+                    sales = json.load(f)
+                self._json(200, sales)
+            except Exception as e:
+                self._json(200, [])
+            return
+
+        if self.path == "/get-invoices":
             try:
                 with open("sales.json", "r", encoding="utf-8") as f:
                     sales = json.load(f)
