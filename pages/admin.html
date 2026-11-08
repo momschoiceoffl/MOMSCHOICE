@@ -136,6 +136,8 @@
       <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
       <button class="nav-btn" onclick="switchTab('stock', this)">📦 Stock Availability</button>
+      <button class="nav-btn" onclick="pullFromSheet()" style="background:#dcfce7; color:#166534;">⬇ Pull from Sheet</button>
+      <button class="nav-btn" onclick="pushToSheet()" style="background:#dbeafe; color:#1e40af;">⬆ Push to Sheet</button>
       <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
     </div>
   </nav>
@@ -1389,12 +1391,67 @@
     }
 
     async function deleteProduct(index) {
-      if (!confirm("Permanently delete this product?")) return;
+      if (!confirm("Permanently delete this product? This will remove it from Google Sheet too.")) return;
       const p = productsList[index];
-      // We push a dummy update to GSheet (GSheet code needs to handle deletion, but for now we just hide it)
-      p.visible = false; 
-      await fetch("http://localhost:5000/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) });
+      
+      // Remove from local products.json
+      productsList.splice(index, 1);
+      await fetch("http://localhost:5000/save-products", { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(productsList) 
+      });
+      
+      // Also send delete signal to Google Sheet
+      try {
+        await fetch("http://localhost:5000/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete_product", id: p.id })
+        });
+      } catch (e) { console.warn("Sheet delete failed:", e); }
+      
       fetchCatalog();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PULL from Google Sheet → overwrites products.json
+    // ═══════════════════════════════════════════════════════════════
+    async function pullFromSheet() {
+      if (!confirm("This will replace your local products.json with the data from Google Sheet. Continue?")) return;
+      try {
+        const res = await fetch("http://localhost:5000/get-products");
+        const fresh = await res.json();
+        productsList = fresh;
+        await fetch("http://localhost:5000/save-products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productsList)
+        });
+        alert("✅ Pulled " + fresh.length + " products from Google Sheet.");
+        fetchCatalog();
+      } catch (e) {
+        alert("Pull failed: " + e.message);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PUSH to Google Sheet → overwrites sheet with products.json
+    // ═══════════════════════════════════════════════════════════════
+    async function pushToSheet() {
+      if (!confirm("This will push all " + productsList.length + " products to Google Sheet. Continue?")) return;
+      let ok = 0, fail = 0;
+      for (const p of productsList) {
+        try {
+          await fetch("http://localhost:5000/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(p)
+          });
+          ok++;
+        } catch (e) { fail++; }
+      }
+      alert(`✅ Pushed ${ok} products to Google Sheet. ${fail ? fail + " failed." : ""}`);
     }
 
     function confirmAction(action, index) {

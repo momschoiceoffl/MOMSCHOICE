@@ -116,6 +116,19 @@ class Handler(SimpleHTTPRequestHandler):
                 self._json(500, {"ok": False, "error": str(e)})
             return
 
+        if self.path == "/save-products":
+            length = int(self.headers.get("Content-Length", 0))
+            raw = self.rfile.read(length).decode("utf-8")
+            prods = json.loads(raw)
+            try:
+                with open("products.json", "w", encoding="utf-8") as f:
+                    json.dump(prods, f, indent=2, ensure_ascii=False)
+                print(f"Saved {len(prods)} products to products.json")
+                self._json(200, {"ok": True})
+            except Exception as e:
+                self._json(500, {"ok": False, "error": str(e)})
+            return
+
         if self.path == "/save":
             length = int(self.headers.get("Content-Length", 0))
             raw = self.rfile.read(length).decode("utf-8")
