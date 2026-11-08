@@ -141,14 +141,19 @@ class Handler(SimpleHTTPRequestHandler):
 
                 # ── CASE 1: INVOICE ────────────────────────────────────────
                 if data.get("action") == "save_invoice":
-                    # A. Append to sales.json
+                    # A. Append to sales.json (with real DATE as first column)
                     try:
                         with open("sales.json", "r", encoding="utf-8") as f:
                             sales = json.load(f)
                     except:
                         sales = []
 
+                    import datetime
+                    now = datetime.datetime.now()
+                    dateStr = now.strftime("%d/%m/%Y, %H:%M:%S")
+
                     sales.append([
+                        dateStr,
                         data.get("invNumber", ""),
                         data.get("invNumber", ""),
                         "Auto",

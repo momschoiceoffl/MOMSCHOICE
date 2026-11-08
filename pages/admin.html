@@ -605,43 +605,57 @@
         const n = Number(String(v).replace(/[^0-9.\-]/g, ''));
         return isNaN(n) ? 0 : n;
       };
-      
-      // 12 columns: 0:Date, 1:InvNo, 2:OrderID, 3:Name, 4:Phone, 5:Addr, 6:ProdID, 7:Title, 8:Qty, 9:Price, 10:Courier, 11:GrandTotal
-      const price = num(inv[9]);
-      let courier = num(inv[10]);
-      let grandTotal = num(inv[11]);
-      
-      // 1. If grandTotal is missing (older 11-col format), assume inv[10] is actually grandTotal
-      if (grandTotal === 0 && courier > 0) {
-        grandTotal = courier;
-        courier = grandTotal - price;
+
+      // NEW 13-column format:
+      // [0]Date [1]InvNo [2]InvNo2 [3]OrderID [4]Name [5]Phone [6]Addr
+      // [7]ProdID [8]Title [9]Qty [10]Price [11]Courier [12]GrandTotal
+      // Detect 13-col vs older 12-col
+      let dateStr, invNum, custName, custPhone, custAddr, productId, title, qty, price, courier, grandTotal;
+      if (inv.length >= 13) {
+        dateStr    = String(inv[0] || '').split(',')[0].trim();
+        invNum     = String(inv[1] || '').trim();
+        custName   = String(inv[4] || '').trim();
+        custPhone  = String(inv[5] || '').trim();
+        custAddr   = String(inv[6] || '').trim();
+        productId  = String(inv[7] || '').trim();
+        title      = String(inv[8] || '').trim();
+        qty        = num(inv[9]) || 1;
+        price      = num(inv[10]);
+        courier    = num(inv[11]);
+        grandTotal = num(inv[12]);
+      } else {
+        // Legacy 12-col format fallback
+        dateStr    = String(inv[0] || '').split(',')[0].trim();
+        invNum     = String(inv[1] || '').trim();
+        custName   = String(inv[3] || '').trim();
+        custPhone  = String(inv[4] || '').trim();
+        custAddr   = String(inv[5] || '').trim();
+        productId  = String(inv[6] || '').trim();
+        title      = String(inv[7] || '').trim();
+        qty        = num(inv[8]) || 1;
+        price      = num(inv[9]);
+        courier    = num(inv[10]);
+        grandTotal = num(inv[11]);
       }
-      
-      // 2. If courier equals grandTotal (Apps Script mistakenly put grandTotal in courier column), recalculate
-      if (courier > 0 && courier === grandTotal) {
-        courier = grandTotal - price;
-      }
-      
-      // 3. If courier is still missing, calculate from GrandTotal - Price
-      if (courier === 0 && grandTotal > price) {
-        courier = grandTotal - price;
-      }
-      
-      // 4. Fallback if grandTotal is missing
+
+      // Courier / Grand total math fixes
+      if (grandTotal === 0 && courier > 0) { grandTotal = courier; courier = grandTotal - price; }
+      if (courier > 0 && courier === grandTotal) { courier = grandTotal - price; }
+      if (courier === 0 && grandTotal > price) { courier = grandTotal - price; }
       if (grandTotal === 0) grandTotal = price + courier;
 
       return {
-        rawDate:   inv[0] || '',
-        dateStr:   String(inv[0] || '').split(',')[0].trim(),
-        invNum:    String(inv[1] || '').trim(),
-        custName:  String(inv[3] || '').trim(),
-        custPhone: String(inv[4] || '').trim(),
-        custAddr:  String(inv[5] || '').trim(),
-        productId: String(inv[6] || '').trim(),
-        title:     String(inv[7] || '').trim(),
-        qty:       num(inv[8]) || 1,
-        price:     price,
-        courier:   courier,
+        rawDate:    dateStr,
+        dateStr:    dateStr,
+        invNum:     invNum,
+        custName:   custName,
+        custPhone:  custPhone,
+        custAddr:   custAddr,
+        productId:  productId,
+        title:      title,
+        qty:        qty,
+        price:      price,
+        courier:    courier,
         grandTotal: grandTotal
       };
     }
