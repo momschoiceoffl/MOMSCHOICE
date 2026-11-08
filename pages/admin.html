@@ -389,6 +389,13 @@
 
         <button class="btn" style="background: #d97706; color: #fff; margin-top: 10px;" onclick="generateInvoiceFromForm()">Generate A4 Invoice</button>
       </div>
+
+      <!-- RECENT BILLS SECTION -->
+      <div class="card" style="margin-top: 20px;">
+        <h2>📜 Recent Bills</h2>
+        <p class="sub">View, Share, or Download past invoices</p>
+        <div id="recentBillsContainer">Loading...</div>
+      </div>
     </div>
 
     <!-- TAB 4: PURCHASES -->
@@ -1100,6 +1107,102 @@
       if (tabId === 'purchases') renderPurchases();
       if (tabId === 'sales')     renderSales();
       if (tabId === 'stock')     renderStockAvailability();
+      if (tabId === 'invoices')  renderRecentBills();
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RECENT BILLS (Drill-down by Date)
+       ═══════════════════════════════════════════════════════════════ */
+    function renderRecentBills() {
+      const container = document.getElementById("recentBillsContainer");
+      if (!container) return;
+
+      const allNorm = getNormalizedInvoices();
+      if (allNorm.length === 0) {
+        container.innerHTML = "<p style='color:#64748b; text-align:center; padding:20px;'>No invoices generated yet.</p>";
+        return;
+      }
+
+      // Group by Date
+      const grouped = {};
+      allNorm.reverse().forEach(inv => {
+        // Use dateStr (DD/MM/YYYY) without time
+        const d = inv.dateStr || "Unknown Date";
+        if (!grouped[d]) grouped[d] = [];
+        grouped[d].push(inv);
+      });
+
+      let html = "";
+      Object.keys(grouped).forEach((date, index) => {
+        const dateSafeId = date.replace(/\//g, '-');
+        const bills = grouped[date];
+        
+        // Auto-open the most recent date (index 0)
+        const isOpen = index === 0 ? "open" : "";
+        const displayStyle = index === 0 ? "block" : "none";
+
+        html += `<div class="category-group" style="margin-bottom: 15px;">`;
+        
+        // Date Header
+        html += `<div class="date-header" style="background:#e0f2fe; border-left-color:#0369a1; color:#0369a1;" onclick="const el = document.getElementById('bill-date-${dateSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'block' : 'none'; this.classList.toggle('open')">
+          <span style="font-size: 0.9rem;">📅 ${date} (${bills.length} Bills)</span>
+          <span class="arrow">▼</span>
+        </div>`;
+
+        // Date Content
+        html += `<div class="date-content ${isOpen}" id="bill-date-${dateSafeId}" style="display: ${displayStyle}; padding: 10px 0;">`;
+        html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">`;
+
+        bills.forEach(inv => {
+          const labelUrl = `label.html?id=${encodeURIComponent(inv.productId)}` +
+                           `&title=${encodeURIComponent(inv.title)}` +
+                           `&price=${inv.price}` +
+                           `&qty=${inv.qty}` +
+                           `&shipping=${inv.courier}` +
+                           `&invNum=${encodeURIComponent(inv.invNum)}` +
+                           `&cName=${encodeURIComponent(inv.custName)}` +
+                           `&cPhone=${encodeURIComponent(inv.custPhone)}` +
+                           `&cAddr=${encodeURIComponent(inv.custAddr)}`;
+
+          const receiptUrl = `receipt.html?invNum=${encodeURIComponent(inv.invNum)}` +
+                             `&cName=${encodeURIComponent(inv.custName)}` +
+                             `&title=${encodeURIComponent(inv.title)}` +
+                             `&qty=${inv.qty}` +
+                             `&price=${inv.price}` +
+                             `&shipping=${inv.courier}`;
+
+          // WhatsApp Message
+          const waMsg = `Hello ${inv.custName}, here is your digital receipt for Invoice *${inv.invNum}*.\n\nItem: ${inv.title}\nTotal: ₹${inv.grandTotal}\n\nView Receipt: ${window.location.origin}${window.location.pathname.replace('admin.html', '')}${receiptUrl}`;
+
+          html += `
+            <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; background: #fff; display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="font-size:0.75rem; color:#64748b; font-weight:700;">${inv.invNum}</div>
+                  <div style="font-size:0.85rem; font-weight:800; color:#0f172a; margin-top:2px;">${inv.custName}</div>
+                  <div style="font-size:0.7rem; color:#64748b;">${inv.custPhone}</div>
+                </div>
+                <div style="background:#dcfce7; color:#166534; font-weight:800; padding:4px 8px; border-radius:6px; font-size:0.8rem;">
+                  ₹${inv.grandTotal}
+                </div>
+              </div>
+              
+              <div style="font-size:0.75rem; color:#334155; background:#f1f5f9; padding:6px; border-radius:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${inv.title} (x${inv.qty})
+              </div>
+
+              <div style="display:flex; gap:6px; margin-top:auto; padding-top:8px;">
+                <a href="${labelUrl}" target="_blank" style="flex:1; text-align:center; padding:6px; background:#e0f2fe; color:#0369a1; text-decoration:none; border-radius:6px; font-size:0.75rem; font-weight:700;">👁️ View</a>
+                <a href="${labelUrl}&print=true" target="_blank" style="flex:1; text-align:center; padding:6px; background:#fef08a; color:#854d0e; text-decoration:none; border-radius:6px; font-size:0.75rem; font-weight:700;">⬇️ PDF</a>
+                <a href="https://wa.me/91${inv.custPhone}?text=${encodeURIComponent(waMsg)}" target="_blank" style="flex:1; text-align:center; padding:6px; background:#25d366; color:#fff; text-decoration:none; border-radius:6px; font-size:0.75rem; font-weight:700;">📲 Share</a>
+              </div>
+            </div>`;
+        });
+
+        html += `</div></div></div>`;
+      });
+
+      container.innerHTML = html;
     }
 
     function parseDate(dateStr) {
