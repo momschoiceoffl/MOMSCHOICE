@@ -1091,22 +1091,32 @@
 
     function renderStockAvailability() {
       const container = document.getElementById("stockContainer");
-      
+
+      // Build SOLD set from Invoice Log
+      const allInvoices = getNormalizedInvoices();
+      const soldProductIds = new Set();
+      allInvoices.forEach(inv => {
+        if (inv.productId) soldProductIds.add(inv.productId);
+      });
+
       const grouped = {};
       productsList.forEach(p => {
         const cat = p.category || "Uncategorized";
-        const status = (p.status || "AVAILABLE").toUpperCase();
-        
+
+        const isSoldInSheet = soldProductIds.has(p.id);
+        const isSoldInJson  = (p.status || "AVAILABLE").toUpperCase() === 'SOLD';
+        const status = (isSoldInSheet || isSoldInJson) ? "SOLD" : "AVAILABLE";
+
         const match = p.id.match(/[A-Z]{2}(\d{6})/);
         const dateStr = match ? match[1] : "000000";
-        const formattedDate = dateStr !== "000000" 
-          ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}` 
+        const formattedDate = dateStr !== "000000"
+          ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}`
           : "Unknown Date";
 
         if (!grouped[cat]) grouped[cat] = { "AVAILABLE": {}, "SOLD": {} };
         if (!grouped[cat][status]) grouped[cat][status] = {};
         if (!grouped[cat][status][formattedDate]) grouped[cat][status][formattedDate] = [];
-        
+
         grouped[cat][status][formattedDate].push(p);
       });
 
