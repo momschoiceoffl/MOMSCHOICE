@@ -978,7 +978,7 @@
               type: 'bar',
               label: 'Total Revenue',
               data: datasetRevenue,
-              backgroundColor: 'rgba(148, 163, 184, 0.7)',
+              backgroundColor: 'rgba(148, 163, 184, 0.5)', // Softer grey to blend in dark
               borderColor: '#94a3b8',
               borderWidth: 1,
               order: 2
@@ -987,12 +987,12 @@
               type: 'line',
               label: 'Gross Profit',
               data: datasetGross,
-              borderColor: '#3b82f6',
+              borderColor: '#60a5fa', // Brighter blue for dark mode
               backgroundColor: 'transparent',
               borderWidth: 3,
               tension: 0.4,
-              pointBackgroundColor: '#fff',
-              pointBorderColor: '#3b82f6',
+              pointBackgroundColor: '#1a0b13', // Dark fill for point centers
+              pointBorderColor: '#60a5fa',
               pointBorderWidth: 2,
               pointRadius: 4,
               order: 1
@@ -1001,12 +1001,12 @@
               type: 'line',
               label: 'Net Profit',
               data: datasetNet,
-              borderColor: '#16a34a',
+              borderColor: '#4ade80', // Brighter green for dark mode
               backgroundColor: 'transparent',
               borderWidth: 3,
               tension: 0.4,
-              pointBackgroundColor: '#fff',
-              pointBorderColor: '#16a34a',
+              pointBackgroundColor: '#1a0b13',
+              pointBorderColor: '#4ade80',
               pointBorderWidth: 2,
               pointRadius: 4,
               order: 0
@@ -1021,10 +1021,15 @@
             intersect: false,
           },
           plugins: { 
-            legend: { position: 'top' },
+            legend: { 
+              position: 'top',
+              labels: {
+                color: '#FDF8F9' // White text for legend
+              }
+            },
             tooltip: {
               filter: function(tooltipItem) {
-                return tooltipItem.raw > 0; // Hides items that are 0
+                return tooltipItem.raw > 0; 
               },
               callbacks: {
                 label: function(context) {
@@ -1036,13 +1041,21 @@
           scales: { 
             y: { 
               beginAtZero: true,
+              grid: {
+                color: 'rgba(217, 160, 139, 0.1)' // Faint gold grid lines
+              },
               ticks: { 
+                color: '#D9A08B', // Gold Y-axis text
                 stepSize: stepSize,
                 callback: function(value) { return '₹' + value; }
               } 
             },
             x: {
+              grid: {
+                color: 'rgba(217, 160, 139, 0.05)'
+              },
               ticks: {
+                color: '#C2A5B0', // Muted gold X-axis text
                 autoSkip: true,
                 maxTicksLimit: 15
               }
