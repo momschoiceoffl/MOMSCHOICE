@@ -752,7 +752,7 @@
       let data = [];
       let maxRevenue = 0;
 
-      // 1. Generate X-Axis Labels based on Time Filter
+      // 1. Generate X-Axis Labels
       if (timeFilter === 'week') {
         for (let i = 6; i >= 0; i--) {
           const d = new Date(now);
@@ -764,28 +764,39 @@
         for (let i = 1; i <= daysInMonth; i++) {
           labels.push(`${String(i).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}`);
         }
-      } else if (timeFilter === 'year') {
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        labels = months;
       } else {
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        labels = months;
+        labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       }
 
       // 2. Map Invoices to X-Axis Slots
       data = new Array(labels.length).fill(0);
 
       invoices.forEach(inv => {
-        const revenue = inv.grandTotal || 0;
+        const revenue = Number(inv.grandTotal) || 0;
         if (revenue > 0) maxRevenue += revenue;
 
-        // Parse invoice date string: "DD/MM/YYYY, HH:MM:SS" or "DD/MM/YYYY"
-        const rawDate = String(inv.rawDate || inv.dateStr || '').split(',')[0].trim();
-        const parts = rawDate.split('/');
-        if (parts.length !== 3) return;
-        const day   = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const year  = parseInt(parts[2], 10);
+        // SAFE DATE PARSING: Handle "DD/MM/YYYY", "DD/MM/YYYY, HH:MM:SS", or Excel serial dates
+        let day, month, year;
+        const rawDate = String(inv.rawDate || inv.dateStr || '').split(',')[0].trim(); // Drops the time
+        
+        if (rawDate.includes('/')) {
+          const parts = rawDate.split('/');
+          if (parts.length === 3) {
+            day   = parseInt(parts[0], 10);
+            month = parseInt(parts[1], 10) - 1;
+            year  = parseInt(parts[2], 10);
+          }
+        } else if (rawDate.includes('-')) {
+           const parts = rawDate.split('-');
+           if (parts.length === 3) {
+             // Assuming YYYY-MM-DD
+             year = parseInt(parts[0], 10);
+             month = parseInt(parts[1], 10) - 1;
+             day = parseInt(parts[2], 10);
+           }
+        }
+
+        if (day === undefined) return; // Skip if date format is unrecognized
 
         if (timeFilter === 'week' || timeFilter === 'month') {
           const dayStr = `${String(day).padStart(2,'0')}-${String(month+1).padStart(2,'0')}`;
@@ -1296,12 +1307,16 @@
       allInvoices.forEach(inv => {
         if (inv.productId) {
           soldProductIds.add(inv.productId);
-          // Convert inv dateStr (DD/MM/YYYY or DD/MM/YYYY, HH:MM:SS) to DD-MM-YYYY only
-          const cleanDate = String(inv.dateStr || '').split(',')[0].trim();
-          const parts = cleanDate.split('/');
+          
+          // Safely strip the time part (everything after the comma)
+          const rawDate = String(inv.dateStr || '').split(',')[0].trim();
+          
+          // Ensure it's in DD-MM-YYYY format
+          const parts = rawDate.split('/');
           const displayDate = parts.length === 3
-            ? `${parts[0]}-${parts[1]}-${parts[2]}`
-            : cleanDate;
+            ? `${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[2]}`
+            : rawDate;
+            
           soldDateMap[inv.productId] = displayDate;
         }
       });
