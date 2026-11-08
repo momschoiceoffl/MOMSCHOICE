@@ -530,38 +530,51 @@
     function renderDashboard() {
       const filter = document.getElementById("dashTimeFilter").value;
 
-      // 1. Purchased = ALL products (both Available and Sold)
-      let purchasedQty = productsList.length;
-      let purchasedVal = 0;
-      productsList.forEach(p => {
-        purchasedVal += (Number(p.purchaseRate) || 0);
+      // ─────────────────────────────────────────────
+      // Purchased  = every item in Store Catalog
+      // Sold       = every invoice line in Invoice Log
+      // Available  = Purchased − Sold (matched by Product ID)
+      // ─────────────────────────────────────────────
+
+      const allInvoices = getNormalizedInvoices();
+
+      // Set of product IDs that appear in the Invoice Log
+      const soldProductIds = new Set();
+      allInvoices.forEach(inv => {
+        if (inv.productId) soldProductIds.add(inv.productId);
       });
 
-      // 2. Available = Only those NOT sold
+      // Purchased totals + Available totals
+      let purchasedQty = 0, purchasedVal = 0;
       let availQty = 0, availVal = 0;
+
       productsList.forEach(p => {
-        if ((p.status || 'AVAILABLE').toUpperCase() !== 'SOLD') {
+        purchasedQty += 1;
+        purchasedVal += (Number(p.purchaseRate) || 0);
+
+        const isSoldInSheet = soldProductIds.has(p.id);
+        const isSoldInJson  = (p.status || 'AVAILABLE').toUpperCase() === 'SOLD';
+
+        if (!isSoldInSheet && !isSoldInJson) {
           availQty += 1;
           availVal += (Number(p.purchaseRate) || 0);
         }
       });
 
-      // 3. Sold = From Google Sheets (Invoices)
-      const all = getNormalizedInvoices();
-      const inWindow = all.filter(inv => filterByTime(inv.rawDate || inv.dateStr, filter));
-
+      // Sold totals (respect Dashboard time filter for display only)
+      const inWindow = allInvoices.filter(inv => filterByTime(inv.rawDate || inv.dateStr, filter));
       let soldQty = 0, soldVal = 0;
       inWindow.forEach(inv => {
         soldQty += inv.qty;
         soldVal += inv.grandTotal;
       });
 
-      document.getElementById("statSoldQty").innerText = soldQty + " Qty";
-      document.getElementById("statSoldVal").innerText = soldVal.toLocaleString("en-IN");
-      document.getElementById("statPurchasedQty").innerText = purchasedQty + " Qty";
-      document.getElementById("statPurchasedVal").innerText = purchasedVal.toLocaleString("en-IN");
-      document.getElementById("statAvailQty").innerText = availQty + " Qty";
-      document.getElementById("statAvailVal").innerText = availVal.toLocaleString("en-IN");
+      document.getElementById("statSoldQty").innerText       = soldQty + " Qty";
+      document.getElementById("statSoldVal").innerText       = soldVal.toLocaleString("en-IN");
+      document.getElementById("statPurchasedQty").innerText  = purchasedQty + " Qty";
+      document.getElementById("statPurchasedVal").innerText  = purchasedVal.toLocaleString("en-IN");
+      document.getElementById("statAvailQty").innerText      = availQty + " Qty";
+      document.getElementById("statAvailVal").innerText      = availVal.toLocaleString("en-IN");
 
       drawChart(inWindow);
     }
