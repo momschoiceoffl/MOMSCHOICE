@@ -56,10 +56,9 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path.startswith("/get-products"):
             try:
-                req = Request(GSHEET_URL)
-                with urlopen(req) as r:
-                    data = r.read()
-                self._json(200, json.loads(data))
+                with open("products.json", "r", encoding="utf-8") as f:
+                    prods = json.load(f)
+                self._json(200, prods)
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return
@@ -123,8 +122,13 @@ class Handler(SimpleHTTPRequestHandler):
             data = json.loads(raw)
 
             try:
-                # If this is an INVOICE: save to sales.json AND push to Google Sheet
+                # ═══════════════════════════════════════════════════════════
+                # RULE: every write updates BOTH local JSON AND Google Sheet
+                # ═══════════════════════════════════════════════════════════
+
+                # ── CASE 1: INVOICE ────────────────────────────────────────
                 if data.get("action") == "save_invoice":
+                    # A. Append to sales.json
                     try:
                         with open("sales.json", "r", encoding="utf-8") as f:
                             sales = json.load(f)
@@ -149,9 +153,53 @@ class Handler(SimpleHTTPRequestHandler):
                     with open("sales.json", "w", encoding="utf-8") as f:
                         json.dump(sales, f, indent=2, ensure_ascii=False)
 
+                    # B. ALSO mark product as SOLD in products.json
+                    try:
+                        with open("products.json", "r", encoding="utf-8") as f:
+                            prods = json.load(f)
+                        for p in prods:
+                            if p.get("id") == data.get("id"):
+                                p["status"] = "SOLD"
+                                break
+                        with open("products.json", "w", encoding="utf-8") as f:
+                            json.dump(prods, f, indent=2, ensure_ascii=False)
+                    except Exception as e:
+                        print("Warning: could not update products.json:", e)
+
                     print(f"Invoice {data.get('invNumber')} saved to sales.json ({len(sales)} total)")
 
-                # ALWAYS push to Google Sheet
+                # ── CASE 2: PRODUCT (Add / Edit / Delete) ──────────────────
+                else:
+                    try:
+                        with open("products.json", "r", encoding="utf-8") as f:
+                            prods = json.load(f)
+                    except:
+                        prods = []
+
+                    # Find existing product by id
+                    existing_idx = None
+                    for i, p in enumerate(prods):
+                        if p.get("id") == data.get("id"):
+                            existing_idx = i
+                            break
+
+                    if data.get("visible") is False and existing_idx is not None:
+                        # Treat as delete → remove from local products.json
+                        prods.pop(existing_idx)
+                        print(f"Product {data.get('id')} deleted from products.json")
+                    elif existing_idx is not None:
+                        # Update
+                        prods[existing_idx] = data
+                        print(f"Product {data.get('id')} updated in products.json")
+                    else:
+                        # Add new
+                        prods.append(data)
+                        print(f"Product {data.get('id')} added to products.json")
+
+                    with open("products.json", "w", encoding="utf-8") as f:
+                        json.dump(prods, f, indent=2, ensure_ascii=False)
+
+                # ── ALWAYS push to Google Sheet (both cases) ──────────────
                 req = Request(GSHEET_URL, method="POST", data=json.dumps(data).encode("utf-8"),
                               headers={"Content-Type": "application/json"})
                 with urlopen(req) as r:
