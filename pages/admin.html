@@ -978,8 +978,8 @@
               type: 'bar',
               label: 'Total Revenue',
               data: datasetRevenue,
-              backgroundColor: 'rgba(148, 163, 184, 0.5)', // Softer grey to blend in dark
-              borderColor: '#94a3b8',
+              backgroundColor: 'rgba(107, 15, 46, 0.8)', // Dark maroon matching theme
+              borderColor: '#9C1A45', // Slightly brighter maroon border for definition
               borderWidth: 1,
               order: 2
             },
@@ -1024,7 +1024,17 @@
             legend: { 
               position: 'top',
               labels: {
-                color: '#FDF8F9' // White text for legend
+                color: '#FDF8F9',
+                generateLabels: function(chart) {
+                  const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                  labels.forEach(label => {
+                    if (label.text === 'Total Revenue') {
+                      label.fillStyle = 'rgba(107, 15, 46, 0.8)';
+                      label.strokeStyle = '#9C1A45';
+                    }
+                  });
+                  return labels;
+                }
               }
             },
             tooltip: {
