@@ -3,6 +3,12 @@ import json
 import subprocess
 import os
 
+
+
+
+
+
+
 PRODUCTS_FILE = "products.json"
 ENV_FILE      = ".env"
 

@@ -1116,12 +1116,12 @@
         const catSafeId = cat.replace(/\s+/g, '_');
         
         html += `<div style="margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">`;
-        html += `<div style="padding: 12px; font-weight: bold; background: #fef3c7; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; justify-content: space-between;" onclick="document.getElementById('stock-${catSafeId}').classList.toggle('open')">
+        html += `<div style="padding: 12px; font-weight: bold; background: #fef3c7; border-radius: 8px 8px 0 0; cursor: pointer; display: flex; justify-content: space-between;" onclick="const el = document.getElementById('stock-${catSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'grid' : 'none';">
           <span>🗂️ ${cat}</span>
           <span>▼</span>
         </div>`;
         
-        html += `<div class="date-content" id="stock-${catSafeId}" style="padding: 10px; display: none; grid-template-columns: 1fr 1fr; gap: 15px;">`;
+        html += `<div id="stock-${catSafeId}" style="padding: 10px; display: none; grid-template-columns: 1fr 1fr; gap: 15px;">`;
 
         ['AVAILABLE', 'SOLD'].forEach(status => {
           const isSold = status === "SOLD";

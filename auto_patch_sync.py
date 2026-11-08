@@ -215,19 +215,29 @@ def git_push(commit_msg="Update store via auto-patch"):
         subprocess.run(["git", "rebase", "--abort"], capture_output=True)
         subprocess.run(["git", "merge", "--abort"], capture_output=True)
         
-        # Fetch remote changes but do not merge
-        subprocess.run(["git", "fetch", "origin", branch], capture_output=True)
+        # Force sync with remote
+        print("🔄 Force syncing with remote...")
         
-        # Force the local branch to match remote HEAD (accepting remote changes) 
-        # Then re-apply our commit on top.
+        # Build authenticated URL using .env credentials
+        remote_url = f"https://{user}:{token}@github.com/{user}/{repo}.git"
+        
+        # Abort any pending merge/rebase
+        subprocess.run(["git", "rebase", "--abort"], capture_output=True)
+        subprocess.run(["git", "merge", "--abort"], capture_output=True)
+        
+        # Fetch remote changes using the authenticated URL
+        subprocess.run(["git", "fetch", remote_url, branch], capture_output=True)
+        
+        # Force the local branch to match remote HEAD
         try:
-            subprocess.run(["git", "reset", "--soft", f"origin/{branch}"], check=True, capture_output=True)
+            subprocess.run(["git", "reset", "--soft", "FETCH_HEAD"], check=True, capture_output=True)
             subprocess.run(["git", "add", "."], check=True)
             subprocess.run(["git", "commit", "-m", commit_msg], check=True)
         except subprocess.CalledProcessError:
             print("⚠️ Remote reset failed. Proceeding with standard push.")
             
-        subprocess.run(["git", "push", "origin", f"HEAD:{branch}", "--force"], check=True)
+        # Push using the authenticated URL (bypasses Windows Credential Manager)
+        subprocess.run(["git", "push", remote_url, f"HEAD:{branch}", "--force"], check=True)
         print("🎉 Pushed! GitHub Pages live in ~20s.")
         
     except subprocess.CalledProcessError as e:
