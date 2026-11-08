@@ -136,6 +136,7 @@
       <button class="nav-btn" onclick="switchTab('sales', this)">💰 Sales</button>
       <button class="nav-btn" onclick="switchTab('invoices', this)">🧾 Invoices</button>
       <button class="nav-btn" onclick="switchTab('stock', this)">📦 Stock Availability</button>
+      <button class="nav-btn" onclick="switchTab('catalog', this)">📚 Catalog</button>
       <button class="nav-btn" onclick="switchTab('settings', this)">⚙️ Settings</button>
     </div>
   </nav>
@@ -1120,7 +1121,7 @@
           <span>▼</span>
         </div>`;
         
-        html += `<div id="stock-${catSafeId}" style="padding: 10px; display: none; grid-template-columns: 1fr 1fr; gap: 15px;">`;
+        html += `<div id="stock-${catSafeId}" class="date-content" style="padding: 10px; display: none; grid-template-columns: 1fr 1fr; gap: 15px;">`;
 
         ['AVAILABLE', 'SOLD'].forEach(status => {
           const isSold = status === "SOLD";
@@ -1496,9 +1497,11 @@
       document.getElementById("invShipping").value = "0";
     }
 
+
     // ── RENDER CATALOG (Category > 2-Column Split: Available | Sold) ──
     function renderCatalog() {
       const container = document.getElementById("itemsContainer");
+      if (!container) return;
       if (productsList.length === 0) { container.innerHTML = "<p>No items in catalog.</p>"; return; }
       
       const grouped = {};
@@ -1524,10 +1527,9 @@
         const catSafeId = cat.replace(/\s+/g, '_');
         
         html += `<div class="category-group">`;
-        html += `<div class="date-header" onclick="document.getElementById('cat-${catSafeId}').classList.toggle('open'); this.classList.toggle('open')"><span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span></div>`;
+        html += `<div class="date-header" onclick="const el = document.getElementById('cat-${catSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'block' : 'none'; this.classList.toggle('open')"><span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span></div>`;
         html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: #fff; border-radius: 0 0 8px 8px; display: none;">`;
 
-        // Level 2: Side-by-Side Split (Available vs Sold)
         html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
 
         ['AVAILABLE', 'SOLD'].forEach(status => {
@@ -1549,8 +1551,8 @@
             const dateSafeId = `${catSafeId}_${status}_${date.replace(/\//g, '-')}`;
             
             html += `<div style="margin-bottom: 8px; border: 1px dashed #ccc; border-radius: 4px; background: #fafaf9;">`;
-            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #555; display: flex; justify-content: space-between; align-items: center;" onclick="document.getElementById('date-${dateSafeId}').classList.toggle('open'); this.querySelector('.arrow').classList.toggle('open')"><span>📅 ${date} (${itemsData[date].length})</span><span class="arrow" style="transition: transform 0.3s;">▼</span></div>`;
-            html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 10px; border-top: 1px dashed #ccc; background: #fff;">`;
+            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #555; display: flex; justify-content: space-between; align-items: center;" onclick="const el = document.getElementById('date-${dateSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'block' : 'none'; this.querySelector('.arrow').classList.toggle('open')"><span>📅 ${date} (${itemsData[date].length})</span><span class="arrow" style="transition: transform 0.3s;">▼</span></div>`;
+            html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 10px; border-top: 1px dashed #ccc; background: #fff; display: none;">`;
 
             html += itemsData[date].map(item => {
               const idx = productsList.findIndex(p => p.id === item.id);
