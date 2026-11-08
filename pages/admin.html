@@ -531,14 +531,14 @@
     function renderDashboard() {
       const filter = document.getElementById("dashTimeFilter").value;
 
-      // Purchased = ALL products (both Available and Sold)
+      // 1. Purchased = ALL products (both Available and Sold)
       let purchasedQty = productsList.length;
       let purchasedVal = 0;
       productsList.forEach(p => {
         purchasedVal += (Number(p.purchaseRate) || 0);
       });
 
-      // Available = Only those NOT sold
+      // 2. Available = Only those NOT sold
       let availQty = 0, availVal = 0;
       productsList.forEach(p => {
         if ((p.status || 'AVAILABLE').toUpperCase() !== 'SOLD') {
@@ -547,6 +547,7 @@
         }
       });
 
+      // 3. Sold = From Google Sheets (Invoices)
       const all = getNormalizedInvoices();
       const inWindow = all.filter(inv => filterByTime(inv.rawDate || inv.dateStr, filter));
 
@@ -1144,21 +1145,16 @@
               const idx = productsList.findIndex(p => p.id === item.id);
               const imgSrc = (item.images && item.images[0]) ? item.images[0] : (item.image || '');
               return `
-              <div class="item-card" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 0; border-bottom: 1px solid #eee;">
-                <div style="display:flex; gap: 10px;">
-                  <img src="${imgSrc}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 6px;">
-                  <div class="item-meta" style="flex:1;">
-                    <strong style="font-size: 0.8rem; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.2;">${item.title}</strong>
-                    <div class="sub-text" style="color: #64748b; font-size: 0.7rem; display: flex; justify-content: space-between; margin-top: 4px;">
-                      <span>₹${item.price}</span>
-                      <span>${item.id}</span>
-                    </div>
+              <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-start; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                <img src="${imgSrc}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
+                <div style="flex:1; overflow: hidden;">
+                  <strong style="font-size: 0.75rem; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.2;">${item.title}</strong>
+                  <div style="color: #64748b; font-size: 0.7rem; margin-top: 2px;">${item.id}</div>
+                  <div class="item-actions" style="display: flex; gap: 4px; margin-top: 4px;">
+                    ${!isSold ? `<button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})">Bill</button>` : ''}
+                    <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})">Edit</button>
+                    <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
                   </div>
-                </div>
-                <div class="item-actions" style="justify-content: flex-end; margin-top: 4px;">
-                  ${!isSold ? `<button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})" style="margin-right: 4px;">Bill</button>` : ''}
-                  <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})" style="margin-right: 4px;">Edit</button>
-                  <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
                 </div>
               </div>`;
             }).join("");
