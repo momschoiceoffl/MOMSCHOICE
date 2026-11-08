@@ -272,21 +272,23 @@
 
     <!-- TAB 1: DASHBOARD -->
     <div id="tab-dashboard" class="tab-content active">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div>
-          <h2>Welcome back, Admin!</h2>
-          <p class="sub">Here is your store's financial overview.</p>
-        </div>
+      <!-- HEADER WITH FILTER & ACTIONS -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
         <select id="dashTimeFilter" style="width: 150px; margin: 0;" onchange="renderDashboard()">
           <option value="week">This Week</option>
           <option value="month" selected>This Month</option>
           <option value="year">This Year</option>
           <option value="all">All Time</option>
         </select>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="window.print()">🖨️ Print</button>
+          <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="exportDashboard()">⬇️ Export</button>
+          <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareDashboard()">📲 Share</button>
+        </div>
       </div>
 
       <!-- STATS CARDS -->
-      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="stat-card" style="border-left-color: #3b82f6;">
           <h3>Purchased Stock</h3>
           <div class="value" id="statPurchasedQty" style="color: #3b82f6;">0 Qty</div>
@@ -303,12 +305,18 @@
           <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Purchase Value: ₹<span id="statAvailVal">0</span></div>
           <div style="font-size: 0.8rem; color: #16a34a; margin-top: 4px; font-weight: 600;">MRP Value: ₹<span id="statAvailMrpVal">0</span></div>
         </div>
+        <div class="stat-card" style="border-left-color: #dc2626;">
+          <h3>Total Cost & Profit</h3>
+          <div class="value" id="statTotalCost" style="color: #dc2626;">₹0</div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Gross Profit: ₹<span id="statDashGross" style="color:#3b82f6; font-weight:bold;">0</span></div>
+          <div style="font-size: 0.8rem; color: #16a34a; margin-top: 4px; font-weight: 600;">Net Profit: ₹<span id="statDashNet">0</span></div>
+        </div>
       </div>
 
       <!-- CHART -->
       <div class="card" style="margin-top: 24px;">
-        <h2>Stock Movement</h2>
-        <div style="height: 300px; width: 100%;">
+        <h2>Financial Movement</h2>
+        <div style="height: 350px; width: 100%;">
           <canvas id="stockChart"></canvas>
         </div>
       </div>
@@ -744,6 +752,23 @@
       document.getElementById("statAvailVal").innerText      = availVal.toLocaleString("en-IN");
       document.getElementById("statAvailMrpVal").innerText   = availMrpVal.toLocaleString("en-IN");
 
+      // Calculate Total Cost, Gross & Net for 4th Tile
+      let dashTotalCost = 0, dashGross = 0, dashNet = 0;
+      inWindow.forEach(inv => {
+        const prod = productsList.find(p => p.id === inv.productId);
+        const cost = prod ? (Number(prod.purchaseRate) || 0) : 0;
+        dashTotalCost += cost;
+        dashGross += (inv.grandTotal - cost);
+        dashNet += (inv.grandTotal - cost - (inv.courier || 0));
+      });
+      
+      const tcEl = document.getElementById("statTotalCost");
+      if(tcEl) tcEl.innerText = "₹" + dashTotalCost.toLocaleString("en-IN");
+      const dgEl = document.getElementById("statDashGross");
+      if(dgEl) dgEl.innerText = dashGross.toLocaleString("en-IN");
+      const dnEl = document.getElementById("statDashNet");
+      if(dnEl) dnEl.innerText = dashNet.toLocaleString("en-IN");
+
       drawChart(inWindow);
     }
 
@@ -775,12 +800,19 @@
         labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       }
 
-      // 2. Map Invoices to X-Axis Slots
-      data = new Array(labels.length).fill(0);
+      // 2. Map Invoices to X-Axis Slots (Revenue, Gross, Net)
+      let datasetRevenue = new Array(labels.length).fill(0);
+      let datasetGross = new Array(labels.length).fill(0);
+      let datasetNet = new Array(labels.length).fill(0);
 
       invoices.forEach(inv => {
         const revenue = Number(inv.grandTotal) || 0;
-        if (revenue > 0) maxRevenue += revenue;
+        if (revenue <= 0) return;
+        if (revenue > maxRevenue) maxRevenue = revenue;
+
+        const prod = productsList.find(p => p.id === inv.productId);
+        const cost = prod ? (Number(prod.purchaseRate) || 0) : 0;
+        const courier = inv.courier || 0;
 
         let day, month, year;
         const rawDate = String(inv.rawDate || inv.dateStr || '').split(',')[0].trim();
@@ -803,12 +835,18 @@
 
         if (day === undefined) return;
 
+        let idx = -1;
         if (timeFilter === 'week' || timeFilter === 'month') {
           const dayStr = `${String(day).padStart(2,'0')}-${String(month+1).padStart(2,'0')}`;
-          const idx = labels.indexOf(dayStr);
-          if (idx !== -1) data[idx] += revenue;
+          idx = labels.indexOf(dayStr);
         } else {
-          if (month >= 0 && month < 12) data[month] += revenue;
+          if (month >= 0 && month < 12) idx = month;
+        }
+
+        if (idx !== -1) {
+          datasetRevenue[idx] += revenue;
+          datasetGross[idx] += (revenue - cost);
+          datasetNet[idx] += (revenue - cost - courier);
         }
       });
 
@@ -820,27 +858,47 @@
 
       if (myChart) myChart.destroy();
       myChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
           labels: labels,
-          datasets: [{
-            label: 'Revenue (₹)',
-            data: data,
-            backgroundColor: 'rgba(107, 15, 46, 0.7)',
-            borderColor: '#6B0F2E',
-            borderWidth: 1,
-            borderRadius: 4
-          }]
+          datasets: [
+            {
+              label: 'Total Revenue',
+              data: datasetRevenue,
+              borderColor: '#94a3b8',
+              backgroundColor: 'rgba(148, 163, 184, 0.1)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Gross Profit',
+              data: datasetGross,
+              borderColor: '#3b82f6',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              tension: 0.4
+            },
+            {
+              label: 'Net Profit',
+              data: datasetNet,
+              borderColor: '#16a34a',
+              backgroundColor: 'transparent',
+              borderWidth: 3,
+              tension: 0.4
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { 
-            legend: { display: false },
+            legend: { position: 'top' },
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return '₹' + context.raw.toLocaleString('en-IN');
+                  return context.dataset.label + ': ₹' + context.raw.toLocaleString('en-IN');
                 }
               }
             }
@@ -856,12 +914,42 @@
             x: {
               ticks: {
                 autoSkip: true,
-                maxTicksLimit: 15 // Prevents X-axis from being too crowded
+                maxTicksLimit: 15
               }
             }
           }
         }
       });
+    }
+
+    function exportDashboard() {
+      const rows = [["Metric", "Value"]];
+      rows.push(["Purchased Stock", document.getElementById("statPurchasedQty").innerText]);
+      rows.push(["Purchase Value", document.getElementById("statPurchasedVal").innerText]);
+      rows.push(["Sold Stock", document.getElementById("statSoldQty").innerText]);
+      rows.push(["Total Revenue", document.getElementById("statSoldVal").innerText]);
+      rows.push(["Available Stock", document.getElementById("statAvailQty").innerText]);
+      rows.push(["Total Cost", document.getElementById("statTotalCost").innerText]);
+      rows.push(["Gross Profit", document.getElementById("statDashGross").innerText]);
+      rows.push(["Net Profit", document.getElementById("statDashNet").innerText]);
+      
+      let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "dashboard_summary.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function shareDashboard() {
+      const txt = `📊 *Store Dashboard Summary*\n` +
+                  `Purchased: ${document.getElementById("statPurchasedQty").innerText}\n` +
+                  `Sold: ${document.getElementById("statSoldQty").innerText}\n` +
+                  `Revenue: ₹${document.getElementById("statSoldVal").innerText}\n` +
+                  `Net Profit: ₹${document.getElementById("statDashNet").innerText}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
     }
 
     /* ═══════════════════════════════════════════════════════════════
