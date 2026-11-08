@@ -1284,11 +1284,20 @@
     function renderStockAvailability() {
       const container = document.getElementById("stockContainer");
 
-      // Build SOLD set from Invoice Log
+      // Build maps: soldProductIds → invoice date
       const allInvoices = getNormalizedInvoices();
       const soldProductIds = new Set();
+      const soldDateMap = {};   // productId → actual sale date (DD-MM-YYYY)
       allInvoices.forEach(inv => {
-        if (inv.productId) soldProductIds.add(inv.productId);
+        if (inv.productId) {
+          soldProductIds.add(inv.productId);
+          // Convert inv dateStr (DD/MM/YYYY) to DD-MM-YYYY for display
+          const parts = String(inv.dateStr || '').split('/');
+          const displayDate = parts.length === 3
+            ? `${parts[0]}-${parts[1]}-${parts[2]}`
+            : inv.dateStr;
+          soldDateMap[inv.productId] = displayDate;
+        }
       });
 
       const grouped = {};
@@ -1299,17 +1308,25 @@
         const isSoldInJson  = (p.status || "AVAILABLE").toUpperCase() === 'SOLD';
         const status = (isSoldInSheet || isSoldInJson) ? "SOLD" : "AVAILABLE";
 
-        const match = p.id.match(/[A-Z]{2}(\d{6})/);
-        const dateStr = match ? match[1] : "000000";
-        const formattedDate = dateStr !== "000000"
-          ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}`
-          : "Unknown Date";
+        // DATE LOGIC:
+        // - If SOLD → use the actual sale date from sales.json
+        // - If AVAILABLE → use the purchase date from the product ID
+        let displayDate;
+        if (status === "SOLD" && soldDateMap[p.id]) {
+          displayDate = soldDateMap[p.id];
+        } else {
+          const match = p.id.match(/[A-Z]{2}(\d{6})/);
+          const dateStr = match ? match[1] : "000000";
+          displayDate = dateStr !== "000000"
+            ? `${dateStr.substring(4,6)}-${dateStr.substring(2,4)}-20${dateStr.substring(0,2)}`
+            : "Unknown Date";
+        }
 
         if (!grouped[cat]) grouped[cat] = { "AVAILABLE": {}, "SOLD": {} };
         if (!grouped[cat][status]) grouped[cat][status] = {};
-        if (!grouped[cat][status][formattedDate]) grouped[cat][status][formattedDate] = [];
+        if (!grouped[cat][status][displayDate]) grouped[cat][status][displayDate] = [];
 
-        grouped[cat][status][formattedDate].push(p);
+        grouped[cat][status][displayDate].push(p);
       });
 
       let html = "";
@@ -1345,15 +1362,17 @@
               const idx = productsList.findIndex(p => p.id === item.id);
               const imgSrc = (item.images && item.images[0]) ? item.images[0] : (item.image || '');
               return `
-              <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-start; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                <img src="${imgSrc}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
-                <div style="flex:1; overflow: hidden;">
-                  <strong style="font-size: 0.75rem; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.2;">${item.title}</strong>
-                  <div style="color: #64748b; font-size: 0.7rem; margin-top: 2px;">${item.id}</div>
-                  <div class="item-actions" style="display: flex; gap: 4px; margin-top: 4px;">
-                    ${!isSold ? `<button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})">Bill</button>` : ''}
-                    <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})">Edit</button>
-                    <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
+              <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                <img src="${imgSrc}" style="width: 42px; height: 42px; object-fit: cover; border-radius: 6px; flex-shrink: 0;">
+                <div style="flex:1; min-width: 0; overflow: hidden;">
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #0f172a; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.title}</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span style="font-size: 0.72rem; color: #64748b;">₹${item.price} · ${item.id}</span>
+                    <span style="display: flex; gap: 4px;">
+                      ${!isSold ? `<button class="btn-sm btn-invoice" onclick="confirmAction('invoice', ${idx})">Bill</button>` : ''}
+                      <button class="btn-sm btn-edit" onclick="confirmAction('edit', ${idx})">Edit</button>
+                      <button class="btn-sm btn-del" onclick="confirmAction('delete', ${idx})">Del</button>
+                    </span>
                   </div>
                 </div>
               </div>`;
