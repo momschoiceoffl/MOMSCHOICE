@@ -153,6 +153,19 @@
 
     /* Cards & Forms */
     .card { background: rgba(36,10,20,0.35); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+    
+    /* Force all tables to be dark */
+    table { background: transparent !important; }
+    table thead { background: rgba(0,0,0,0.4) !important; }
+    table th { background: transparent !important; color: var(--primary) !important; border-bottom: 2px solid var(--border) !important; padding: 12px 10px !important; }
+    table td { color: var(--text) !important; border-bottom: 1px solid rgba(217,160,139,0.1) !important; padding: 12px 10px !important; }
+    table tr:hover td { background: rgba(255,255,255,0.03) !important; }
+    
+    /* Custom dark scrollbar for tables */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(217,160,139,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(217,160,139,0.6); }
     h2 { font-size: 1.2rem; color: var(--primary); margin-bottom: 6px; }
     p.sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; }
     label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
@@ -1117,12 +1130,12 @@
 
       let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
         <div style="flex:1; overflow-x:auto;">
-          <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
-            Showing <strong>${filtered.length}</strong> of ${productsList.length} items${activeCount ? ` • <span style="color:#d97706;">${activeCount} active</span>` : ''}
+          <div style="margin-bottom:10px; font-size:0.85rem; color:var(--muted);">
+            Showing <strong>${filtered.length}</strong> of ${productsList.length} items${activeCount ? ` • <span style="color:var(--primary);">${activeCount} active</span>` : ''}
           </div>
           <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
             <thead>
-              <tr style="background:#f1f5f9; text-align:left;">
+              <tr style="text-align:left;">
                 <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('date')">Date</th>
                 <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('id')">Unique ID</th>
                 <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortPurchase('cat')">Category</th>
@@ -1240,12 +1253,12 @@
 
       let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
         <div style="flex:1; overflow-x:auto;">
-          <div style="margin-bottom:10px; font-size:0.85rem; color:#64748b;">
-            Showing <strong>${filtered.length}</strong> of ${enriched.length} invoices${activeCount ? ` • <span style="color:#d97706;">${activeCount} active</span>` : ''}
+          <div style="margin-bottom:10px; font-size:0.85rem; color:var(--muted);">
+            Showing <strong>${filtered.length}</strong> of ${enriched.length} invoices${activeCount ? ` • <span style="color:var(--primary);">${activeCount} active</span>` : ''}
           </div>
           <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; min-width: 800px;">
             <thead>
-              <tr style="background:#f1f5f9; text-align:left;">
+              <tr style="text-align:left;">
                 <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('date')">Date</th>
                 <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary); cursor:pointer;" onclick="sortSale('id')">Invoice ID</th>
                 <th style="padding:10px; border-bottom:2px solid var(--border); color: var(--primary);">Category</th>
