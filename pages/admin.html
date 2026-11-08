@@ -706,12 +706,27 @@
         }
       });
 
-      // Sold totals (respect Dashboard time filter for display only)
+      // ── SOLD TILE ─────────────────────────────────────
+      // Use BOTH sources:
+      // 1. Every invoice in sales.json (revenue-verified sales)
+      // 2. Every product marked SOLD in products.json that has NO invoice row
+      //    (this covers old sales made before sales.json existed)
       const inWindow = allInvoices.filter(inv => filterByTime(inv.rawDate || inv.dateStr, filter));
       let soldQty = 0, soldVal = 0;
+      const countedIds = new Set();
       inWindow.forEach(inv => {
         soldQty += inv.qty;
         soldVal += inv.grandTotal;
+        if (inv.productId) countedIds.add(inv.productId);
+      });
+
+      // Add SOLD-in-JSON products not covered by invoices
+      productsList.forEach(p => {
+        const isSoldInJson = (p.status || '').toUpperCase() === 'SOLD';
+        if (isSoldInJson && !countedIds.has(p.id)) {
+          soldQty += 1;
+          soldVal += (Number(p.price) || 0); // Use selling price as revenue estimate
+        }
       });
 
       document.getElementById("statSoldQty").innerText       = soldQty + " Qty";
