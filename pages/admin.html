@@ -306,10 +306,14 @@
           <div style="font-size: 0.8rem; color: #16a34a; margin-top: 4px; font-weight: 600;">MRP Value: ₹<span id="statAvailMrpVal">0</span></div>
         </div>
         <div class="stat-card" style="border-left-color: #dc2626;">
-          <h3>Total Cost & Profit</h3>
+          <h3>Total Cost</h3>
           <div class="value" id="statTotalCost" style="color: #dc2626;">₹0</div>
-          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Gross Profit: ₹<span id="statDashGross" style="color:#3b82f6; font-weight:bold;">0</span></div>
-          <div style="font-size: 0.8rem; color: #16a34a; margin-top: 4px; font-weight: 600;">Net Profit: ₹<span id="statDashNet">0</span></div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Total Purchase Value</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #3b82f6;">
+          <h3>Profit Breakdown</h3>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #3b82f6; margin-bottom: 4px;">₹<span id="statDashGross">0</span> <span style="font-size:0.8rem; color:var(--muted); font-weight:600;">Gross</span></div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #16a34a;">₹<span id="statDashNet">0</span> <span style="font-size:0.8rem; color:var(--muted); font-weight:600;">Net</span></div>
         </div>
       </div>
 
@@ -911,6 +915,9 @@
           plugins: { 
             legend: { position: 'top' },
             tooltip: {
+              filter: function(tooltipItem) {
+                return tooltipItem.raw > 0; // Hides items that are 0
+              },
               callbacks: {
                 label: function(context) {
                   return context.dataset.label + ': ₹' + context.raw.toLocaleString('en-IN');
