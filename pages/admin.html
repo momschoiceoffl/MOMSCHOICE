@@ -99,13 +99,28 @@
       background: var(--border);
       margin: 6px 0;
     }
-    .settings-menu .menu-item.green { color: #16a34a; font-weight: 700; }
-    .settings-menu .menu-item.green:hover { background: #dcfce7; border-left-color: #16a34a; }
-    .settings-menu .menu-item.blue { color: #2563eb; font-weight: 700; }
-    .settings-menu .menu-item.blue:hover { background: #dbeafe; border-left-color: #2563eb; }
+    .settings-menu .menu-item.green { color: #4ade80; font-weight: 700; }
+    .settings-menu .menu-item.green:hover { background: rgba(22, 163, 74, 0.2); border-left-color: #16a34a; }
+    .settings-menu .menu-item.blue { color: #60a5fa; font-weight: 700; }
+    .settings-menu .menu-item.blue:hover { background: rgba(37, 99, 235, 0.2); border-left-color: #2563eb; }
     .settings-menu .menu-item .status-dot {
       width: 10px; height: 10px; border-radius: 50%;
       display: inline-block;
+    }
+
+    /* ─── EXPORT DROPDOWN ─── */
+    .dropdown-content {
+      background: #1a0b13 !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.8) !important;
+    }
+    .dropdown-content div {
+      color: var(--text) !important;
+      border-bottom: 1px solid var(--border) !important;
+      transition: background 0.15s;
+    }
+    .dropdown-content div:hover {
+      background: rgba(217,160,139,0.2) !important;
     }
     
     /* Excel Filter Dropdown */
@@ -304,18 +319,18 @@
           <option value="all">All Time</option>
         </select>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="window.print()">🖨️ Print</button>
+          <button class="btn-sm" style="background:rgba(217,160,139,0.1); border:1px solid var(--border); color:var(--text);" onclick="window.print()">🖨️ Print</button>
           
           <div class="dropdown" style="position: relative; display: inline-block;">
-            <button class="btn-sm" style="background:#dcfce7; color:#166534;" onclick="toggleExportMenu('dashExportMenu')">⬇️ Export ▾</button>
-            <div id="dashExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; background: #fff; min-width: 120px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); z-index: 100; border-radius: 6px; border: 1px solid #ccc; text-align: left;">
-              <div onclick="exportTableToCSV('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">CSV</div>
-              <div onclick="exportTableToJSON('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #eee;">JSON</div>
+            <button class="btn-sm" style="background:rgba(217,160,139,0.1); border:1px solid var(--border); color:var(--text);" onclick="toggleExportMenu('dashExportMenu')">⬇️ Export ▾</button>
+            <div id="dashExportMenu" class="dropdown-content" style="display: none; position: absolute; right: 0; min-width: 120px; z-index: 100; border-radius: 6px; text-align: left;">
+              <div onclick="exportTableToCSV('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">CSV</div>
+              <div onclick="exportTableToJSON('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">JSON</div>
               <div onclick="exportToPDF('dashboard')" style="padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">PDF</div>
             </div>
           </div>
 
-          <button class="btn-sm" style="background:#25d366; color:#fff;" onclick="shareData('dashboard')">📲 Share</button>
+          <button class="btn-sm" style="background:rgba(37,211,102,0.2); border:1px solid #25d366; color:#25d366;" onclick="shareData('dashboard')">📲 Share</button>
         </div>
       </div>
 
@@ -342,13 +357,13 @@
           <div class="value" id="statTotalCost" style="color: #dc2626;">₹0</div>
           
           <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <div style="flex: 1; background: #eff6ff; padding: 6px; border-radius: 6px; border: 1px solid #bfdbfe;">
-              <div style="font-size: 0.65rem; color: #1d4ed8; font-weight: 700; text-transform: uppercase;">Gross Profit</div>
-              <div style="font-size: 1rem; font-weight: 800; color: #2563eb;">₹<span id="statDashGross">0</span></div>
+            <div style="flex: 1; background: rgba(37, 99, 235, 0.15); padding: 6px; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.3);">
+              <div style="font-size: 0.65rem; color: #60a5fa; font-weight: 700; text-transform: uppercase;">Gross Profit</div>
+              <div style="font-size: 1rem; font-weight: 800; color: #93c5fd;">₹<span id="statDashGross">0</span></div>
             </div>
-            <div style="flex: 1; background: #f0fdf4; padding: 6px; border-radius: 6px; border: 1px solid #bbf7d0;">
-              <div style="font-size: 0.65rem; color: #15803d; font-weight: 700; text-transform: uppercase;">Net Profit</div>
-              <div style="font-size: 1rem; font-weight: 800; color: #16a34a;">₹<span id="statDashNet">0</span></div>
+            <div style="flex: 1; background: rgba(22, 163, 74, 0.15); padding: 6px; border-radius: 6px; border: 1px solid rgba(74, 222, 128, 0.3);">
+              <div style="font-size: 0.65rem; color: #4ade80; font-weight: 700; text-transform: uppercase;">Net Profit</div>
+              <div style="font-size: 1rem; font-weight: 800; color: #86efac;">₹<span id="statDashNet">0</span></div>
             </div>
           </div>
         </div>
@@ -2261,19 +2276,19 @@
         
         html += `<div class="category-group">`;
         html += `<div class="date-header" onclick="const el = document.getElementById('cat-${catSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'block' : 'none'; this.classList.toggle('open')"><span style="font-size: 1rem;">🗂️ ${cat}</span><span class="arrow">▼</span></div>`;
-        html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: #fff; border-radius: 0 0 8px 8px; display: none;">`;
+        html += `<div class="date-content" id="cat-${catSafeId}" style="padding: 10px; border: 1px solid var(--border); border-top: none; background: rgba(36,10,20,0.4); border-radius: 0 0 8px 8px; display: none;">`;
 
         html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">`;
 
         ['AVAILABLE', 'SOLD'].forEach(status => {
           const isSold = status === "SOLD";
-          const statusColor = isSold ? "#dc2626" : "#16a34a";
-          const statusBg = isSold ? "#fee2e2" : "#dcfce7";
+          const statusColor = isSold ? "#f87171" : "#4ade80";
+          const statusBg = isSold ? "rgba(220, 38, 38, 0.15)" : "rgba(22, 163, 74, 0.15)";
           const itemsData = grouped[cat][status] || {};
           const totalItems = Object.values(itemsData).flat().length;
 
-          html += `<div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">`;
-          html += `<div style="background: ${statusBg}; color: ${statusColor}; padding: 12px; font-weight: bold; text-align: center; border-bottom: 1px solid #ddd;">${isSold ? '🔴 SOLD STOCK' : '🟢 AVAILABLE STOCK'} (${totalItems})</div>`;
+          html += `<div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.2);">`;
+          html += `<div style="background: ${statusBg}; color: ${statusColor}; padding: 12px; font-weight: bold; text-align: center; border-bottom: 1px solid var(--border);">${isSold ? '🔴 SOLD STOCK' : '🟢 AVAILABLE STOCK'} (${totalItems})</div>`;
           html += `<div style="padding: 10px; max-height: 400px; overflow-y: auto;">`;
 
           Object.keys(itemsData).sort((a, b) => {
@@ -2283,9 +2298,9 @@
           }).forEach(date => {
             const dateSafeId = `${catSafeId}_${status}_${date.replace(/\//g, '-')}`;
             
-            html += `<div style="margin-bottom: 8px; border: 1px dashed #ccc; border-radius: 4px; background: #fafaf9;">`;
-            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #555; display: flex; justify-content: space-between; align-items: center;" onclick="const el = document.getElementById('date-${dateSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'block' : 'none'; this.querySelector('.arrow').classList.toggle('open')"><span>📅 ${date} (${itemsData[date].length})</span><span class="arrow" style="transition: transform 0.3s;">▼</span></div>`;
-            html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 10px; border-top: 1px dashed #ccc; background: #fff; display: none;">`;
+            html += `<div style="margin-bottom: 8px; border: 1px dashed var(--border); border-radius: 4px; background: rgba(0,0,0,0.1);">`;
+            html += `<div style="padding: 8px 12px; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: var(--primary); display: flex; justify-content: space-between; align-items: center;" onclick="const el = document.getElementById('date-${dateSafeId}'); el.classList.toggle('open'); el.style.display = el.classList.contains('open') ? 'block' : 'none'; this.querySelector('.arrow').classList.toggle('open')"><span>📅 ${date} (${itemsData[date].length})</span><span class="arrow" style="transition: transform 0.3s;">▼</span></div>`;
+            html += `<div class="date-content" id="date-${dateSafeId}" style="padding: 10px; border-top: 1px dashed var(--border); background: rgba(36,10,20,0.3); display: none;">`;
 
             html += itemsData[date].map(item => {
               const idx = productsList.findIndex(p => p.id === item.id);
