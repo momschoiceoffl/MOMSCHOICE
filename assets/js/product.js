@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   currentProduct = products.find(p => p.id === id);
   if (!currentProduct || currentProduct.visible === false) { document.getElementById("pdTitle").innerText = "Product not found or hidden"; return; }
   renderProduct();
+  renderReviews();
   renderAlsoLike();
   updateCartUI();
   setupListeners();
@@ -262,6 +263,47 @@ function renderAlsoLike() {
       <div class="pd-also-price">${sym}${p.price.toLocaleString("en-IN")}</div>
     </a>`;
   }).join("");
+}
+
+function renderReviews() {
+  const list = document.getElementById("reviewsList");
+  if (!list || !currentProduct) return;
+  
+  const allReviews = JSON.parse(localStorage.getItem("moms_reviews") || "{}");
+  const productReviews = allReviews[currentProduct.id] || [
+    { name: "Priya S.", stars: 5, text: "Beautiful saree! The color is exactly as shown." },
+    { name: "Meena R.", stars: 5, text: "Very good quality for this price. Fast shipping." }
+  ];
+
+  list.innerHTML = productReviews.map(r => `
+    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--gold-glow);">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <strong style="font-size: 0.85rem; color: var(--text);">${r.name}</strong>
+        <span style="color: var(--gold-glow); font-size: 0.8rem;">${"⭐".repeat(r.stars)}</span>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">${r.text}</p>
+    </div>
+  `).join("");
+}
+
+function submitReview() {
+  const name = document.getElementById("reviewName").value.trim();
+  const text = document.getElementById("reviewText").value.trim();
+  const stars = Number(document.getElementById("reviewStars").value);
+  
+  if (!name || !text) return alert("Please enter your name and a short review.");
+  
+  const allReviews = JSON.parse(localStorage.getItem("moms_reviews") || "{}");
+  if (!allReviews[currentProduct.id]) allReviews[currentProduct.id] = [];
+  
+  allReviews[currentProduct.id].unshift({ name, stars, text });
+  localStorage.setItem("moms_reviews", JSON.stringify(allReviews));
+  
+  document.getElementById("reviewName").value = "";
+  document.getElementById("reviewText").value = "";
+  
+  renderReviews();
+  if (typeof showToast === 'function') showToast("Review Submitted!", "assets/icons/heart.svg");
 }
 
 function addToCart(id) {
