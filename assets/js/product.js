@@ -72,7 +72,16 @@ function renderProduct() {
   const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
   const desc = (lang === "ta" && p.description_ta) ? p.description_ta : (p.description || "");
 
-  document.title = title + " | Mom's Pick";
+  document.title = title + " | Mom's Choice";
+  
+  // Update WhatsApp Share Preview Meta Tags dynamically
+  const ogTitle = document.getElementById("ogTitle");
+  const ogDesc = document.getElementById("ogDesc");
+  const ogImg = document.getElementById("ogImage");
+  if (ogTitle) ogTitle.content = title + " | Mom's Choice";
+  if (ogDesc) ogDesc.content = desc.substring(0, 100) + "...";
+  if (ogImg) ogImg.content = p.image;
+  
   document.getElementById("pdHeaderTitle").innerText = title;
   document.getElementById("pdTitle").innerText = title;
   document.getElementById("pdPrice").innerText = sym + p.price.toLocaleString("en-IN");
@@ -82,7 +91,17 @@ function renderProduct() {
   const tagEl = document.getElementById("pdTag");
   if (tag) { tagEl.innerText = tag; tagEl.style.display = "inline-block"; }
   const gallery = document.getElementById("pdGallery");
-  gallery.innerHTML = imgs.map(u => `<img src="${u}" alt="${p.title}">`).join("");
+  gallery.innerHTML = imgs.map(u => `<img src="${u}" alt="${p.title}" class="zoomable-img">`).join("");
+  
+  // Apply Medium-Zoom for close-ups
+  setTimeout(() => {
+    if (typeof mediumZoom !== 'undefined') {
+      mediumZoom('.zoomable-img', {
+        margin: 20,
+        background: 'rgba(20,5,11,0.95)'
+      });
+    }
+  }, 100);
   const thumbs = document.getElementById("pdThumbs");
   if (imgs.length > 1) {
     thumbs.innerHTML = imgs.map((u,i) => `<button class="pd-thumb${i===0?" active":""}" data-idx="${i}"><img src="${u}"></button>`).join("");
