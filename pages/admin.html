@@ -399,6 +399,7 @@
           <div><label>Purchase Rate (₹) - Private</label><input type="number" id="pCost" placeholder="e.g. 350"></div>
           <div><label>Actual Selling Price (₹)</label><input type="number" id="pPrice" placeholder="e.g. 599"></div>
           <div><label>Crossed MRP (₹)</label><input type="number" id="pMrp" placeholder="e.g. 999"></div>
+          <div><label>Stock Qty</label><input type="number" id="pStock" placeholder="e.g. 1" value="1"></div>
         </div>
 
         <div class="row">
@@ -1450,6 +1451,16 @@
       container.innerHTML = html;
     }
 
+    function filterStockList() {
+      const query = document.getElementById("stockSearchInput").value.toLowerCase().trim();
+      const cards = document.querySelectorAll("#stockContainer .item-card");
+      
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(query) ? "flex" : "none";
+      });
+    }
+
     function parseDate(dateStr) {
       if (!dateStr) return new Date();
       const s = String(dateStr).trim();
@@ -1582,6 +1593,18 @@
 
     function renderStockAvailability() {
       const container = document.getElementById("stockContainer");
+      
+      // Inject Search Bar at the top of the Stock tab
+      let searchHtml = `<div style="margin-bottom: 15px; display: flex; gap: 10px;">
+        <input type="text" id="stockSearchInput" placeholder="🔍 Search by Product ID or Title..." oninput="filterStockList()" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: var(--text); width: 100%; outline: none;">
+      </div>`;
+      
+      if (!document.getElementById("stockSearchWrapper")) {
+        const wrap = document.createElement('div');
+        wrap.id = "stockSearchWrapper";
+        wrap.innerHTML = searchHtml;
+        container.parentNode.insertBefore(wrap, container);
+      }
 
       // Build maps: soldProductIds → invoice date
       const allInvoices = getNormalizedInvoices();
@@ -1843,6 +1866,7 @@
         id: id, category: document.getElementById("pCat").value, subcategory: document.getElementById("pSubCat").value,
         purchaseRate: Number(document.getElementById("pCost").value) || 0,
         price: price, originalPrice: Number(document.getElementById("pMrp").value) || price,
+        stock: Number(document.getElementById("pStock").value) || 1,
         title: title, title_ta: document.getElementById("pTitleTa").value,
         description: document.getElementById("pDesc").value, description_ta: document.getElementById("pDescTa").value,
         image: finalImages[0] || "", images: finalImages, visible: true
@@ -2121,6 +2145,9 @@
     }
 
     function confirmAction(action, index) {
+      const p = productsList[index];
+      if (!p) return alert("Product not found. It may have been deleted.");
+      
       if (action === 'edit') editProduct(index);
       if (action === 'delete') deleteProduct(index);
       if (action === 'invoice') {
@@ -2333,7 +2360,7 @@
                   <img src="${item.image || ''}" style="width: 40px; height: 40px;">
                   <div class="item-meta">
                     <strong style="font-size: 0.75rem; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.title}</strong>
-                    <div class="sub-text"><span>₹${item.price}</span><span>${item.id}</span></div>
+                    <div class="sub-text"><span>₹${item.price}</span><span>${item.id} | Qty: ${item.stock || 1}</span></div>
                   </div>
                 </div>
                 <div class="item-actions" style="justify-content: flex-end;">
