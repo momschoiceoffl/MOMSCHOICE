@@ -401,6 +401,13 @@
           <div><label>Crossed MRP (₹)</label><input type="number" id="pMrp" placeholder="e.g. 999"></div>
           <div><label>Stock Qty</label><input type="number" id="pStock" placeholder="e.g. 1" value="1"></div>
         </div>
+        
+        <!-- BULK IMPORT SECTION -->
+        <div style="background: rgba(0,0,0,0.2); border: 1px dashed var(--border); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <label style="color: var(--primary); margin-bottom: 4px; display: block;">Bulk Import via CSV</label>
+          <p style="font-size: 0.75rem; color: var(--muted); margin-bottom: 8px;">Format: ID, Category, SubCat, Cost, Price, MRP, Stock, Title EN, Title TA</p>
+          <input type="file" id="csvInput" accept=".csv" onchange="handleCSVImport(event)" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
+        </div>
 
         <div class="row">
           <div><label>Title (English)</label><input type="text" id="pTitle" placeholder="e.g. Antique Matte Peacock Choker Set"></div>
@@ -1418,7 +1425,7 @@
                              `&shipping=${inv.courier}`;
 
           // WhatsApp Message
-          const waMsg = `Hello ${inv.custName}, here is your digital receipt for Invoice *${inv.invNum}*.\n\nItem: ${inv.title}\nTotal: ₹${inv.grandTotal}\n\nView Receipt: ${window.location.origin}${window.location.pathname.replace('admin.html', '')}${receiptUrl}`;
+          const waMsg = `Hello ${inv.custName}, here is your digital receipt for Invoice *${inv.invNum}*.\n\nItem: ${inv.title}\nTotal: ₹${inv.grandTotal}\n\nView Receipt: ${window.location.origin}${window.location.pathname.replace('admin.html', '')}${receiptUrl}\n\n_Thank you for shopping with Mom's Choice!_`;
 
           html += `
             <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: rgba(0,0,0,0.2); display:flex; flex-direction:column; gap:8px;">
@@ -1877,6 +1884,61 @@
       
       btn.innerText = "✅ Saved!"; setTimeout(() => { btn.innerText = "Publish"; btn.disabled = false; }, 1500);
       resetForm(); fetchCatalog(); switchTab('catalog', document.querySelectorAll('.nav-btn')[3]);
+    }
+
+    function handleCSVImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n').filter(l => l.trim() !== '');
+        
+        if (lines.length < 2) return alert("CSV is empty or missing headers.");
+        
+        let added = 0;
+        const newProducts = [];
+        
+        // Skip header row (index 0)
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.trim());
+          if (cols.length < 8) continue; // Skip incomplete rows
+          
+          newProducts.push({
+            id: cols[0],
+            category: cols[1] || "Sarees",
+            subcategory: cols[2] || "Silk",
+            purchaseRate: Number(cols[3]) || 0,
+            price: Number(cols[4]) || 0,
+            originalPrice: Number(cols[5]) || Number(cols[4]) || 0,
+            stock: Number(cols[6]) || 1,
+            title: cols[7],
+            title_ta: cols[8] || "",
+            description: "Bulk imported item.",
+            description_ta: "",
+            image: "",
+            images: [],
+            visible: true,
+            status: "AVAILABLE"
+          });
+        }
+
+        if (newProducts.length === 0) return alert("No valid rows found.");
+        
+        if (!confirm(`Found ${newProducts.length} products. Upload to database?`)) return;
+        
+        for (const p of newProducts) {
+          await fetch("http://localhost:5000/save", {
+            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p)
+          });
+          added++;
+        }
+        
+        alert(`✅ Successfully imported ${added} products! You can now add images to them in the Catalog tab.`);
+        event.target.value = ""; // Reset input
+        fetchCatalog();
+      };
+      reader.readAsText(file);
     }
 
     function resetForm() {
