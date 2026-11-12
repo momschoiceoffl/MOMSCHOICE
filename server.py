@@ -196,7 +196,9 @@ class Handler(SimpleHTTPRequestHandler):
                             prods = json.load(f)
                         for p in prods:
                             if p.get("id") == data.get("id"):
+                                # Force status to SOLD and stock to 0
                                 p["status"] = "SOLD"
+                                p["stock"] = 0
                                 break
                         with open("products.json", "w", encoding="utf-8") as f:
                             json.dump(prods, f, indent=2, ensure_ascii=False)
