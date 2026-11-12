@@ -85,6 +85,14 @@ function renderProduct() {
   document.getElementById("pdPrice").innerText = sym + p.price.toLocaleString("en-IN");
   document.getElementById("pdMrp").innerText = sym + (p.originalPrice || p.price).toLocaleString("en-IN");
   document.getElementById("pdDesc").innerText = desc;
+  
+  // Check Admin Setting for Reviews
+  if (localStorage.getItem("moms_show_reviews") === "true") {
+    const revCont = document.getElementById("reviewSectionContainer");
+    if (revCont) revCont.style.display = "block";
+    renderReviews();
+  }
+
   const tag = (p.tags && p.tags[0]) ? p.tags[0].replace("_"," ") : (p.tag || "");
   const tagEl = document.getElementById("pdTag");
   if (tag) { tagEl.innerText = tag; tagEl.style.display = "inline-block"; }

@@ -236,7 +236,8 @@ setInterval(async () => {
     
     // Only update if data actually changed (saves bandwidth & prevents flickering)
     if (JSON.stringify(newData) !== JSON.stringify(products)) {
-      products = newData.filter(p => p.visible !== false); // Keep hidden logic
+      // Filter out hidden AND sold out products during auto-sync
+      products = newData.filter(p => p.visible !== false && p.status !== "SOLD" && p.stock !== 0); 
       products.forEach(p => { if (!Array.isArray(p.tags)) p.tags = []; });
       
       // Re-render everything
