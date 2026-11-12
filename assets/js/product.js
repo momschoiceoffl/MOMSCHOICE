@@ -248,7 +248,13 @@ function shareStore() {
 }
 
 function renderAlsoLike() {
-  const others = products.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id).slice(0, 6);
+  const others = products.filter(p => 
+    p.category === currentProduct.category && 
+    p.id !== currentProduct.id &&
+    String(p.status).toUpperCase() !== "SOLD" &&
+    Number(p.stock) !== 0 &&
+    !soldIds.includes(p.id)
+  ).slice(0, 6);
   if (!others.length) return;
   
   const lang = localStorage.getItem("moms_pick_lang") || "en";
