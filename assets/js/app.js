@@ -209,8 +209,21 @@ async function fetchProducts() {
       storeCategories = await catRes.json();
     } catch(e) { console.warn("No categories.json found, using fallback."); }
 
-    // Filter out hidden products AND sold out products
-    products = products.filter(p => p.visible !== false && p.status !== "SOLD" && p.stock !== 0);
+    // 1. Fetch Sales Log to hide anything that has been sold
+    let soldIds = [];
+    try {
+      const salesRes = await fetch(`sales.json?_t=${Date.now()}`);
+      const salesData = await salesRes.json();
+      soldIds = salesData.map(sale => sale[7]); // Index 7 is the Product ID in sales.json
+    } catch(e) { console.warn("No sales.json found."); }
+
+    // 2. Filter out hidden products, sold products, and products found in sales.json
+    products = products.filter(p => 
+      p.visible !== false && 
+      p.status !== "SOLD" && 
+      p.stock !== 0 && 
+      !soldIds.includes(p.id)
+    );
 
     // Backwards compatibility: if a product has old single "tag"
     // but no "tags" array, convert it.

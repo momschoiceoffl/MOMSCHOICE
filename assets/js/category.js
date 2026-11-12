@@ -86,8 +86,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
     
-    // Filter out hidden products AND sold out products
-    products = products.filter(p => p.visible !== false && p.status !== "SOLD" && p.stock !== 0);
+    // 1. Fetch Sales Log to hide anything that has been sold
+    let soldIds = [];
+    try {
+      const salesRes = await fetch(`sales.json?_t=${Date.now()}`);
+      const salesData = await salesRes.json();
+      soldIds = salesData.map(sale => sale[7]);
+    } catch(e) { console.warn("No sales.json found."); }
+
+    // 2. Filter out hidden products, sold products, and products found in sales.json
+    products = products.filter(p => 
+      p.visible !== false && 
+      p.status !== "SOLD" && 
+      p.stock !== 0 && 
+      !soldIds.includes(p.id)
+    );
     
     const catRes = await fetch(`categories.json?_t=${Date.now()}`);
     if (catRes.ok) storeCategories = await catRes.json();

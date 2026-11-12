@@ -20,9 +20,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const id = new URLSearchParams(location.search).get("id");
   if (!id) { document.getElementById("pdTitle").innerText = "Product not found"; return; }
+  let soldIds = [];
   try {
     const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
+    
+    // Fetch Sales to check if this specific item is sold
+    const salesRes = await fetch(`sales.json?_t=${Date.now()}`);
+    const salesData = await salesRes.json();
+    soldIds = salesData.map(sale => sale[7]);
   } catch (e) { document.getElementById("pdTitle").innerText = "Could not load products"; return; }
 
   // Wire the "← Back" button
@@ -38,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   currentProduct = products.find(p => p.id === id);
-  if (!currentProduct || currentProduct.visible === false || currentProduct.status === "SOLD" || currentProduct.stock === 0) { 
+  if (!currentProduct || currentProduct.visible === false || currentProduct.status === "SOLD" || currentProduct.stock === 0 || soldIds.includes(currentProduct.id)) { 
     document.getElementById("pdTitle").innerText = "Product not found or sold out"; 
     document.getElementById("pdDesc").innerText = "This item is no longer available.";
     document.getElementById("pdAddBtn").style.display = "none";
