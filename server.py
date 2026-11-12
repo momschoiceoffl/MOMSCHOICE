@@ -44,22 +44,28 @@ class Handler(SimpleHTTPRequestHandler):
             self._json(200, {"ok": True, "token_set": True})
             return
 
-        if self.path == "/get-last-invoice":
+        if self.path.startswith("/get-last-invoice"):
             try:
-                # First try to get from sales.json
+                # Parse date from query params (e.g., /get-last-invoice?date=261108)
+                import urllib.parse
+                parsed = urllib.parse.urlparse(self.path)
+                query = urllib.parse.parse_qs(parsed.query)
+                todayDate = query.get("date", [""])[0]
+                
+                lastInvForToday = "A0000"
+                
                 if os.path.exists("sales.json"):
                     with open("sales.json", "r", encoding="utf-8") as f:
                         sales = json.load(f)
-                    if len(sales) > 0:
-                        # Return the last invoice number found
-                        self._json(200, {"lastInv": sales[-1][1]})
-                        return
+                    
+                    # Loop through sales to find the most recent one for TODAY
+                    for sale in reversed(sales):
+                        invNum = sale[1] # e.g., SAR-261108-A0004
+                        if todayDate in invNum:
+                            lastInvForToday = invNum.split('-')[-1] # Extract A0004
+                            break
                 
-                # Fallback to Google Sheet
-                req = Request(GSHEET_URL + "?action=get_last_invoice")
-                with urlopen(req) as r:
-                    data = r.read()
-                self._json(200, json.loads(data))
+                self._json(200, {"lastInv": lastInvForToday})
             except Exception as e:
                 self._json(500, {"error": str(e)})
             return

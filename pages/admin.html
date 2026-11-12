@@ -2229,15 +2229,14 @@
 
       let seqPart = "A0001"; 
       try {
-        const logRes = await fetch("http://localhost:5000/get-last-invoice");
+        // Send the current date to the server
+        const logRes = await fetch(`http://localhost:5000/get-last-invoice?date=${dateStr}`);
         if (logRes.ok) {
           const logData = await logRes.json();
-          const lastInv = logData.lastInv || "A0000"; 
+          const lastSeq = logData.lastInv || "A0000"; 
           
-          const lastSeq = lastInv.split('-').pop() || "A0000";
-          
-          const letter = lastSeq.charAt(0);
-          const numStr = lastSeq.substring(1);
+          const letter = lastSeq.charAt(0) || "A";
+          const numStr = lastSeq.substring(1) || "0000";
           let num = parseInt(numStr, 10) || 0;
           
           num++;
