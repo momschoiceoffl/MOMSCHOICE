@@ -190,24 +190,13 @@ class Handler(SimpleHTTPRequestHandler):
                     with open("sales.json", "w", encoding="utf-8") as f:
                         json.dump(sales, f, indent=2, ensure_ascii=False)
 
-                    # B. Reduce stock or mark as SOLD in products.json
+                    # B. ALSO mark product as SOLD in products.json
                     try:
                         with open("products.json", "r", encoding="utf-8") as f:
                             prods = json.load(f)
                         for p in prods:
                             if p.get("id") == data.get("id"):
-                                # Default stock to 1 if it doesn't exist yet
-                                current_stock = p.get("stock", 1)
-                                qty_sold = int(data.get("qty", 1))
-                                
-                                new_stock = current_stock - qty_sold
-                                
-                                if new_stock <= 0:
-                                    p["stock"] = 0
-                                    p["status"] = "SOLD"
-                                else:
-                                    p["stock"] = new_stock
-                                    p["status"] = "AVAILABLE"
+                                p["status"] = "SOLD"
                                 break
                         with open("products.json", "w", encoding="utf-8") as f:
                             json.dump(prods, f, indent=2, ensure_ascii=False)
@@ -269,4 +258,4 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     print("Server running on http://localhost:5000")
-    HTTPServer(("127.0.0.1", 5000), Handler).serve_forever()
+    HTTPServer(("0.0.0.0", 5000), Handler).serve_forever()

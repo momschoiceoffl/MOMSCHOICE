@@ -56,35 +56,6 @@ function translateCategoryLocal(cat) {
   return map[cat] || cat;
 }
 
-// Initialize Smooth Scrolling (Lenis) for Premium Feel
-if (typeof Lenis !== 'undefined') {
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smooth: true,
-    smoothTouch: false,
-  });
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
-}
-
-function initScrollReveal() {
-  const reveals = document.querySelectorAll('.product-card');
-  reveals.forEach(el => el.classList.add('reveal'));
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('active');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  reveals.forEach(el => observer.observe(el));
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Setup Hamburger Menu FIRST (so it works even if fetch fails)
   const s = document.getElementById("sidebar");
@@ -115,8 +86,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(`products.json?_t=${Date.now()}`);
     products = await res.json();
     
-    // Filter out hidden products
-    products = products.filter(p => p.visible !== false);
+    // Filter out hidden products AND sold out products
+    products = products.filter(p => p.visible !== false && p.status !== "SOLD" && p.stock !== 0);
     
     const catRes = await fetch(`categories.json?_t=${Date.now()}`);
     if (catRes.ok) storeCategories = await catRes.json();
@@ -228,8 +199,6 @@ function renderProducts() {
         </div>
       </div>`;
   }).join("");
-  
-  setTimeout(initScrollReveal, 100);
 }
 
 function addToCart(id) {

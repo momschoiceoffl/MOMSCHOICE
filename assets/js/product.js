@@ -38,9 +38,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   currentProduct = products.find(p => p.id === id);
-  if (!currentProduct || currentProduct.visible === false) { document.getElementById("pdTitle").innerText = "Product not found or hidden"; return; }
+  if (!currentProduct || currentProduct.visible === false || currentProduct.status === "SOLD" || currentProduct.stock === 0) { 
+    document.getElementById("pdTitle").innerText = "Product not found or sold out"; 
+    document.getElementById("pdDesc").innerText = "This item is no longer available.";
+    document.getElementById("pdAddBtn").style.display = "none";
+    document.getElementById("pdWaBtn").style.display = "none";
+    document.getElementById("pdGallery").style.display = "none";
+    return; 
+  }
   renderProduct();
-  renderReviews();
   renderAlsoLike();
   updateCartUI();
   setupListeners();
@@ -73,16 +79,7 @@ function renderProduct() {
   const title = (lang === "ta" && p.title_ta) ? p.title_ta : p.title;
   const desc = (lang === "ta" && p.description_ta) ? p.description_ta : (p.description || "");
 
-  document.title = title + " | Mom's Choice";
-  
-  // Update WhatsApp Share Preview Meta Tags dynamically
-  const ogTitle = document.getElementById("ogTitle");
-  const ogDesc = document.getElementById("ogDesc");
-  const ogImg = document.getElementById("ogImage");
-  if (ogTitle) ogTitle.content = title + " | Mom's Choice";
-  if (ogDesc) ogDesc.content = desc.substring(0, 100) + "...";
-  if (ogImg) ogImg.content = p.image;
-  
+  document.title = title + " | Mom's Pick";
   document.getElementById("pdHeaderTitle").innerText = title;
   document.getElementById("pdTitle").innerText = title;
   document.getElementById("pdPrice").innerText = sym + p.price.toLocaleString("en-IN");
@@ -92,17 +89,7 @@ function renderProduct() {
   const tagEl = document.getElementById("pdTag");
   if (tag) { tagEl.innerText = tag; tagEl.style.display = "inline-block"; }
   const gallery = document.getElementById("pdGallery");
-  gallery.innerHTML = imgs.map(u => `<img src="${u}" alt="${p.title}" class="zoomable-img">`).join("");
-  
-  // Apply Medium-Zoom for close-ups
-  setTimeout(() => {
-    if (typeof mediumZoom !== 'undefined') {
-      mediumZoom('.zoomable-img', {
-        margin: 20,
-        background: 'rgba(20,5,11,0.95)'
-      });
-    }
-  }, 100);
+  gallery.innerHTML = imgs.map(u => `<img src="${u}" alt="${p.title}">`).join("");
   const thumbs = document.getElementById("pdThumbs");
   if (imgs.length > 1) {
     thumbs.innerHTML = imgs.map((u,i) => `<button class="pd-thumb${i===0?" active":""}" data-idx="${i}"><img src="${u}"></button>`).join("");
@@ -263,47 +250,6 @@ function renderAlsoLike() {
       <div class="pd-also-price">${sym}${p.price.toLocaleString("en-IN")}</div>
     </a>`;
   }).join("");
-}
-
-function renderReviews() {
-  const list = document.getElementById("reviewsList");
-  if (!list || !currentProduct) return;
-  
-  const allReviews = JSON.parse(localStorage.getItem("moms_reviews") || "{}");
-  const productReviews = allReviews[currentProduct.id] || [
-    { name: "Priya S.", stars: 5, text: "Beautiful saree! The color is exactly as shown." },
-    { name: "Meena R.", stars: 5, text: "Very good quality for this price. Fast shipping." }
-  ];
-
-  list.innerHTML = productReviews.map(r => `
-    <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; border-left: 3px solid var(--gold-glow);">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-        <strong style="font-size: 0.85rem; color: var(--text);">${r.name}</strong>
-        <span style="color: var(--gold-glow); font-size: 0.8rem;">${"⭐".repeat(r.stars)}</span>
-      </div>
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">${r.text}</p>
-    </div>
-  `).join("");
-}
-
-function submitReview() {
-  const name = document.getElementById("reviewName").value.trim();
-  const text = document.getElementById("reviewText").value.trim();
-  const stars = Number(document.getElementById("reviewStars").value);
-  
-  if (!name || !text) return alert("Please enter your name and a short review.");
-  
-  const allReviews = JSON.parse(localStorage.getItem("moms_reviews") || "{}");
-  if (!allReviews[currentProduct.id]) allReviews[currentProduct.id] = [];
-  
-  allReviews[currentProduct.id].unshift({ name, stars, text });
-  localStorage.setItem("moms_reviews", JSON.stringify(allReviews));
-  
-  document.getElementById("reviewName").value = "";
-  document.getElementById("reviewText").value = "";
-  
-  renderReviews();
-  if (typeof showToast === 'function') showToast("Review Submitted!", "assets/icons/heart.svg");
 }
 
 function addToCart(id) {

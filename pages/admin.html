@@ -240,6 +240,14 @@
     .bg-yellow { background: rgba(217, 119, 6, 0.2); color: #fbbf24; }
     .bg-red { background: rgba(220, 38, 38, 0.2); color: #f87171; }
 
+    /* Toggle Switch CSS */
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--success); }
+    input:checked + .slider:before { transform: translateX(24px); }
+
     @media (max-width: 768px) {
       .top-nav { flex-direction: column; padding: 0; }
       .brand-area { width: 100%; padding: 15px; border-bottom: 1px solid var(--border); justify-content: space-between; }
@@ -399,14 +407,6 @@
           <div><label>Purchase Rate (₹) - Private</label><input type="number" id="pCost" placeholder="e.g. 350"></div>
           <div><label>Actual Selling Price (₹)</label><input type="number" id="pPrice" placeholder="e.g. 599"></div>
           <div><label>Crossed MRP (₹)</label><input type="number" id="pMrp" placeholder="e.g. 999"></div>
-          <div><label>Stock Qty</label><input type="number" id="pStock" placeholder="e.g. 1" value="1"></div>
-        </div>
-        
-        <!-- BULK IMPORT SECTION -->
-        <div style="background: rgba(0,0,0,0.2); border: 1px dashed var(--border); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
-          <label style="color: var(--primary); margin-bottom: 4px; display: block;">Bulk Import via CSV</label>
-          <p style="font-size: 0.75rem; color: var(--muted); margin-bottom: 8px;">Format: ID, Category, SubCat, Cost, Price, MRP, Stock, Title EN, Title TA</p>
-          <input type="file" id="csvInput" accept=".csv" onchange="handleCSVImport(event)" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
         </div>
 
         <div class="row">
@@ -609,6 +609,20 @@
 
     <!-- TAB 7: SETTINGS -->
     <div id="tab-settings" class="tab-content">
+      <div class="card">
+        <h2>Store Settings</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 24px;">
+          <div>
+            <strong style="color: var(--text); font-size: 0.9rem;">Show Customer Reviews</strong>
+            <p style="font-size: 0.75rem; color: var(--muted); margin: 2px 0 0 0;">Toggle ratings on the product page</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleReviews" onchange="toggleReviewsSetting()">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
       <div class="card">
         <h2>Brand Logo</h2>
         <p class="sub">Upload your store logo — saved to Cloudinary</p>
@@ -1425,7 +1439,7 @@
                              `&shipping=${inv.courier}`;
 
           // WhatsApp Message
-          const waMsg = `Hello ${inv.custName}, here is your digital receipt for Invoice *${inv.invNum}*.\n\nItem: ${inv.title}\nTotal: ₹${inv.grandTotal}\n\nView Receipt: ${window.location.origin}${window.location.pathname.replace('admin.html', '')}${receiptUrl}\n\n_Thank you for shopping with Mom's Choice!_`;
+          const waMsg = `Hello ${inv.custName}, here is your digital receipt for Invoice *${inv.invNum}*.\n\nItem: ${inv.title}\nTotal: ₹${inv.grandTotal}\n\nView Receipt: ${window.location.origin}${window.location.pathname.replace('admin.html', '')}${receiptUrl}`;
 
           html += `
             <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: rgba(0,0,0,0.2); display:flex; flex-direction:column; gap:8px;">
@@ -1456,16 +1470,6 @@
       });
 
       container.innerHTML = html;
-    }
-
-    function filterStockList() {
-      const query = document.getElementById("stockSearchInput").value.toLowerCase().trim();
-      const cards = document.querySelectorAll("#stockContainer .item-card");
-      
-      cards.forEach(card => {
-        const text = card.innerText.toLowerCase();
-        card.style.display = text.includes(query) ? "flex" : "none";
-      });
     }
 
     function parseDate(dateStr) {
@@ -1589,10 +1593,21 @@
       }
     }
 
+    function toggleReviewsSetting() {
+      const isChecked = document.getElementById("toggleReviews").checked;
+      localStorage.setItem("moms_show_reviews", isChecked ? "true" : "false");
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       fetchCatalog();
       checkBackendHealth();
       loadSavedLogo();
+      
+      // Load review setting
+      const savedReviewSetting = localStorage.getItem("moms_show_reviews");
+      if (savedReviewSetting !== null && document.getElementById("toggleReviews")) {
+        document.getElementById("toggleReviews").checked = (savedReviewSetting === "true");
+      }
     });
 
     // Auto-refresh status every 30 seconds
@@ -1600,18 +1615,6 @@
 
     function renderStockAvailability() {
       const container = document.getElementById("stockContainer");
-      
-      // Inject Search Bar at the top of the Stock tab
-      let searchHtml = `<div style="margin-bottom: 15px; display: flex; gap: 10px;">
-        <input type="text" id="stockSearchInput" placeholder="🔍 Search by Product ID or Title..." oninput="filterStockList()" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: var(--text); width: 100%; outline: none;">
-      </div>`;
-      
-      if (!document.getElementById("stockSearchWrapper")) {
-        const wrap = document.createElement('div');
-        wrap.id = "stockSearchWrapper";
-        wrap.innerHTML = searchHtml;
-        container.parentNode.insertBefore(wrap, container);
-      }
 
       // Build maps: soldProductIds → invoice date
       const allInvoices = getNormalizedInvoices();
@@ -1873,7 +1876,6 @@
         id: id, category: document.getElementById("pCat").value, subcategory: document.getElementById("pSubCat").value,
         purchaseRate: Number(document.getElementById("pCost").value) || 0,
         price: price, originalPrice: Number(document.getElementById("pMrp").value) || price,
-        stock: Number(document.getElementById("pStock").value) || 1,
         title: title, title_ta: document.getElementById("pTitleTa").value,
         description: document.getElementById("pDesc").value, description_ta: document.getElementById("pDescTa").value,
         image: finalImages[0] || "", images: finalImages, visible: true
@@ -1884,61 +1886,6 @@
       
       btn.innerText = "✅ Saved!"; setTimeout(() => { btn.innerText = "Publish"; btn.disabled = false; }, 1500);
       resetForm(); fetchCatalog(); switchTab('catalog', document.querySelectorAll('.nav-btn')[3]);
-    }
-
-    function handleCSVImport(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const text = e.target.result;
-        const lines = text.split('\n').filter(l => l.trim() !== '');
-        
-        if (lines.length < 2) return alert("CSV is empty or missing headers.");
-        
-        let added = 0;
-        const newProducts = [];
-        
-        // Skip header row (index 0)
-        for (let i = 1; i < lines.length; i++) {
-          const cols = lines[i].split(',').map(c => c.trim());
-          if (cols.length < 8) continue; // Skip incomplete rows
-          
-          newProducts.push({
-            id: cols[0],
-            category: cols[1] || "Sarees",
-            subcategory: cols[2] || "Silk",
-            purchaseRate: Number(cols[3]) || 0,
-            price: Number(cols[4]) || 0,
-            originalPrice: Number(cols[5]) || Number(cols[4]) || 0,
-            stock: Number(cols[6]) || 1,
-            title: cols[7],
-            title_ta: cols[8] || "",
-            description: "Bulk imported item.",
-            description_ta: "",
-            image: "",
-            images: [],
-            visible: true,
-            status: "AVAILABLE"
-          });
-        }
-
-        if (newProducts.length === 0) return alert("No valid rows found.");
-        
-        if (!confirm(`Found ${newProducts.length} products. Upload to database?`)) return;
-        
-        for (const p of newProducts) {
-          await fetch("http://localhost:5000/save", {
-            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p)
-          });
-          added++;
-        }
-        
-        alert(`✅ Successfully imported ${added} products! You can now add images to them in the Catalog tab.`);
-        event.target.value = ""; // Reset input
-        fetchCatalog();
-      };
-      reader.readAsText(file);
     }
 
     function resetForm() {
@@ -2207,9 +2154,6 @@
     }
 
     function confirmAction(action, index) {
-      const p = productsList[index];
-      if (!p) return alert("Product not found. It may have been deleted.");
-      
       if (action === 'edit') editProduct(index);
       if (action === 'delete') deleteProduct(index);
       if (action === 'invoice') {
@@ -2422,7 +2366,7 @@
                   <img src="${item.image || ''}" style="width: 40px; height: 40px;">
                   <div class="item-meta">
                     <strong style="font-size: 0.75rem; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.title}</strong>
-                    <div class="sub-text"><span>₹${item.price}</span><span>${item.id} | Qty: ${item.stock || 1}</span></div>
+                    <div class="sub-text"><span>₹${item.price}</span><span>${item.id}</span></div>
                   </div>
                 </div>
                 <div class="item-actions" style="justify-content: flex-end;">

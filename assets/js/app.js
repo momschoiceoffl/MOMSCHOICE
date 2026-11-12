@@ -66,42 +66,6 @@ let carouselSlides = [];
 /* ═══════════════════════════════════════════════════════════════ */
 /* [INIT] Boot the app                                             */
 /* ═══════════════════════════════════════════════════════════════ */
-// Initialize Smooth Scrolling (Lenis) for Premium Feel
-if (typeof Lenis !== 'undefined') {
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
-    direction: 'vertical',
-    gestureDirection: 'vertical',
-    smooth: true,
-    mouseMultiplier: 1,
-    smoothTouch: false, // Keep false so mobile scrolling doesn't feel delayed
-    touchMultiplier: 2,
-  });
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
-}
-
-// Scroll Reveal Observer
-function initScrollReveal() {
-  const reveals = document.querySelectorAll('.product-card, .category-card, .hero-carousel');
-  reveals.forEach(el => el.classList.add('reveal'));
-  
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('active');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  
-  reveals.forEach(el => observer.observe(el));
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   fetchProducts();
   setupListeners();
@@ -245,8 +209,8 @@ async function fetchProducts() {
       storeCategories = await catRes.json();
     } catch(e) { console.warn("No categories.json found, using fallback."); }
 
-    // Filter out hidden products
-    products = products.filter(p => p.visible !== false);
+    // Filter out hidden products AND sold out products
+    products = products.filter(p => p.visible !== false && p.status !== "SOLD" && p.stock !== 0);
 
     // Backwards compatibility: if a product has old single "tag"
     // but no "tags" array, convert it.
@@ -259,7 +223,6 @@ async function fetchProducts() {
     initCarousel();
     renderCategoryCards();
     renderSubcategories();
-    setTimeout(initScrollReveal, 100); // Trigger reveal after render
   } catch (e) {
     console.error("Could not load products.json", e);
   }
@@ -528,8 +491,6 @@ function renderProducts(items) {
     </div>
   `;
   }).join("") + renderPagination(totalPages);
-  
-  setTimeout(initScrollReveal, 100); // Trigger reveal for new products
 }
 
 function renderPagination(totalPages) {
