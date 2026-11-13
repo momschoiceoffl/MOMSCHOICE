@@ -220,7 +220,7 @@ async function fetchProducts() {
     // 2. Filter out hidden products, sold products, and products found in sales.json
     products = products.filter(p => 
       p.visible !== false && 
-      String(p.status).toUpperCase() !== "SOLD" && 
+      !String(p.status).toUpperCase().startsWith("SOLD") && 
       Number(p.stock) !== 0 && 
       !soldIds.includes(p.id)
     );
@@ -250,7 +250,7 @@ setInterval(async () => {
     // Only update if data actually changed (saves bandwidth & prevents flickering)
     if (JSON.stringify(newData) !== JSON.stringify(products)) {
       // Filter out hidden AND sold out products during auto-sync
-      products = newData.filter(p => p.visible !== false && p.status !== "SOLD" && p.stock !== 0); 
+      products = newData.filter(p => p.visible !== false && !String(p.status).toUpperCase().startsWith("SOLD") && p.stock !== 0); 
       products.forEach(p => { if (!Array.isArray(p.tags)) p.tags = []; });
       
       // Re-render everything

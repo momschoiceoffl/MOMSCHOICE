@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 2. Filter out hidden products, sold products, and products found in sales.json
     products = products.filter(p => 
       p.visible !== false && 
-      String(p.status).toUpperCase() !== "SOLD" && 
+      !String(p.status).toUpperCase().startsWith("SOLD") && 
       Number(p.stock) !== 0 && 
       !soldIds.includes(p.id)
     );

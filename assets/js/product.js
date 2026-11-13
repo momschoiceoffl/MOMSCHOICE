@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   currentProduct = products.find(p => p.id === id);
-  if (!currentProduct || currentProduct.visible === false || currentProduct.status === "SOLD" || currentProduct.stock === 0 || soldIds.includes(currentProduct.id)) { 
+  if (!currentProduct || currentProduct.visible === false || String(currentProduct.status).toUpperCase().startsWith("SOLD") || currentProduct.stock === 0 || soldIds.includes(currentProduct.id)) { 
     document.getElementById("pdTitle").innerText = "Product not found or sold out"; 
     document.getElementById("pdDesc").innerText = "This item is no longer available.";
     document.getElementById("pdAddBtn").style.display = "none";

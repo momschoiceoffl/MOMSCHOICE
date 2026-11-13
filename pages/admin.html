@@ -855,7 +855,7 @@
         purchasedVal += (Number(p.purchaseRate) || 0);
 
         const isSoldInSheet = soldProductIds.has(p.id);
-        const isSoldInJson  = (p.status || 'AVAILABLE').toUpperCase() === 'SOLD';
+        const isSoldInJson  = String(p.status || 'AVAILABLE').toUpperCase().startsWith('SOLD');
 
         if (!isSoldInSheet && !isSoldInJson) {
           availQty += 1;
@@ -880,7 +880,7 @@
 
       // Add SOLD-in-JSON products not covered by invoices
       productsList.forEach(p => {
-        const isSoldInJson = (p.status || '').toUpperCase() === 'SOLD';
+        const isSoldInJson = String(p.status || '').toUpperCase().startsWith('SOLD');
         if (isSoldInJson && !countedIds.has(p.id)) {
           soldQty += 1;
           soldVal += (Number(p.price) || 0); // Use selling price as revenue estimate
@@ -2225,6 +2225,9 @@
       const dd = String(d.getDate()).padStart(2, '0');
       const dateStr = `${yy}${mm}${dd}`;
       
+      // STORE IDENTIFIER (Change this per repo!)
+      // MC = Mom's Choice, FP = Fashion Paradise, MD = Mahadev Fashion
+      const storeCode = "MC";
       const catPrefix = (product.category || "GEN").substring(0, 3).toUpperCase();
 
       let seqPart = "A0001"; 
@@ -2252,7 +2255,7 @@
         console.error("Could not fetch last invoice number", e);
       }
 
-      const invNumber = `${catPrefix}-${dateStr}-${seqPart}`;
+      const invNumber = `${storeCode}-${catPrefix}-${dateStr}-${seqPart}`;
 
       // 2. Save the Invoice to Google Sheets (12 columns with Courier)
       const invoiceData = {

@@ -177,11 +177,16 @@ class Handler(SimpleHTTPRequestHandler):
                     now = datetime.datetime.now()
                     dateStr = now.strftime("%d/%m/%Y, %H:%M:%S")
 
+                    # Determine store ID from invoice prefix (MC, FP, MD)
+                    invPrefix = data.get("invNumber", "")[:2]
+                    storeMap = {"MC": "MOMS CHOICE", "FP": "FASHION PARADISE", "MD": "MAHADEV FASHION"}
+                    storeName = storeMap.get(invPrefix, "STORE")
+                    
                     sales.append([
                         dateStr,
                         data.get("invNumber", ""),
                         data.get("invNumber", ""),
-                        "Auto",
+                        storeName,
                         data.get("cName", ""),
                         data.get("cPhone", ""),
                         data.get("cAddr", ""),
@@ -202,8 +207,12 @@ class Handler(SimpleHTTPRequestHandler):
                             prods = json.load(f)
                         for p in prods:
                             if p.get("id") == data.get("id"):
-                                # Force status to SOLD and stock to 0
-                                p["status"] = "SOLD"
+                                # Determine store name from invoice prefix
+                                invPrefix = data.get("invNumber", "")[:2]
+                                storeNames = {"MC": "MOMS CHOICE", "FP": "FASHION PARADISE", "MD": "MAHADEV FASHION"}
+                                soldLabel = f"SOLD BY {storeNames.get(invPrefix, 'STORE')}"
+                                
+                                p["status"] = soldLabel
                                 p["stock"] = 0
                                 break
                         with open("products.json", "w", encoding="utf-8") as f:
