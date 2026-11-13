@@ -122,7 +122,7 @@ setInterval(async () => {
     const newData = await res.json();
     
     if (JSON.stringify(newData) !== JSON.stringify(products)) {
-      products = newData.filter(p => p.visible !== false && String(p.status).toUpperCase() !== "SOLD" && Number(p.stock) !== 0 && !soldIds.includes(p.id));
+      products = newData.filter(p => p.visible !== false && !String(p.status).toUpperCase().startsWith("SOLD") && Number(p.stock) !== 0 && !soldIds.includes(p.id));
       renderProducts(); // Re-render just the grid on category page
       console.log("🔄 Category page synchronized.");
     }

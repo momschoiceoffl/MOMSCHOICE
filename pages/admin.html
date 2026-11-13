@@ -2228,12 +2228,13 @@
       // STORE IDENTIFIER (Change this per repo!)
       // MC = Mom's Choice, FP = Fashion Paradise, MD = Mahadev Fashion
       const storeCode = "MC";
-      const catPrefix = (product.category || "GEN").substring(0, 3).toUpperCase();
+      // STORE IDENTIFIER (Change this per repo!)
+
 
       let seqPart = "A0001"; 
       try {
-        // Send the current date to the server
-        const logRes = await fetch(`http://localhost:5000/get-last-invoice?date=${dateStr}`);
+        // Send the current date & store code to the server
+        const logRes = await fetch(`http://localhost:5000/get-last-invoice?date=${dateStr}&store=${storeCode}`);
         if (logRes.ok) {
           const logData = await logRes.json();
           const lastSeq = logData.lastInv || "A0000"; 

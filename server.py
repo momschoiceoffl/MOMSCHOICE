@@ -46,11 +46,12 @@ class Handler(SimpleHTTPRequestHandler):
 
         if self.path.startswith("/get-last-invoice"):
             try:
-                # Parse date from query params (e.g., /get-last-invoice?date=261108)
+                # Parse date & store from query params
                 import urllib.parse
                 parsed = urllib.parse.urlparse(self.path)
                 query = urllib.parse.parse_qs(parsed.query)
-                todayDate = query.get("date", [""])[0]
+                todayDate = query.get("date", [""])[0]   # e.g. 261108
+                storeCode = query.get("store", ["MC"])[0] # e.g. MC
                 
                 lastInvForToday = "A0000"
                 
@@ -58,10 +59,11 @@ class Handler(SimpleHTTPRequestHandler):
                     with open("sales.json", "r", encoding="utf-8") as f:
                         sales = json.load(f)
                     
-                    # Loop through sales to find the most recent one for TODAY
+                    # Loop through sales to find the most recent one for TODAY & THIS STORE
                     for sale in reversed(sales):
-                        invNum = sale[1] # e.g., SAR-261108-A0004
-                        if todayDate in invNum:
+                        invNum = sale[1] # e.g., MC-SAR-261108-A0004
+                        # Must start with store code AND contain today's date
+                        if invNum.startswith(storeCode + "-") and todayDate in invNum:
                             lastInvForToday = invNum.split('-')[-1] # Extract A0004
                             break
                 
@@ -177,16 +179,16 @@ class Handler(SimpleHTTPRequestHandler):
                     now = datetime.datetime.now()
                     dateStr = now.strftime("%d/%m/%Y, %H:%M:%S")
 
-                    # Determine store ID from invoice prefix (MC, FP, MD)
-                    invPrefix = data.get("invNumber", "")[:2]
-                    storeMap = {"MC": "MOMS CHOICE", "FP": "FASHION PARADISE", "MD": "MAHADEV FASHION"}
-                    storeName = storeMap.get(invPrefix, "STORE")
+                    invNumber = data.get("invNumber", "")
+                    invPrefix = invNumber[:2]
+                    storeId = invPrefix if invPrefix in ["MC", "FP", "MD"] else "MC"
+                    orderId = "ORD-" + invNumber
                     
                     sales.append([
                         dateStr,
-                        data.get("invNumber", ""),
-                        data.get("invNumber", ""),
-                        storeName,
+                        invNumber,
+                        storeId,
+                        orderId,
                         data.get("cName", ""),
                         data.get("cPhone", ""),
                         data.get("cAddr", ""),
@@ -205,14 +207,13 @@ class Handler(SimpleHTTPRequestHandler):
                     try:
                         with open("products.json", "r", encoding="utf-8") as f:
                             prods = json.load(f)
+                        invPrefix = data.get("invNumber", "")[:2]
+                        storeId = invPrefix if invPrefix in ["MC", "FP", "MD"] else "MC"
+                        
                         for p in prods:
                             if p.get("id") == data.get("id"):
-                                # Determine store name from invoice prefix
-                                invPrefix = data.get("invNumber", "")[:2]
-                                storeNames = {"MC": "MOMS CHOICE", "FP": "FASHION PARADISE", "MD": "MAHADEV FASHION"}
-                                soldLabel = f"SOLD BY {storeNames.get(invPrefix, 'STORE')}"
-                                
-                                p["status"] = soldLabel
+                                p["status"] = "SOLD"
+                                p["soldBy"] = storeId
                                 p["stock"] = 0
                                 break
                         with open("products.json", "w", encoding="utf-8") as f:
