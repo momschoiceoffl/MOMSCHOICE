@@ -2224,12 +2224,14 @@
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const dd = String(d.getDate()).padStart(2, '0');
       const dateStr = `${yy}${mm}${dd}`;
-      
-      // STORE IDENTIFIER (Change this per repo!)
-      // MC = Mom's Choice, FP = Fashion Paradise, MD = Mahadev Fashion
-      const storeCode = "MC";
-      // STORE IDENTIFIER (Change this per repo!)
 
+      // STORE IDENTIFIER — change to "FP" or "MD" in the other 2 repos
+      const storeCode = "MC";
+
+      // Category prefix (SAR, NEC, EAR, BAN, RIN, ORN, ACC…)
+      const _pForPrefix = productsList.find(p => p.id.toLowerCase() === query || p.title.toLowerCase().includes(query));
+      const _catName = (_pForPrefix && _pForPrefix.category) ? _pForPrefix.category : "Misc";
+      const catPrefix = _catName.replace(/[^A-Za-z]/g, "").substring(0, 3).toUpperCase() || "MSC";
 
       let seqPart = "A0001"; 
       try {

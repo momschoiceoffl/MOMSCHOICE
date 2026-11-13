@@ -99,23 +99,7 @@ def apply_patches(patches, dry_run=False):
             else:
                 with open(tf, "w", encoding="utf-8", newline="\n") as f:
                     f.write(p["content"] + "\n")
-                print(f"✅ Created/Overwritten [{tf}]") # <--- CHANGED THIS LINE
-            count += 1
-            continue
-            # Auto-create parent folders if needed
-            parent = os.path.dirname(tf)
-            if parent and not os.path.exists(parent):
-                if dry_run:
-                    print(f"🧪 Would MKDIR [{parent}]")
-                else:
-                    os.makedirs(parent, exist_ok=True)
-                    print(f"📁 Created folder [{parent}]")
-            if dry_run:
-                print(f"🧪 Would CREATE [{tf}] ({len(p['content'])} chars)")
-            else:
-                with open(tf, "w", encoding="utf-8", newline="\n") as f:
-                    f.write(p["content"] + "\n")
-                print(f"✅ Created [{tf}]")
+                print(f"✅ Created/Overwritten [{tf}]")
             count += 1
             continue
 
